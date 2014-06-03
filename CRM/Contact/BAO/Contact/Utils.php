@@ -317,9 +317,9 @@ UNION
 
 
       // In case we change employer, clean prveovious employer related records.
-      if (!$previousEmployerID) {
-        $previousEmployerID = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $contactID, 'employer_id');
-      }
+      //if (!$previousEmployerID) {
+      //  $previousEmployerID = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $contactID, 'employer_id');
+      //}
       if ($previousEmployerID &&
         $previousEmployerID != $organizationId
       ) {

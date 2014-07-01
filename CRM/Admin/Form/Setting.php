@@ -142,12 +142,16 @@ class CRM_Admin_Form_Setting extends CRM_Core_Form {
       if(isset($settingMetaData['values'][$setting]['quick_form_type'])){
         $add = 'add' . $settingMetaData['values'][$setting]['quick_form_type'];
         if($add == 'addElement'){
-          $this->$add(
-            $settingMetaData['values'][$setting]['html_type'],
-            $setting,
-            ts($settingMetaData['values'][$setting]['title']),
-            CRM_Utils_Array::value('html_attributes', $settingMetaData['values'][$setting], array())
+          if (in_array( $settingMetaData['values'][$setting]['html_type'], array('advcheckbox', 'checkbox', 'textarea') ) ) {
+            $this->$add( $settingMetaData['values'][$setting]['html_type'], $setting, ts($settingMetaData['values'][$setting]['title']) );
+          } else {
+            $this->$add(
+              $settingMetaData['values'][$setting]['html_type'],
+              $setting,
+              ts($settingMetaData['values'][$setting]['title']),
+              CRM_Utils_Array::value('html_attributes', $settingMetaData['values'][$setting], array())
           );
+          }
         }
         else{
           $this->$add($setting, ts($settingMetaData['values'][$setting]['title']));
@@ -259,10 +263,12 @@ AND    time_format <> ''
     }
     $settings = array_intersect_key($params, $this->_settings);
     $result = civicrm_api('setting', 'create', $settings + array('version' => 3));
-    foreach ($settings as $setting => $settingGroup){
+    //foreach ($settings as $setting => $settingGroup){
       //@todo array_diff this
-      unset($params[$setting]);
-    }
+      //unset($params[$setting]);
+      //if unset then value from domain and setting table are different, and using getvalue api, domain have preference over setting table
+     
+    //}
     CRM_Core_BAO_ConfigSetting::create($params);
     CRM_Core_Session::setStatus(" ", ts('Changes Saved.'), "success");
   }

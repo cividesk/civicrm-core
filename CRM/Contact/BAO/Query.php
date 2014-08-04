@@ -3815,11 +3815,12 @@ WHERE  id IN ( $groupIDs )
     }
     // also get values array for relation_target_name
     // for relatinship search we always do wildcard
+    $relationType = $this->getWhereValues('relation_type_id', $grouping);    
     $targetName = $this->getWhereValues('relation_target_name', $grouping);
     $relStatus = $this->getWhereValues('relation_status', $grouping);
     $relPermission = $this->getWhereValues('relation_permission', $grouping);
     $targetGroup = $this->getWhereValues('relation_target_group', $grouping);
-
+    
     $nameClause = $name = NULL;
     if ($targetName) {
       $name = trim($targetName[2]);
@@ -3836,13 +3837,14 @@ WHERE  id IN ( $groupIDs )
       }
     }
 
-    $rel = explode('_', $value);
-
-    self::$_relType = $rel[1];
-    $params = array('id' => $rel[0]);
     $rTypeValues = array();
-    $rType = CRM_Contact_BAO_RelationshipType::retrieve($params, $rTypeValues);
-    if ($rTypeValues['name_a_b'] == $rTypeValues['name_b_a']) {
+    if( !empty($relationType) ) {
+      $rel = explode('_', $relationType[2]);
+      self::$_relType = $rel[1];
+      $params = array('id' => $rel[0]);
+      $rType = CRM_Contact_BAO_RelationshipType::retrieve($params, $rTypeValues);
+    }
+    if ( empty($rTypeValues) ) {    
       // if we don't know which end of the relationship we are dealing with we'll create a temp table
       //@todo unless we are dealing with a target group
       self::$_relType = 'reciprocal';
@@ -3930,20 +3932,20 @@ civicrm_relationship.start_date > {$today}
 
     //check for permissioned, non-permissioned and all permissioned relations
     if ($relPermission[2] == 1) {
-      $this->_where[$grouping][] = "(
+      $where[$grouping][] = "(
 civicrm_relationship.is_permission_a_b = 1
 )";
       $this->_qill[$grouping][] = ts('Relationship - Permissioned');
     } elseif ($relPermission[2] == 2) {
       //non-allowed permission relationship.
-      $this->_where[$grouping][] = "(
+      $where[$grouping][] = "(
 civicrm_relationship.is_permission_a_b = 0
 )";
       $this->_qill[$grouping][] = ts('Relationship - Non-permissioned');
     }
 
     $this->addRelationshipDateClauses($grouping, $where);
-    if(!empty($rType) && isset($rType->id)){
+    if( !empty($relationType) && !empty($rType) && isset($rType->id)){
       $where[$grouping][] = 'civicrm_relationship.relationship_type_id = ' . $rType->id;
     }
     $this->_tables['civicrm_relationship'] = $this->_whereTables['civicrm_relationship'] = 1;

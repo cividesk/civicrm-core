@@ -126,6 +126,7 @@ class CRM_Contact_Form_Task_LabelCommon {
       // we need first name/last name for summarising to avoid spillage
       $returnProperties['first_name'] = 1;
       $returnProperties['last_name'] = 1;
+      $returnProperties['prefix_id'] = 1;
     }
 
     //get the contacts information
@@ -336,6 +337,7 @@ class CRM_Contact_Form_Task_LabelCommon {
    */
   function mergeSameAddress(&$rows) {
     $uniqueAddress = array();
+    $prefix = CRM_Core_PseudoConstant::get('CRM_Contact_DAO_Contact', 'prefix_id');
     foreach (array_keys($rows) as $rowID) {
       // load complete address as array key
       $address =
@@ -346,18 +348,25 @@ class CRM_Contact_Form_Task_LabelCommon {
       else {
         $name = $rows[$rowID]['display_name'];
       }
+      if ( $rows[$rowID]['first_name'] && $rows[$rowID]['prefix_id'] ) {
+        $rows[$rowID]['first_name'] = $prefix[$rows[$rowID]['prefix_id']] . ' ' . $rows[$rowID]['first_name'];
+      }
       // fill uniqueAddress array with last/first name tree
       if (isset($uniqueAddress[$address])) {
-        $uniqueAddress[$address]['names'][$name][] = $rows[$rowID]['first_name'];
+        $uniqueAddress[$address]['names'][$name][$rows[$rowID]['first_name']]['first_name'] = $rows[$rowID]['first_name'];
+        $uniqueAddress[$address]['names'][$name][$rows[$rowID]['first_name']]['addressee_display'] = $rows[$rowID]['addressee_display'];
+                
         // drop unnecessary rows
         unset($rows[$rowID]);
         // this is the first listing at this address
       }
       else {
         $uniqueAddress[$address]['ID'] = $rowID;
-        $uniqueAddress[$address]['names'][$name][] = $rows[$rowID]['first_name'];
+        $uniqueAddress[$address]['names'][$name][$rows[$rowID]['first_name']]['first_name'] = $rows[$rowID]['first_name'];
+        $uniqueAddress[$address]['names'][$name][$rows[$rowID]['first_name']]['addressee_display'] = $rows[$rowID]['addressee_display'];        
       }
     }
+
     foreach ($uniqueAddress as $address => $data) {
       // copy data back to $rows
       $count = 0;
@@ -367,8 +376,14 @@ class CRM_Contact_Form_Task_LabelCommon {
         if ($count > 2) {
           break;
         }
-        // collapse the tree to summarize
-        $family = trim(implode(" & ", $first_names) . " " . $last_name);
+
+        if(count($first_names) == 1){
+          $family = $first_names[current(array_keys($first_names))]['addressee_display'];
+        }
+        else {
+          // collapse the tree to summarize
+          $family = trim(implode(" & ", array_keys($first_names)) . " " . $last_name);
+        }
         if ($count) {
           $processedNames .= "\n" . $family;
         }

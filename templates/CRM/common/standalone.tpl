@@ -33,14 +33,14 @@
   {crmRegion name='html-header' allowCmsOverride=0}
   {/crmRegion}
 
+  <link rel="stylesheet" href="{$config->resourceBase}css/civicrm.css" type="text/css" />
+  <link rel="stylesheet" href="{$config->resourceBase}css/standalone.css" type="text/css" />
+  <link rel="stylesheet" href="{$config->resourceBase}css/extras.css" type="text/css" />
   {if $config->customCSSURL}
     <link rel="stylesheet" href="{$config->customCSSURL}" type="text/css" />
   {else}
-    <link rel="stylesheet" href="{$config->resourceBase}css/civicrm.css" type="text/css" />
+    <link rel="stylesheet" href="{$config->resourceBase}css/garland.css" type="text/css" />
   {/if}
-  <link rel="stylesheet" href="{$config->resourceBase}css/standalone.css" type="text/css" />
-  <link rel="stylesheet" href="{$config->resourceBase}css/extras.css" type="text/css" />
-  <link rel="stylesheet" href="{$config->resourceBase}css/garland.css" type="text/css" />
 
   {$pageHTMLHead}
 

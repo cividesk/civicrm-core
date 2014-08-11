@@ -337,7 +337,6 @@ class CRM_Contact_Form_Task_LabelCommon {
    */
   function mergeSameAddress(&$rows) {
     $uniqueAddress = array();
-    $prefix = CRM_Core_PseudoConstant::get('CRM_Contact_DAO_Contact', 'prefix_id');
     foreach (array_keys($rows) as $rowID) {
       // load complete address as array key
       $address =
@@ -348,8 +347,8 @@ class CRM_Contact_Form_Task_LabelCommon {
       else {
         $name = $rows[$rowID]['display_name'];
       }
-      if ( $rows[$rowID]['first_name'] && $rows[$rowID]['prefix_id'] ) {
-        $rows[$rowID]['first_name'] = $prefix[$rows[$rowID]['prefix_id']] . ' ' . $rows[$rowID]['first_name'];
+      if ( $rows[$rowID]['first_name'] && $rows[$rowID]['individual_prefix'] ) {
+        $rows[$rowID]['first_name'] = $rows[$rowID]['individual_prefix'] . ' ' . $rows[$rowID]['first_name'];
       }
       // fill uniqueAddress array with last/first name tree
       if (isset($uniqueAddress[$address])) {

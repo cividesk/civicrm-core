@@ -3957,7 +3957,10 @@ civicrm_relationship.is_permission_a_b = 0
     // as even creating a temp table of all relationships is much much more efficient than
     // an OR in the join
     if($relationshipTempTable) {
-      $whereClause = ' WHERE ' . implode(' AND ', $where[$grouping]);
+      $whereClause = '';
+      if ( ! empty( $where[$grouping] ) ) {
+        $whereClause = ' WHERE ' . implode(' AND ', $where[$grouping]);
+      }
       $sql = "
         CREATE TEMPORARY TABLE {$relationshipTempTable}
           (SELECT contact_id_b as contact_id, civicrm_relationship.id

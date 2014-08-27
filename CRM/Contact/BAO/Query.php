@@ -3820,7 +3820,7 @@ WHERE  id IN ( $groupIDs )
     $relStatus = $this->getWhereValues('relation_status', $grouping);
     $relPermission = $this->getWhereValues('relation_permission', $grouping);
     $targetGroup = $this->getWhereValues('relation_target_group', $grouping);
-    
+
     $nameClause = $name = NULL;
     if ($targetName) {
       $name = trim($targetName[2]);
@@ -3876,7 +3876,11 @@ WHERE  id IN ( $groupIDs )
     $allRelationshipType = array_merge($allRelationshipType, $relTypeHou);
 
     if ($nameClause || !$targetGroup) {
-      $this->_qill[$grouping][] = "$allRelationshipType[$value]  $name";
+      if( !empty($relationType) ) {
+        $this->_qill[$grouping][] = $allRelationshipType[$relationType[2]] ." $name";
+      } else {
+        $this->_qill[$grouping][] = $name;
+      }
     }
 
 
@@ -3907,7 +3911,11 @@ WHERE  id IN ( $groupIDs )
           $qillNames[] = $groupNames[$groupId];
         }
       }
-      $this->_qill[$grouping][] = "$allRelationshipType[$value]  ( " . implode(", ", $qillNames) . " )";
+      if( !empty($relationType) ) {
+        $this->_qill[$grouping][] = $allRelationshipType[$relationType[2]] ." ( " . implode(", ", $qillNames) . " )";
+      } else {
+        $this->_qill[$grouping][] = implode(", ", $qillNames);
+      }
     }
 
     // Note we do not currently set mySql to handle timezones, so doing this the old-fashioned way

@@ -218,15 +218,12 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
    * @access public
    * @static
    */
-  static function postURL( $action ) {
-    if ( ! empty( $action ) ) {
+  function postURL( $action ) {
+    if (!empty($action)) {
       return $action;
     }
-    if ( isset( $_GET['q'] ) ) {
-      return self::url( $_GET['q'] );
-    } else {
-      return '';
-    }
+
+    return $this->url($_GET['q']);
   }
 
   /**

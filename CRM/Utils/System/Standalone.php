@@ -47,6 +47,7 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
     $config = CRM_Core_Config::singleton();
     $config->inCiviCRM = (strrchr($_SERVER['SCRIPT_NAME'], '/') == '/index.php');
     $this->is_drupal = FALSE;
+    $this->setMySQLTimeZone();
   }
 
   /**
@@ -449,7 +450,7 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
    * @param $loadUser boolean load cms user?
    * @param $throwError throw error on failure?
    */
-  static function loadBootStrap( $params = array( ), $loadUser = true, $throwError = true )
+  function loadBootStrap( $params = array( ), $loadUser = true, $throwError = true )
   {
     if ($loadUser) {
       if (!CRM_Utils_Array::value('uid', $params)) {
@@ -506,5 +507,9 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
 
   function getVersion() {
     return CRM_Utils_System::version();
+  }
+
+  function getTimeZoneString() {
+    return defined('CIVICRM_DB_TZCHANGE') ? CIVICRM_DB_TZCHANGE : NULL;
   }
 }

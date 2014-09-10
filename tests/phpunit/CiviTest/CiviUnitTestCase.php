@@ -306,6 +306,9 @@ class CiviUnitTestCase extends PHPUnit_Extensions_Database_TestCase {
 
     // also set this global hack
     $GLOBALS['_PEAR_ERRORSTACK_OVERRIDE_CALLBACK'] = array();
+
+    $env = new CRM_Utils_Check_Env();
+    CRM_Utils_Check::singleton()->assertValid($env->checkAll());
   }
 
   /**
@@ -1941,21 +1944,15 @@ class CiviUnitTestCase extends PHPUnit_Extensions_Database_TestCase {
 
     $smarty->assign('action', $action);
     if (empty($subfile)) {
-      if (file_exists('../tests/templates/documentFunction.tpl')) {
-        $f = fopen("../api/v3/examples/$entity$entityAction.php", "w");
-        fwrite($f, $smarty->fetch('../tests/templates/documentFunction.tpl'));
-        fclose($f);
-      }
+      $subfile = $entityAction;
     }
-    else {
-      if (file_exists('../tests/templates/documentFunction.tpl')) {
-        if (!is_dir("../api/v3/examples/$entity")) {
-          mkdir("../api/v3/examples/$entity");
-        }
-        $f = fopen("../api/v3/examples/$entity/$subfile.php", "w+b");
-        fwrite($f, $smarty->fetch('../tests/templates/documentFunction.tpl'));
-        fclose($f);
+    if (file_exists('../tests/templates/documentFunction.tpl')) {
+      if (!is_dir("../api/v3/examples/$entity")) {
+        mkdir("../api/v3/examples/$entity");
       }
+      $f = fopen("../api/v3/examples/$entity/$subfile.php", "w+b");
+      fwrite($f, $smarty->fetch('../tests/templates/documentFunction.tpl'));
+      fclose($f);
     }
   }
 

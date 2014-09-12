@@ -48,7 +48,7 @@ function invoke() {
 
     require_once 'CRM/Core/Invoke.php';
     if ( $session->get('userID') == null || $session->get('userID') == '' ) {
-        if (empty($_GET[$urlVar])) {
+        if (empty($_GET[$urlVar]) || CRM_Utils_Array::value('redirect', $_GET, false) ) {
             require_once "CRM/Core/BAO/UFMatch.php";
             if ( CRM_Core_BAO_UFMatch::isEmptyTable( ) == false ) {
                 if (CIVICRM_UF_AUTH == 'SAML20') {

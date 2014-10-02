@@ -418,8 +418,14 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
   }
 
   static function permissionDenied( ) {
-    $redirect = "/login.php?redirect=" . urlencode($_SERVER['SCRIPT_URI'] .'?'.$_SERVER['QUERY_STRING']. '&redirect=1');
-    CRM_Utils_System::redirect( $redirect);
+    $session = CRM_Core_Session::singleton();
+    $userID = $session->get('userID');
+    if (empty($userID)) {
+      $redirect = "/login.php?redirect=" . urlencode($_SERVER['SCRIPT_URI'] .'?'.$_SERVER['QUERY_STRING']. '&redirect=1');
+      CRM_Utils_System::redirect( $redirect);
+    } else {
+      CRM_Core_Error::fatal( ts( 'You do not have permission to access this page' ) );
+    }
   }
 
   static function logout( ) {

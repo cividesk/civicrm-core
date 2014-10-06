@@ -836,7 +836,8 @@ class CRM_Utils_System {
     // lets capture the return stuff rather than echo
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true );
 
-    return curl_exec($ch);
+    // CRM-13227, CRM-14744: only return the SSL error status
+    return (curl_exec($ch) !== FALSE);
   }
 
   static function checkPHPVersion($ver = 5, $abort = TRUE) {

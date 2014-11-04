@@ -10,14 +10,14 @@ if ($auth_email) {
 
   $allow_login = CRM_Utils_System_Standalone::getAllowedToLogin( $user );
   if ( !$allow_login && (!defined('CIVICRM_ALLOW_ALL') || !CIVICRM_ALLOW_ALL ) ) {
-    $message = sprintf( 'You authentified as \'%s\'. This user is not allowed to login.', $auth_email );
+    $message = sprintf( 'You authenticated as \'%s\'. This user is not allowed to login.', $auth_email );
     $session->set( 'msg' , $message );
     $session->set( 'goahead', "no" );
   } else {
     CRM_Utils_System_Standalone::getUserID( $user );
 
     if ( ! $session->get('userID') ) {
-      $message = sprintf( 'You authentified as \'%s\'. This user is not authorized to login.', $auth_email );
+      $message = sprintf( 'You authenticated as \'%s\'. This user is not authorized to login.', $auth_email );
       $session->set( 'msg' , $message );
       $session->set( 'goahead', "no" );
     }

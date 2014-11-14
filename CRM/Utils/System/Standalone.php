@@ -244,7 +244,7 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
    */
   function url($path = null, $query = null, $absolute = true, $fragment = null, $htmlize = true ) {
     $config = CRM_Core_Config::singleton( );
-    $script = ($config->inCiviCRM ? 'index.php' : 'embed.php');
+    $script = 'index.php';
 
     if (isset($fragment)) {
       $fragment = '#'. $fragment;

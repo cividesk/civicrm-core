@@ -1,4 +1,5 @@
 <?php
+
 /*
  +--------------------------------------------------------------------+
  | CiviCRM version 4.4                                                |
@@ -26,41 +27,67 @@
 */
 
 /**
+ * File for the CiviCRM APIv3 activity contact functions
  *
- * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2013
- * $Id$
+ * @package CiviCRM_APIv3
+ * @subpackage API_ActivityContact
  *
+ * @copyright CiviCRM LLC (c) 2004-2014
+ * @version $Id: ActivityContact.php 2014-04-01 elcapo $
  */
-class CRM_Mailing_Page_Confirm extends CRM_Core_Page {
-  function run() {
-    CRM_Utils_System::addHTMLHead('<META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">');
 
-    $contact_id   = CRM_Utils_Request::retrieve('cid', 'Integer', CRM_Core_DAO::$_nullObject);
-    $subscribe_id = CRM_Utils_Request::retrieve('sid', 'Integer', CRM_Core_DAO::$_nullObject);
-    $hash         = CRM_Utils_Request::retrieve('h', 'String', CRM_Core_DAO::$_nullObject);
-
-    if (!$contact_id ||
-      !$subscribe_id ||
-      !$hash
-    ) {
-      CRM_Core_Error::fatal(ts("Missing input parameters"));
-    }
-
-    $result = CRM_Mailing_Event_BAO_Confirm::confirm($contact_id, $subscribe_id, $hash);
-    if ($result === FALSE) {
-      $this->assign('success', $result);
-    }
-    else {
-      $this->assign('success', TRUE);
-      $this->assign('group', $result);
-    }
-
-    list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contact_id);
-    $this->assign('display_name', $displayName);
-    $this->assign('email', $email);
-
-    return parent::run();
-  }
+/**
+ *  Add a record relating a contact with an activity
+ *
+ * Allowed @params array keys are:
+ *
+ * @example ActivityContact.php
+ *
+ * @param $params
+ *
+ * @return array of newly created activity contact records.
+ * @access public
+ */
+function civicrm_api3_activity_contact_create($params) {
+  return _civicrm_api3_basic_create(_civicrm_api3_get_BAO(__FUNCTION__), $params);
 }
 
+/**
+ * Adjust Metadata for Create action
+ *
+ * The metadata is used for setting defaults, documentation & validation
+ * @param array $params array or parameters determined by getfields
+ */
+function _civicrm_api3_activity_contact_create_spec(&$params) {
+  $params['contact_id']['api.required'] = 1;
+  $params['activity_id']['api.required'] = 1;
+}
+
+/**
+ * Deletes an existing ActivityContact record
+ *
+ * @param  array  $params
+ *
+ * @return array Api Result
+ *
+ * @example ActivityContact.php
+ * @access public
+ */
+function civicrm_api3_activity_contact_delete($params) {
+  return _civicrm_api3_basic_delete(_civicrm_api3_get_BAO(__FUNCTION__), $params);
+}
+
+/**
+ * Get a ActivityContact.
+ *
+ * @example ActivityContact.php
+ *
+ * @param  array $params  an associative array of name/value pairs.
+ *
+ * @return  array details of found tags else error
+ *
+ * @access public
+ */
+function civicrm_api3_activity_contact_get($params) {
+  return _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params);
+}

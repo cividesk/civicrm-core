@@ -295,7 +295,7 @@ function civicrm_api3_contribution_transact($params) {
       return CRM_Core_Error::createApiError($last_error['message']);
     }
   }
-
+  $params['payment_instrument_id'] = CRM_Core_DAO::getFieldValue('CRM_Financial_DAO_PaymentProcessorType', $paymentProcessor['payment_processor_type_id'], 'payment_type') == 1 ? 'Credit Card' : 'Debit Card';
   return civicrm_api('contribution', 'create', $params);
 }
 /**
@@ -376,6 +376,9 @@ function civicrm_api3_contribution_completetransaction(&$params) {
     if(!$contribution->loadRelatedObjects($input, $ids, FALSE, TRUE)){
       throw new API_Exception('failed to load related objects');
     }
+    elseif ($contribution->contribution_status_id == CRM_Core_OptionGroup::getValue('contribution_status', 'Completed', 'name')) {
+      throw new API_Exception(ts('Contribution already completed'));
+    }
     $objects = $contribution->_relatedObjects;
     $objects['contribution'] = &$contribution;
     $input['component'] = $contribution->_component;
@@ -388,14 +391,14 @@ function civicrm_api3_contribution_completetransaction(&$params) {
     // @todo required for base ipn but problematic as api layer handles this
     $transaction = new CRM_Core_Transaction();
     $ipn = new CRM_Core_Payment_BaseIPN();
-    $ipn->completeTransaction($input, $ids, $objects, $transaction);
+    $ipn->completeTransaction($input, $ids, $objects, $transaction, !empty($contribution->contribution_recur_id));
   }
   catch(Exception $e) {
     throw new API_Exception('failed to load related objects' . $e->getMessage() . "\n" . $e->getTraceAsString());
   }
 }
 
-function _civicrm_api3_contribution_completetransaction(&$params) {
+function _civicrm_api3_contribution_completetransaction_spec(&$params) {
   $params['id'] = array(
     'title' => 'Contribution ID',
     'type' => CRM_Utils_Type::T_INT,

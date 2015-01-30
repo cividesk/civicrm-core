@@ -24,6 +24,7 @@ if ($auth_email) {
   }
   CRM_Utils_Hook::singleton()->invoke(1, $user, $user, $user, $user, $user, 'civicrm_login');
   header("Location: index.php");
+  exit;
 }
 
 // Go to the SSO login page

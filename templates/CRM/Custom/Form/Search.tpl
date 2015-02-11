@@ -51,7 +51,11 @@
                     {if $element.html_type EQ 'CheckBox' AND  $smarty.foreach.outer.last EQ 1} {* Put 'match ANY / match ALL' checkbox in separate row. *}
                         </tr>
                         <tr>
-                        <td class="op-checkbox" colspan="{$element.options_per_line}" style="padding-top: 0px;">{$form.$element_name.$key.html}</td>
+                        <td class="op-checkbox" colspan="{$element.options_per_line}" style="padding-top: 0px;">{$form.$element_name.$key.html}
+                        {if $element.html_type EQ 'CheckBox'}
+                          &nbsp; <span class="crm-clear-link">(<a href="#" title="{ts}check / clear all{/ts}" onclick="selectUnselectCheckbox('{$element_name}', '{$form.formName}', this); return false;">{ts}check / clear all{/ts}</a>)</span>
+                        {/if}
+                        </td>
                     {else}
                         <td class="labels font-light">{$form.$element_name.$key.html}</td>
                         {if $count EQ $element.options_per_line}
@@ -95,6 +99,9 @@
                 <td class="label">{$form.$element_name.label}</td><td>
                 {if $element.data_type neq 'Date'}
                     {$form.$element_name.html}
+                    {if $element.html_type EQ 'CheckBox'}
+                      &nbsp; <span class="crm-clear-link">(<a href="#" title="{ts}check / clear all{/ts}" onclick="selectUnselectCheckbox('{$element_name}', '{$form.formName}', this); return false;">{ts}check / clear all{/ts}</a>)</span>
+                    {/if}
                 {elseif $element.skip_calendar NEQ true }
                     {include file="CRM/common/jcalendar.tpl" elementName=$element_name}
                 {/if}

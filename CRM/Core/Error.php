@@ -188,7 +188,19 @@ class CRM_Core_Error extends PEAR_ErrorStack {
         }
       }
     }
+    $config = CRM_Core_Config::singleton();
 
+    if ($config->fatalErrorHandler &&
+      function_exists($config->fatalErrorHandler)
+    ) {
+      $name = $config->fatalErrorHandler;
+      $ret = $name($error);
+      if ($ret) {
+        // the call has been successfully handled
+        // so we just exit
+        self::abend(CRM_Core_Error::FATAL_ERROR);
+      }
+    }
     $template->assign_by_ref('error', $error);
     $errorDetails = CRM_Core_Error::debug('', $error, FALSE);
     $template->assign_by_ref('errorDetails', $errorDetails);

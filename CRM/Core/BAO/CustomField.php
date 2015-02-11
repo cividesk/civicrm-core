@@ -638,6 +638,7 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField {
         'import' => 1,
         'custom_field_id' => $id,
         'options_per_line' => CRM_Utils_Array::value('options_per_line', $values),
+        'text_length' => CRM_Utils_Array::value('text_length', $values, 255),
         'data_type' => CRM_Utils_Array::value('data_type', $values),
         'html_type' => CRM_Utils_Array::value('html_type', $values),
         'is_search_range' => CRM_Utils_Array::value('is_search_range', $values),
@@ -1558,7 +1559,7 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField {
     $entityId = NULL,
     $inline = FALSE,
     $checkPermission = TRUE,
-    $includeViewOnly = false
+    $includeViewOnly = FALSE
   ) {
     //get the custom fields for the entity
     //subtype and basic type
@@ -1591,7 +1592,7 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField {
     }
 
     // return if field is a 'code' field
-    if ( !$includeViewOnly && CRM_Utils_Array::value( 'is_view', $customFields[$customFieldId] ) ) {
+    if (!$includeViewOnly && !empty($customFields[$customFieldId]['is_view'])) {
       return;
     }
 

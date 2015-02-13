@@ -136,8 +136,8 @@ ORDER BY title";
     $session   = CRM_Core_Session::singleton();
     $contactID = $session->get('userID');
     
-    if (empty($config->recaptchaPublicKey) ||
-      empty($config->recaptchaPrivateKey) ||
+    if (empty(CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'recaptchaPublicKey')) ||
+      empty(CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'recaptchaPrivateKey')) ||
       $contactID) {
       $addCaptcha = FALSE;
     }

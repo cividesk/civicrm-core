@@ -97,7 +97,7 @@ class CRM_Utils_PDF_Utils {
     </div>
   </body>
 </html>";
-    if ($config->wkhtmltopdfPath) {
+    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'wkhtmltopdfPath')) {
       return self::_html2pdf_wkhtmltopdf($paper_size, $orientation, $margins, $html, $output, $fileName);
     }
     else {
@@ -124,7 +124,7 @@ class CRM_Utils_PDF_Utils {
   static function _html2pdf_wkhtmltopdf($paper_size, $orientation, $margins, $html, $output, $fileName) {
     require_once 'packages/snappy/src/autoload.php';
     $config = CRM_Core_Config::singleton();
-    $snappy = new Knp\Snappy\Pdf($config->wkhtmltopdfPath);
+    $snappy = new Knp\Snappy\Pdf(CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'wkhtmltopdfPath'));
     $snappy->setOption("page-width", $paper_size[2] . "pt");
     $snappy->setOption("page-height", $paper_size[3] . "pt");
     $snappy->setOption("orientation", $orientation);

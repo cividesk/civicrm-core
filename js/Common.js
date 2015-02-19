@@ -388,6 +388,31 @@ function unselectRadio(fieldName, form) {
 }
 
 /**
+ * Select/ Clear all the checkbox buttons with a given name
+ *
+ * @param string fieldName
+ * @param string form
+ * @param object obj
+ * @return null
+ */
+function selectUnselectCheckbox(fieldName, form, obj) {
+  if ( ! cj(obj).hasClass('selectallcheckbox') && cj('#'+form +' input:checkbox[id^="'+fieldName +'"]').length == cj('#'+form +' input:checkbox[id^="'+fieldName +'"]:checked').length) {
+    cj(obj).toggleClass('selectallcheckbox');
+  }
+  
+  cj('#'+form +' input:checkbox[id^="'+fieldName +'"]').each(function(){
+    if( cj(obj).hasClass('selectallcheckbox')){
+      cj(this).removeAttr('checked');
+    }
+    else {
+      cj(this).attr('checked','checked');
+    }
+  });
+  cj(obj).toggleClass('selectallcheckbox');
+  return;
+}
+
+/**
  * Function to change button text and disable one it is clicked
  *
  * @param obj object - the button clicked

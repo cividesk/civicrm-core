@@ -195,7 +195,7 @@ class CRM_Report_Form_Event_ParticipantListing extends CRM_Report_Form_Event {
       array(
         'dao' => 'CRM_Event_DAO_Participant',
         'fields' =>
-        array('participant_id' => array('title' => 'Participant ID'),
+        array('participant_id' => array('title' => ts('Participant ID')),
           'participant_record' => array(
             'name' => 'id',
             'no_display' => TRUE,
@@ -240,7 +240,7 @@ class CRM_Report_Form_Event_ParticipantListing extends CRM_Report_Form_Event {
             'options' => CRM_Event_PseudoConstant::participantRole(),
           ),
           'participant_register_date' => array(
-            'title' => 'Registration Date',
+            'title' => ts('Registration Date'),
             'operatorType' => CRM_Report_Form::OP_DATE,
           ),
           'fee_currency' =>
@@ -256,6 +256,8 @@ class CRM_Report_Form_Event_ParticipantListing extends CRM_Report_Form_Event {
         array(
           'event_id' =>
           array('title' => ts('Event'), 'default_weight' => '1', 'default_order' => 'ASC'),
+          'participant_register_date' =>
+          array('title' => ts('Registration Date'), 'default_weight' => '1', 'default_order' => 'DESC'),
         ),
       ),
       'civicrm_phone' =>
@@ -328,7 +330,7 @@ class CRM_Report_Form_Event_ParticipantListing extends CRM_Report_Form_Event {
         'grouping' => 'contrib-fields',
         'filters' => array(
           'receive_date' => array(
-            'title' => 'Payment Date',
+            'title' => ts('Payment Date'),
             'operatorType' => CRM_Report_Form::OP_DATE,
           ),
           'financial_type_id' => array('title' => ts('Financial Type'),

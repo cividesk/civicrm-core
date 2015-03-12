@@ -146,6 +146,9 @@ tools/scripts/releaser/releaser.conf
 tools/tests/reports/logfile.tap
 tools/tests/reports/testdox.html
 tools/tests/reports/testdox.txt
+distmaker
+tests
+tools
 l10n
 vendor
 civicrm.settings.php

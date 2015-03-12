@@ -54,6 +54,9 @@
                 <td class="label">{$form.$element_name.label}</td><td>
                 {if $element.data_type neq 'Date'}
                     {$form.$element_name.html}
+                    {if $element.html_type EQ 'CheckBox'}
+                      &nbsp; <span class="crm-clear-link">(<a href="#" title="{ts}check / clear all{/ts}" onclick="selectUnselectCheckbox('{$element_name}', '{$form.formName}', this); return false;">{ts}check / clear all{/ts}</a>)</span>
+                    {/if}
                 {elseif $element.skip_calendar NEQ true }
                     {include file="CRM/common/jcalendar.tpl" elementName=$element_name}
                 {/if}

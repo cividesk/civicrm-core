@@ -45,7 +45,7 @@ class CRM_Member_BAO_Membership extends CRM_Member_DAO_Membership {
   static $_renewalActType = NULL;
 
   static $_signupActType = NULL;
-
+  static $_aclCache = NULL;
   /**
    * class constructor
    *
@@ -1170,16 +1170,18 @@ INNER JOIN  civicrm_membership_type type ON ( type.id = membership.membership_ty
     if (!self::$_signupActType || !self::$_renewalActType) {
       return 0;
     }
-
+    $acl = self::getAclClause();
     $query = "
     SELECT  COUNT(DISTINCT membership.id) as member_count
       FROM  civicrm_membership membership
 INNER JOIN civicrm_activity activity ON (activity.source_record_id = membership.id AND activity.activity_type_id in (%1, %2))
 INNER JOIN  civicrm_membership_status status ON ( membership.status_id = status.id AND status.is_current_member = 1 )
-INNER JOIN  civicrm_contact contact ON ( contact.id = membership.contact_id AND contact.is_deleted = 0 )
-     WHERE  membership.membership_type_id = %3
+INNER JOIN  civicrm_contact contact_a ON ( contact_a.id = membership.contact_id AND contact_a.is_deleted = 0 ) ";
+    $query .= $acl['aclFromClause'];
+    $query .= " WHERE  membership.membership_type_id = %3
        AND  activity.activity_date_time >= '$startDate' AND activity.activity_date_time <= '$endDate 23:59:59'
        AND  {$testClause}";
+    $query .= $acl['aclWhereClause'];
 
     $query .= ($isOwner) ? ' AND owner_membership_id IS NULL' : '';
 
@@ -1191,6 +1193,18 @@ INNER JOIN  civicrm_contact contact ON ( contact.id = membership.contact_id AND 
 
     $memberCount = CRM_Core_DAO::singleValueQuery($query, $params);
     return (int)$memberCount;
+  }
+  
+  function getAclClause() {
+    if (! self::$_aclCache ) { 
+      $acl=  new CRM_Contact_BAO_Query();
+      $acl->generatePermissionClause(false, true);
+      $aclFrom  = CRM_Utils_Array::value('civicrm_group_contact', $acl->_whereTables);
+      $aclWhere = $acl->_permissionWhereClause ?  ' AND '.  $acl->_permissionWhereClause : '';
+      self::$_aclCache = array('aclFromClause' => $aclFrom, 'aclWhereClause' => $aclWhere);
+    }
+    return self::$_aclCache;
+
   }
 
   /**
@@ -1218,15 +1232,21 @@ INNER JOIN  civicrm_contact contact ON ( contact.id = membership.contact_id AND 
     if (!CRM_Utils_Rule::date($date)) {
       CRM_Core_Error::fatal(ts('Invalid date "%1" (must have form yyyy-mm-dd).', array(1 => $date)));
     }
-
+    
+    $acl = self::getAclClause();
+    
     $params = array(1 => array($membershipTypeId, 'Integer'),
       2 => array($isTest, 'Boolean'),
     );
     $query = "SELECT  count(civicrm_membership.id ) as member_count
-FROM   civicrm_membership left join civicrm_membership_status on ( civicrm_membership.status_id = civicrm_membership_status.id  )
-WHERE  civicrm_membership.membership_type_id = %1
-AND civicrm_membership.contact_id NOT IN (SELECT id FROM civicrm_contact WHERE is_deleted = 1)
-AND civicrm_membership.is_test = %2";
+              FROM   civicrm_membership left join civicrm_membership_status on ( civicrm_membership.status_id = civicrm_membership_status.id  )
+              LEFT JOIN civicrm_contact contact_a ON contact_a.id = civicrm_membership.contact_id ";
+    $query .= $acl['aclFromClause'];
+    $query .= " WHERE  civicrm_membership.membership_type_id = %1
+                  AND civicrm_membership.is_test = %2 ";
+
+    $query .= $acl['aclWhereClause'];
+
     if (!$date) {
       $query .= " AND civicrm_membership_status.is_current_member = 1";
     }
@@ -1804,6 +1824,8 @@ WHERE  civicrm_membership.contact_id = civicrm_contact.id
         $relMemIds = array();
         if ($relMembership->find(TRUE)) {
           $params['id'] = $relMemIds['membership'] = $relMembership->id;
+        } else {
+          unset($params['id']);
         }
         $params['contact_id'] = $contactId;
         $params['owner_membership_id'] = $membership->id;
@@ -1842,10 +1864,10 @@ WHERE  civicrm_membership.contact_id = civicrm_contact.id
           // related membership already exists, so this is just an update
           if (isset($params['id'])) {
             if ($available > 0) {
-        CRM_Member_BAO_Membership::create($params, $relMemIds);
+              CRM_Member_BAO_Membership::create($params, $relMemIds);
               $available --;
             } else { // we have run out of inherited memberships, so delete extras
-              self::deleteMembership($params['id']);
+              CRM_Member_BAO_Membership::deleteMembership($params['id']);
             }
           // we need to first check if there will remain inherited memberships, so queue it up
           } else {
@@ -1892,7 +1914,7 @@ WHERE  civicrm_membership.contact_id = civicrm_contact.id
    * @return array
    */
   static function &buildMembershipTypeValues(&$form, $membershipTypeID = NULL) {
-    $whereClause = " WHERE domain_id = ". CRM_Core_Config::domainID();
+    $whereClause = " where (1) ";//" WHERE domain_id = ". CRM_Core_Config::domainID();
 
     if (is_array($membershipTypeID)) {
       $allIDs = implode(',', $membershipTypeID);
@@ -2048,16 +2070,18 @@ LEFT JOIN civicrm_membership mem ON ( cr.id = mem.contribution_recur_id )
     if (!self::$_signupActType) {
       return 0;
     }
-
+    $acl = self::getAclClause();
     $query = "
     SELECT  COUNT(DISTINCT membership.id) as member_count
       FROM  civicrm_membership membership
 INNER JOIN civicrm_activity activity ON (activity.source_record_id = membership.id AND activity.activity_type_id = %1)
 INNER JOIN  civicrm_membership_status status ON ( membership.status_id = status.id AND status.is_current_member = 1 )
-INNER JOIN  civicrm_contact contact ON ( contact.id = membership.contact_id AND contact.is_deleted = 0 )
-     WHERE  membership.membership_type_id = %2
+INNER JOIN  civicrm_contact contact_a ON ( contact_a.id = membership.contact_id AND contact_a.is_deleted = 0 ) ";
+    $query .= $acl['aclFromClause'];
+    $query .= " WHERE  membership.membership_type_id = %2
        AND  activity.activity_date_time >= '$startDate' AND activity.activity_date_time <= '$endDate 23:59:59'
        AND  {$testClause}";
+    $query .= $acl['aclWhereClause'];
 
     $params = array(
       1 => array(self::$_signupActType, 'Integer'),
@@ -2096,16 +2120,18 @@ INNER JOIN  civicrm_contact contact ON ( contact.id = membership.contact_id AND 
     if (!self::$_renewalActType) {
       return 0;
     }
-
+    $acl = self::getAclClause();
     $query = "
     SELECT  COUNT(DISTINCT membership.id) as member_count
       FROM  civicrm_membership membership
 INNER JOIN civicrm_activity activity ON (activity.source_record_id = membership.id AND activity.activity_type_id = %1)
 INNER JOIN  civicrm_membership_status status ON ( membership.status_id = status.id AND status.is_current_member = 1 )
-INNER JOIN  civicrm_contact contact ON ( contact.id = membership.contact_id AND contact.is_deleted = 0 )
-     WHERE  membership.membership_type_id = %2
+INNER JOIN  civicrm_contact contact_a ON ( contact_a.id = membership.contact_id AND contact_a.is_deleted = 0 ) ";
+    $query .= $acl['aclFromClause'];
+    $query .= " WHERE  membership.membership_type_id = %2
        AND  activity.activity_date_time >= '$startDate' AND activity.activity_date_time <= '$endDate 23:59:59'
        AND  {$testClause}";
+    $query .= $acl['aclWhereClause'];
 
     $params = array(
       1 => array(self::$_renewalActType, 'Integer'),

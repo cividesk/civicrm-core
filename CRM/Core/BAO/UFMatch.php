@@ -89,7 +89,6 @@ class CRM_Core_BAO_UFMatch extends CRM_Core_DAO_UFMatch {
 
     $userSystemID = $userSystem->getBestUFID($user);
     $uniqId = $userSystem->getBestUFUniqueIdentifier($user);
-
     // if the id of the object is zero (true for anon users in drupal)
     // have we already processed this user, if so early
     // return.
@@ -188,7 +187,16 @@ class CRM_Core_BAO_UFMatch extends CRM_Core_DAO_UFMatch {
   static function &synchronizeUFMatch(&$user, $userKey, $uniqId, $uf, $status = NULL, $ctype = NULL, $isLogin = FALSE) {
     $config = CRM_Core_Config::singleton();
 
-    if (!CRM_Utils_Rule::email($uniqId)) {
+    if ($uf == 'Standalone') {
+      $ufmatch             = new CRM_Core_DAO_UFMatch();
+      $ufmatch->domain_id  = CRM_Core_Config::domainID();
+      $ufmatch->uf_id      = $userKey;
+      $ufmatch->contact_id = $user->contact_id;
+      $ufmatch->uf_name    = $uniqId;
+      return $ufmatch;
+    }
+	// We do not need this check for Standalone
+    if (($uf != 'Standalone' ) && (!CRM_Utils_Rule::email($uniqId))) {
       $retVal = $status ? NULL : FALSE;
       return $retVal;
     }
@@ -366,6 +374,10 @@ AND    domain_id    = %4
    * @static
    */
   static function updateUFName($contactId) {
+    $config = CRM_Core_Config::singleton();
+    if ($config->userFramework == 'Standalone')
+      return;
+
     if (!$contactId) {
       return;
     }
@@ -521,6 +533,10 @@ AND    domain_id    = %4
   static function getUFId($contactID) {
     if (!isset($contactID)) {
       return NULL;
+    }
+    $config = CRM_Core_Config::singleton();
+    if ($config->userFramework == 'Standalone') {
+      return $contactID;
     }
     $domain = CRM_Core_BAO_Domain::getDomain();
     $ufmatch = new CRM_Core_DAO_UFMatch();

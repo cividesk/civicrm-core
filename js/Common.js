@@ -132,6 +132,31 @@ function showHideByValue(trigger_field_id, trigger_value, target_element_id, tar
 }
 
 /**
+ * Select/ Clear all the checkbox buttons with a given name
+ *
+ * @param string fieldName
+ * @param string form
+ * @param object obj
+ * @return null
+ */
+function selectUnselectCheckbox(fieldName, form, obj) {
+  if ( ! cj(obj).hasClass('selectallcheckbox') && cj('#'+form +' input:checkbox[id^="'+fieldName +'"]').length == cj('#'+form +' input:checkbox[id^="'+fieldName +'"]:checked').length) {
+    cj(obj).toggleClass('selectallcheckbox');
+  }
+  
+  cj('#'+form +' input:checkbox[id^="'+fieldName +'"]').each(function(){
+    if( cj(obj).hasClass('selectallcheckbox')){
+      cj(this).removeAttr('checked');
+    }
+    else {
+      cj(this).attr('checked','checked');
+    }
+  });
+  cj(obj).toggleClass('selectallcheckbox');
+  return;
+}
+
+/**
  * Function to change button text and disable one it is clicked
  * @deprecated
  * @param obj object - the button clicked
@@ -163,6 +188,11 @@ function submitOnce(obj, formId, procText) {
       return false;
     }
   }
+}
+
+function imagePopUpWH( path, width, height ) {
+    window.open(path,'popupWindow','toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=yes,copyhistory=no'
+        +'width='+width+',height='+height+'screenX=150,screenY=150,top=150,left=150');
 }
 
 /**

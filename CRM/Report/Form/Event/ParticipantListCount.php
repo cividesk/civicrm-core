@@ -164,6 +164,9 @@ class CRM_Report_Form_Event_ParticipantListCount extends CRM_Report_Form_Event {
           'participant_register_date' =>
           array('title' => ts('Registration Date'),
           ),
+          'source' =>
+          array('title' => ts('Registration Source'),
+          ),
         ),
         'grouping' => 'event-fields',
         'filters' =>

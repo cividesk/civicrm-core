@@ -133,6 +133,7 @@ class CRM_Contact_Form_Task_LabelCommon {
       // we need first name/last name for summarising to avoid spillage
       $returnProperties['first_name'] = 1;
       $returnProperties['last_name'] = 1;
+      $returnProperties['prefix_id'] = 1;
     }
 
     //get the contacts information
@@ -375,6 +376,7 @@ class CRM_Contact_Form_Task_LabelCommon {
         $uniqueAddress[$address]['names'][$name][$firstNameWithPrefix]['addressee_display'] = $rows[$rowID]['addressee_display'];
       }
     }
+
     foreach ($uniqueAddress as $address => $data) {
       // copy data back to $rows
       $count = 0;

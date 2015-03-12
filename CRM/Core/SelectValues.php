@@ -809,11 +809,11 @@ class CRM_Core_SelectValues {
   static function getSearchBuilderOperators() {
     return array(
       '=' => '=',
-      '!=' => '≠',
+      '!=' => '?',
       '>' => '>',
       '<' => '<',
-      '>=' => '≥',
-      '<=' => '≤',
+      '>=' => '=',
+      '<=' => '=',
       'IN' => ts('In'),
       'LIKE' => ts('Like'),
       'RLIKE' => ts('Regex'),

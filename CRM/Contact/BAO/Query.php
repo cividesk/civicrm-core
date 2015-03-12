@@ -4091,7 +4091,7 @@ WHERE  id IN ( $groupIDs )
     $allRelationshipType = array_merge($allRelationshipType, $relTypeHou);
 
     if ($nameClause || !$targetGroup) {
-      if (!empty($relationType) ) {
+      if (!empty($relationType)) {
         $this->_qill[$grouping][] = $allRelationshipType[$relationType[2]] ." $name";
       } else {
         $this->_qill[$grouping][] = $name;
@@ -4126,7 +4126,7 @@ WHERE  id IN ( $groupIDs )
           $qillNames[] = $groupNames[$groupId];
         }
       }
-      if ( !empty($relationType) ) {
+      if (!empty($relationType)) {
         $this->_qill[$grouping][] = $allRelationshipType[$relationType[2]] ." ( " . implode(", ", $qillNames) . " )";
       } else {
         $this->_qill[$grouping][] = implode(", ", $qillNames);

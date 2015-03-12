@@ -72,7 +72,12 @@ class CRM_Mailing_Form_Settings extends CRM_Core_Form {
     }
     $count = $this->get('count');
     $this->assign('count', $count);
-    $defaults = array();
+    $defaults = array(
+      // Quick & Dirty fix, should probably:
+      // - change the xml/DAO & refactor this function
+      // - or use CRM_Mailing_BAO_Mailing::create()
+      'visibility' => 'Public Pages',
+    );
 
     $componentFields = array(
       'reply_id' => 'Reply',

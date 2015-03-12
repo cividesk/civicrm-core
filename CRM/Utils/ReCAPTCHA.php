@@ -88,7 +88,7 @@ class CRM_Utils_ReCAPTCHA {
     if (CRM_Utils_System::isSSL()) {
       $useSSL = TRUE;
     }
-    $html = recaptcha_get_html($config->recaptchaPublicKey, $error, $useSSL);
+    $html = recaptcha_get_html(CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'recaptchaPublicKey'), $error, $useSSL);
 
     $form->assign('recaptchaHTML', $html);
     $form->assign('recaptchaOptions', $config->recaptchaOptions);
@@ -123,7 +123,7 @@ class CRM_Utils_ReCAPTCHA {
   static function validate($value, $form) {
     $config = CRM_Core_Config::singleton();
 
-    $resp = recaptcha_check_answer($config->recaptchaPrivateKey,
+    $resp = recaptcha_check_answer(CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'recaptchaPrivateKey'),
       $_SERVER['REMOTE_ADDR'],
       $_POST["recaptcha_challenge_field"],
       $_POST["recaptcha_response_field"]

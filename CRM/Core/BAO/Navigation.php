@@ -578,7 +578,8 @@ ORDER BY parent_id, weight";
     if ($navigation) {
 
       //add additional navigation items
-      $logoutURL = CRM_Utils_System::url('civicrm/logout', 'reset=1');
+      $deskURL = '/index.php';
+      $appendSring = "<li id=\"menu-logout\" class=\"menumain\"><a href=\"{$deskURL}\">" . ts('Desk') . "</a></li>";
 
       // get home menu from db
       $homeParams = array('name' => 'Home');

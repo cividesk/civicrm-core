@@ -180,7 +180,8 @@ class CRM_Member_Form_MembershipType extends CRM_Member_Form {
       asort($relTypeInd);
     }
     $memberRel = &$this->add('select', 'relationship_type_id', ts('Relationship Type'),
-      array('' => ts('- select -')) + $relTypeInd);
+      array('' => ts('- select -')) + $relTypeInd, FALSE,
+      array('onChange' => "showHideMaxRelated(this.value);"));
     $memberRel->setMultiple(TRUE);
 
     $this->addSelect('visibility', array('placeholder' => NULL, 'option_url' => NULL));

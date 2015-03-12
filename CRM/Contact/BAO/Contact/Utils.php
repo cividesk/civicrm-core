@@ -975,6 +975,9 @@ Group By  componentId";
           AND ({$idFldName} IS NULL
           OR ( {$idFldName} IS NOT NULL AND ({$displayFldName} IS NULL OR {$displayFldName} = '')) )";
       }
+      if ($limit) {
+        $sql .= " LIMIT $limit";
+      }
 
       if ($limit) {
         $sql .= " LIMIT 0, %2";

@@ -456,11 +456,6 @@ class CRM_Core_Config_Variables extends CRM_Core_Config_Defaults {
   public $doNotAttachPDFReceipt = FALSE;
 
   /**
-   * Path to wkhtmltopdf if available
-   */
-  public $wkhtmltopdfPath = FALSE;
-
-  /**
    * Allow second-degree relations permission to edit contacts
    */
   public $secondDegRelPermissions = FALSE;

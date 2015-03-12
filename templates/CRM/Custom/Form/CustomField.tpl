@@ -54,6 +54,9 @@
                                 {/if}
                             {/if}
                         {/foreach}
+                        {if $element.html_type EQ 'CheckBox'}
+                          <td>&nbsp; <span class="crm-clear-link">(<a href="#" title="{ts}check / clear all{/ts}" onclick="selectUnselectCheckbox('{$element_name}', '{$form.formName}', this); return false;">{ts}check / clear all{/ts}</a>)</span></td>
+                        {/if}
                     </tr>
                 </table>
             </td>
@@ -65,6 +68,9 @@
             <td class="html-adjust">
                 {if $element.data_type neq 'Date' OR ($element.data_type eq 'Date' AND $element.is_view eq 1)}
                     {$form.$element_name.html}&nbsp;
+                    {if $element.html_type EQ 'CheckBox'}
+                      &nbsp; <span class="crm-clear-link">(<a href="#" title="{ts}check / clear all{/ts}" onclick="selectUnselectCheckbox('{$element_name}', '{$form.formName}', this); return false;">{ts}check / clear all{/ts}</a>)</span>
+                    {/if}
                 {elseif $element.skip_calendar NEQ true}
                     {include file="CRM/common/jcalendar.tpl" elementName=$element_name}
                 {/if}

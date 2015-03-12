@@ -232,7 +232,7 @@ WHERE  email = %2
             FROM        $group
             LEFT JOIN   $gc
                 ON      $gc.group_id = $group.id
-            WHERE       $group.id IN (" . implode(', ', array_merge($group_ids, $base_group_ids)) . ")
+            WHERE       $group.id IN (" . implode(', ', array_merge($group_ids, $base_group_ids, array(-1))) . ")
                 AND     $group.is_hidden = 0
                 AND     ($group.saved_search_id is not null
                             OR  ($gc.contact_id = $contact_id

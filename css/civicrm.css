@@ -2720,6 +2720,9 @@ div.grippie {
   text-indent: -10000px;
   /* for accessibility reason, put the name of the type/subtype in the icon div (it will be hidden and replaced by the icon) */
 }
+td .crm-icon {
+    margin: 0;
+}
 
 .select2-results .select2-highlighted .Individual-icon,
 .crm-container .Individual-icon {

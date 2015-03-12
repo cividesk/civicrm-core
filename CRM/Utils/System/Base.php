@@ -27,6 +27,7 @@ abstract class CRM_Utils_System_Base {
      * @var bool
      */
   var $is_wordpress = FALSE;
+  var $is_standalone = FALSE;
 
   /**
    * Does this CMS / UF support a CMS specific logging mechanism?

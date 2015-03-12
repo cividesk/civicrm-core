@@ -49,6 +49,9 @@ class CRM_Admin_Form_Setting_Miscellaneous extends CRM_Admin_Form_Setting {
     'doNotAttachPDFReceipt' => CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
     'secondDegRelPermissions' => CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
     'checksumTimeout' => CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
+    'wkhtmltopdfPath' => CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
+    'recaptchaPublicKey' => CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
+    'recaptchaPrivateKey' => CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
   );
 
   public $_uploadMaxSize;
@@ -84,21 +87,6 @@ class CRM_Admin_Form_Setting_Miscellaneous extends CRM_Admin_Form_Setting {
 
     $this->assign('validTriggerPermission', $validTriggerPermission);
     $this->addYesNo('logging', ts('Logging'), NULL, NULL, $attribs);
-
-    $this->addElement(
-      'text',
-      'wkhtmltopdfPath', ts('Path to wkhtmltopdf executable'),
-      array('size' => 64, 'maxlength' => 256)
-    );
-
-    $this->addElement(
-      'text', 'recaptchaPublicKey', ts('Public Key'),
-      array('size' => 64, 'maxlength' => 64)
-    );
-    $this->addElement(
-      'text', 'recaptchaPrivateKey', ts('Private Key'),
-      array('size' => 64, 'maxlength' => 64)
-    );
 
     $this->addElement(
       'text', 'dashboardCacheTimeout', ts('Dashboard cache timeout'),

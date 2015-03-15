@@ -1,10 +1,9 @@
-<?php 
-
+<?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 4.5                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2010                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -29,21 +28,34 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2010
+ * @copyright CiviCRM LLC (c) 2004-2015
  * $Id$
  *
  */
-
-require_once 'CRM/Utils/Hook.php';
-
 class CRM_Utils_Hook_Standalone extends CRM_Utils_Hook {
 
-   function invoke( $numParams,
-                    &$arg1, &$arg2, &$arg3, &$arg4, &$arg5,
-                    $fnSuffix ) {
-       return $this->commonInvoke( $numParams,
-                                   $arg1, $arg2, $arg3, $arg4, $arg5,
-                                   $fnSuffix, 'standalone' );
-   }
+  /**
+   *
+   * @see CRM_Utils_Hook::invoke()
+   *
+   * @param integer $numParams Number of parameters to pass to the hook
+   * @param unknown $arg1 parameter to be passed to the hook
+   * @param unknown $arg2 parameter to be passed to the hook
+   * @param unknown $arg3 parameter to be passed to the hook
+   * @param unknown $arg4 parameter to be passed to the hook
+   * @param unknown $arg5 parameter to be passed to the hook
+   * @param mixed $arg6
+   * @param string $fnSuffix function suffix, this is effectively the hook name
+   *
+   * @return Ambigous <boolean, multitype:>
+   */
+  function invoke($numParams,
+    &$arg1, &$arg2, &$arg3, &$arg4, &$arg5, &$arg6,
+    $fnSuffix) {
 
+    return $this->commonInvoke($numParams,
+      $arg1, $arg2, $arg3, $arg4, $arg5, $arg6,
+      $fnSuffix, 'standalone'
+    );
+  }
 }

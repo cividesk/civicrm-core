@@ -191,8 +191,10 @@ class CRM_Core_BAO_UFMatch extends CRM_Core_DAO_UFMatch {
       $ufmatch             = new CRM_Core_DAO_UFMatch();
       $ufmatch->domain_id  = CRM_Core_Config::domainID();
       $ufmatch->uf_id      = $userKey;
-      $ufmatch->contact_id = $user->contact_id;
       $ufmatch->uf_name    = $uniqId;
+      $openId = new CRM_Core_DAO_OpenID();
+      $openId->id = $userKey;
+      $ufmatch->contact_id = ($openId->find(TRUE) ? $openId->contact_id : NULL);
       return $ufmatch;
     }
 	// We do not need this check for Standalone

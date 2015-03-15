@@ -15,14 +15,15 @@ if ($auth_email) {
     $session->set( 'goahead', "no" );
   } else {
     CRM_Utils_System_Standalone::getUserID( $user );
-
     if ( ! $session->get('userID') ) {
       $message = sprintf( 'You authenticated as \'%s\'. This user is not authorized to login.', $auth_email );
       $session->set( 'msg' , $message );
       $session->set( 'goahead', "no" );
     }
   }
-  CRM_Utils_Hook::singleton()->invoke(1, $user, $user, $user, $user, $user, 'civicrm_login');
+  CRM_Utils_Hook::singleton()->invoke(1, $user,
+    CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject,
+    'civicrm_login');
   header("Location: index.php");
   exit;
 }

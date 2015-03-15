@@ -307,15 +307,6 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
    */
   static function authenticate($name, $password, $loadCMSBootstrap = FALSE) {
     // NG: Does NOT work for command line invocation
-    /*      // check that we got a valid URL
-            $options = array( 'domain_check'    => false,
-                              'allowed_schemes' => array( 'http', 'https' ) );
-            require_once 'Validate.php';
-            $validUrl = Validate::uri( $name, $options );
-            if ( !$validUrl ) {
-                return false;
-            }
-    */
 
     // we got a valid URL, see if it's allowed to login
     require_once 'CRM/Core/BAO/OpenID.php';
@@ -325,9 +316,7 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
     }
 
     // see if the password matches the API key
-    require_once 'CRM/Contact/BAO/Contact.php';
     $dao = CRM_Contact_BAO_Contact::matchContactOnOpenId( $name );
-    require_once 'CRM/Core/DAO.php';
     $api_key = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $dao->contact_id, 'api_key');
     if ( $api_key != $password ) {
       return false;
@@ -345,6 +334,45 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
   }
 
   /**
+   * Get if the user is allowed to login
+   *
+   * @param $user the user object holding auth info
+   *
+   * @return boolean
+   * @access public
+   * @static
+   */
+  static function getAllowedToLogin( $user ) {
+    // this returns true if the user is allowed to log in, false o/w
+    $allow_login = CRM_Core_BAO_OpenID::isAllowedToLogin( $user->identity_url );
+    return $allow_login;
+  }
+
+  /**
+   * Get User ID from UserFramework system (CMS)
+   * @param object $user object as described by the CMS
+   * @return mixed <NULL, number>
+   */
+  function getUserIDFromUserObject($user) {
+    $openId = new CRM_Core_DAO_OpenID();
+    $openId->openid = $user->identity_url;
+    if ($openId->find(TRUE)) {
+      return $openId->id;
+    }
+    return NULL;
+  }
+
+  /**
+   * Get Unique Identifier from UserFramework system (CMS)
+   * @param object $user object as described by the User Framework
+   * @return mixed $uniqueIdentifer Unique identifier from the user Framework system
+   *
+   */
+  function getUniqueIdentifierFromUserObject($user) {
+    return empty($user->email) ? NULL : $user->email;
+  }
+
+ /**
    * Get the userID (contact_id) for an already-authorized OpenID login
    *
    * @param mix $user the user object holding OpenID auth info
@@ -354,28 +382,9 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
    * @static
    */
   static function getUserID( $user ) {
-    require_once 'CRM/Core/BAO/UFMatch.php';
-
     // this puts the appropriate values in the session, so
     // no need to return anything
     CRM_Core_BAO_UFMatch::synchronize( $user, true, 'Standalone', 'Individual' );
-  }
-
-  /**
-   * Get if the user is allowed to login 
-   *
-   * @param $user the user object holding auth info
-   *
-   * @return boolean
-   * @access public
-   * @static
-   */
-  static function getAllowedToLogin( $user ) {
-    require_once 'CRM/Core/BAO/OpenID.php';
-
-    // this returns true if the user is allowed to log in, false o/w
-    $allow_login = CRM_Core_BAO_OpenID::isAllowedToLogin( $user->identity_url );
-    return $allow_login;
   }
 
   /**
@@ -489,6 +498,16 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
   public function getLoggedInUfID() {
     $session = CRM_Core_Session::singleton();
     return $session->get('ufID');
+  }
+
+  /**
+   * Get currently logged in user unique identifier - this tends to be the email address or user name.
+   *
+   * @return string $userID logged in user unique identifier
+   */
+  function getLoggedInUniqueIdentifier() {
+    $user = $this->getLoggedInUserObject();
+    return $this->getUniqueIdentifierFromUserObject($user);
   }
 
   /**

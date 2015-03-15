@@ -308,7 +308,7 @@ class CRM_Core_Invoke {
         );
       }
       else {
-        $newArgs = explode('/', $_GET[$config->userFrameworkURLVar]);
+        $newArgs = explode('/', CRM_Utils_Array::value($config->userFrameworkURLVar, $_GET));
         require_once (str_replace('_', DIRECTORY_SEPARATOR, $item['page_callback']) . '.php');
         $mode = 'null';
         if (isset($pageArgs['mode'])) {
@@ -318,7 +318,7 @@ class CRM_Core_Invoke {
         $title = CRM_Utils_Array::value('title', $item);
         if (strstr($item['page_callback'], '_Page')) {
           $object = new $item['page_callback'] ($title, $mode );
-          $object->urlPath = explode('/', $_GET[$config->userFrameworkURLVar]);
+          $object->urlPath = explode('/', CRM_Utils_Array::value($config->userFrameworkURLVar, $_GET));
         }
         elseif (strstr($item['page_callback'], '_Controller')) {
           $addSequence = 'false';

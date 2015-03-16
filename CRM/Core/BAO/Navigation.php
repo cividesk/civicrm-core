@@ -579,7 +579,6 @@ ORDER BY parent_id, weight";
 
       //add additional navigation items
       $deskURL = '/index.php';
-      $appendSring = "<li id=\"menu-logout\" class=\"menumain\"><a href=\"{$deskURL}\">" . ts('Desk') . "</a></li>";
 
       // get home menu from db
       $homeParams = array('name' => 'Home');
@@ -620,7 +619,7 @@ ORDER BY parent_id, weight";
           <ul id='civicrm-home'>
             <li><a href='$homeURL'>$homeLabel</a></li>
             <li><a href='#' class='crm-hidemenu'>$hideLabel</a></li>
-            <li><a href='$logoutURL' class='crm-logout-link'>". ts('Logout') ."</a></li>
+            <li><a href='$deskURL' class='crm-logout-link'>". ts('Desk') ."</a></li>
           </ul>";
       // <li> tag doesn't need to be closed
     }

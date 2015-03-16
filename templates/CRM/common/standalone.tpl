@@ -35,7 +35,6 @@
 
   <link rel="stylesheet" href="{$config->resourceBase}css/civicrm.css" type="text/css" />
   <link rel="stylesheet" href="{$config->resourceBase}css/standalone.css" type="text/css" />
-  <link rel="stylesheet" href="{$config->resourceBase}css/extras.css" type="text/css" />
   {if $config->customCSSURL}
     <link rel="stylesheet" href="{$config->customCSSURL}" type="text/css" />
   {else}
@@ -114,19 +113,19 @@
           {if $localTasks}
             {include file="CRM/common/localNav.tpl"}
           {/if}
+          <div id="crm-main-content-wrapper">
+            {* Check for Status message for the page (stored in session->getStatus). Status is cleared on retrieval. *}
+            {include file="CRM/common/status.tpl"}
 
-          {* Check for Status message for the page (stored in session->getStatus). Status is cleared on retrieval. *}
-          {include file="CRM/common/status.tpl"}
-
-          <!-- .tpl file invoked: {$tplFile}. Call via form.tpl if we have a form in the page. -->
-          {crmRegion name='page-body'}
-          {if isset($isForm) and $isForm}
-            {include file="CRM/Form/$formTpl.tpl"}
-          {else}
-            {include file=$tplFile}
-          {/if}
-          {/crmRegion}
-
+            <!-- .tpl file invoked: {$tplFile}. Call via form.tpl if we have a form in the page. -->
+            {crmRegion name='page-body'}
+            {if isset($isForm) and $isForm}
+              {include file="CRM/Form/$formTpl.tpl"}
+            {else}
+              {include file=$tplFile}
+            {/if}
+            {/crmRegion}
+          </div>
           {crmRegion name='page-footer'}
           {if ! $urlIsPublic}
             {include file="CRM/common/footer.tpl"}

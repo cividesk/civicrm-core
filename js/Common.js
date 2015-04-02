@@ -867,13 +867,14 @@ CRM.validate = CRM.validate || {
    * @see CRM_Core_Resources::addCoreResources
    */
   var currencyTemplate;
-  CRM.formatMoney = function(value, format) {
+  CRM.formatMoney = function(value, format, withOutSign) {
     var decimal, separator, sign, i, j, result;
     if (value === 'init' && format) {
       currencyTemplate = format;
       return;
     }
     format = format || currencyTemplate;
+    withOutSign = withOutSign || false;
     result = /1(.?)234(.?)56/.exec(format);
     if (result === null) {
       return 'Invalid format passed to CRM.formatMoney';
@@ -885,6 +886,9 @@ CRM.validate = CRM.validate || {
     i = parseInt(value = Math.abs(value).toFixed(2)) + '';
     j = ((j = i.length) > 3) ? j % 3 : 0;
     result = sign + (j ? i.substr(0, j) + separator : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + separator) + (2 ? decimal + Math.abs(value - i).toFixed(2).slice(2) : '');
+    if ( withOutSign ) {
+      return result;
+    }
     return format.replace(/1.*234.*56/, result);
   };
 })(jQuery);

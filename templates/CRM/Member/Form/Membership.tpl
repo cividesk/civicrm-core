@@ -449,7 +449,7 @@
       var term = cj('#num_terms').val();
       if ( term ) {
         var feeTotal = allMemberships[memType]['total_amount_numeric'] * term;
-        cj("#total_amount").val( feeTotal.toFixed(2) );
+        cj("#total_amount").val( CRM.formatMoney(feeTotal, '', true));
       }
       else {
         cj("#total_amount").val( allMemberships[memType]['total_amount'] );

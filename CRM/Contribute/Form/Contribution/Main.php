@@ -826,7 +826,6 @@ class CRM_Contribute_Form_Contribution_Main extends CRM_Contribute_Form_Contribu
       if ($self->_useForMember == 1 && !empty($check) && $membershipIsActive) {
         $priceFieldIDS = array();
         $priceFieldMemTypes = array();
-        $priceFieldIsRequired = array();
 
         foreach ($self->_priceSet['fields'] as $priceId => $value) {
           if (!empty($fields['price_' . $priceId]) || ($self->_quickConfig && $value['name'] == 'membership_amount' && !CRM_Utils_Array::value('is_required', $self->_membershipBlock))) {
@@ -851,7 +850,6 @@ class CRM_Contribute_Form_Contribution_Main extends CRM_Contribute_Form_Contribu
                   )
                 ) {
                   $priceFieldMemTypes[] = $val['membership_type_id'];
-                  $priceFieldIsRequired[$priceId] = $value['is_required'];
                 }
               }
             }
@@ -881,8 +879,7 @@ class CRM_Contribute_Form_Contribution_Main extends CRM_Contribute_Form_Contribu
             }
           }
         }
-        $priceFieldIsRequired = array_filter($priceFieldIsRequired);
-        if (empty($priceFieldMemTypes) && !empty($priceFieldIsRequired)) {
+        if (empty($priceFieldMemTypes)) {
           $errors['_qf_default'] = ts('Please select at least one membership option.');
         }
       }

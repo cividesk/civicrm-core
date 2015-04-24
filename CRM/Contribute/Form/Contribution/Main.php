@@ -878,6 +878,7 @@ class CRM_Contribute_Form_Contribution_Main extends CRM_Contribute_Form_Contribu
         $priceFieldIDS = array();
         $priceFieldMemTypes = array();
         $priceFieldIsRequired = array();
+        $priceFieldAmount = array();
 
         foreach ($self->_priceSet['fields'] as $priceId => $value) {
           if (!empty($fields['price_' . $priceId]) || ($self->_quickConfig && $value['name'] == 'membership_amount' && empty($self->_membershipBlock['is_required']))) {
@@ -902,7 +903,20 @@ class CRM_Contribute_Form_Contribution_Main extends CRM_Contribute_Form_Contribu
                   )
                 ) {
                   $priceFieldMemTypes[] = $val['membership_type_id'];
+                  // Separate membership and contribution fee
+                  $priceFieldAmount['memTypes'][] = $val['amount'];
                   $priceFieldIsRequired[$priceId] = $value['is_required'];
+                }
+                elseif ( ($fields['price_' . $priceId] == $val['id']) ||
+                    (isset($fields['price_' . $priceId]) && !empty($fields['price_' . $priceId][$val['id']])) ||
+                    ($value['html_type'] == 'Text' && $priceId == $value['id'])) {
+                    // Separate membership and contribution fee
+                    if ($value['html_type'] == 'Text') {
+                      $priceFieldAmount['other'][] = $val['amount']*$fields['price_' . $priceId];
+                    }
+                    else {
+                      $priceFieldAmount['other'][] = $val['amount'];
+                    }
                 }
               }
             }
@@ -932,6 +946,16 @@ class CRM_Contribute_Form_Contribution_Main extends CRM_Contribute_Form_Contribu
             }
           }
         }
+        // Flag, Membership selected ?
+        $self->set('priceFieldMemTypes', ! empty($priceFieldMemTypes));
+        // all Membership type amount sum
+        $self->set('priceFieldAmountMembership', array_sum($priceFieldAmount['memTypes']));
+        $self->set('priceFieldAmountNonMembership', false);
+        if (!empty($priceFieldAmount['other'])) {
+          // all Non Membership type amount sum
+          $self->set('priceFieldAmountNonMembership', array_sum($priceFieldAmount['other']));
+        }
+
         $priceFieldIsRequired = array_filter($priceFieldIsRequired);
         if (empty($priceFieldMemTypes) && !empty($priceFieldIsRequired)) {
           $errors['_qf_default'] = ts('Please select at least one membership option.');

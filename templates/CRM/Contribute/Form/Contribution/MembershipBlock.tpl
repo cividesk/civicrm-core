@@ -82,7 +82,7 @@
 {elseif $lineItem and $priceSetID AND !$is_quick_config}
   {assign var="totalAmount" value=$amount}
   <div class="header-dark">
-  {ts}Membership Fee{/ts}
+  {if $priceFieldMemTypes}{ts}Membership Fee{/ts}{else}{ts}Contribution Amount{/ts}{/if}
   </div>
   <div class="display-block">
     {include file="CRM/Price/Page/LineItem.tpl" context="Membership"}

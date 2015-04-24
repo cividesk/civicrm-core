@@ -117,6 +117,9 @@ class CRM_Contribute_Form_Contribution_ThankYou extends CRM_Contribute_Form_Cont
     }
     $this->assign('priceSetID', $this->_priceSetId);
     $this->assign('useForMember', $this->get('useForMember'));
+    $this->assign('priceFieldMemTypes', $this->get('priceFieldMemTypes'));
+    $this->assign('priceFieldAmountMembership', $this->get('priceFieldAmountMembership'));
+    $this->assign('priceFieldAmountNonMembership', $this->get('priceFieldAmountNonMembership'));
 
     $params = $this->_params;
     if ($this->_honor_block_is_active && !empty($params['soft_credit_type_id'])) {

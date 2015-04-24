@@ -614,6 +614,9 @@ class CRM_Contribute_Form_Contribution_Confirm extends CRM_Contribute_Form_Contr
     }
 
     $this->assign('useForMember', $this->get('useForMember'));
+    $this->assign('priceFieldMemTypes', $this->get('priceFieldMemTypes'));
+    $this->assign('priceFieldAmountMembership', $this->get('priceFieldAmountMembership'));
+    $this->assign('priceFieldAmountNonMembership', $this->get('priceFieldAmountNonMembership'));
 
     $this->setDefaults($defaults);
 
@@ -894,11 +897,11 @@ class CRM_Contribute_Form_Contribution_Confirm extends CRM_Contribute_Form_Contr
 
     // store the fact that this is a membership and membership type is selected
     $processMembership = FALSE;
-    $priceFieldIds = $this->get('memberPriceFieldIDS');
+    $priceFieldMemTypes = $this->get('priceFieldMemTypes');
     if ((!empty($membershipParams['selectMembership']) &&
         $membershipParams['selectMembership'] != 'no_thanks'
       ) ||
-        ( $this->_useForMember && !empty($priceFieldIds) )
+        ($this->_useForMember && $priceFieldMemTypes)
     ) {
       $processMembership = TRUE;
 

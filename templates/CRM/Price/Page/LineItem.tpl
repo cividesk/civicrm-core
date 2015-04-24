@@ -72,7 +72,9 @@
     {elseif $context EQ "Event"}
       {ts}Event Total{/ts}:
     {elseif $context EQ "Membership"}
-      {ts}Membership Fee Total{/ts}:
+      {if $priceFieldMemTypes and $priceFieldAmountNonMembership}{ts}Membership Fee{/ts}: {$priceFieldAmountMembership|crmMoney}<br/>{/if}
+      {if $priceFieldAmountNonMembership and $priceFieldMemTypes}{ts}Contribution Amount{/ts}: {$priceFieldAmountNonMembership|crmMoney}<br/>{/if}
+      {if $priceFieldMemTypes and $priceFieldAmountNonMembership}{ts}Total Amount{/ts}:{elseif $priceFieldMemTypes and ! $priceFieldAmountNonMembership}{ts}Membership Fee Total{/ts}:{else}{ts}Contribution Total{/ts}:{/if}
     {else}
       {ts}Total Amount{/ts}:
     {/if}

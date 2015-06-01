@@ -280,7 +280,7 @@ function showChildren( parent_id, showOrgInfo, group_id, levelClass) {
             else {
               appendHTML += '<td class="crm-group-name ' + levelClass + '"><span class="crm-no-children"></span>' + val.group_name + '</td>';
             }
-            appendHTML += "<td>" + val.group_id + "</td>";
+            appendHTML += "<td class='crm-group-group_id'>" + val.group_id + "</td>";
             appendHTML += "<td>" + val.created_by + "</td>";
             if (val.group_description) {
               appendHTML += "<td>" + val.group_description + "</td>";

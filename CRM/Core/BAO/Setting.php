@@ -763,6 +763,8 @@ class CRM_Core_BAO_Setting extends CRM_Core_DAO_Setting {
       foreach ($existing['values'] as $domainID => $domainSettings) {
         CRM_Core_BAO_Domain::setDomain($domainID);
         $missing = array_diff_key($allSettings['values'], $domainSettings);
+        $missing = array_merge($missing, 
+          array_flip(array('wkhtmltopdfPath', 'recaptchaPublicKey', 'recaptchaPrivateKey', 'replyTo', 'verpSeparator', 'mailerBatchLimit', 'mailThrottleTime', 'mailerJobSize', 'mailerJobsMax', 'versionAlert')));
         foreach ($missing as $name => $settings) {
           self::convertConfigToSetting($name, $domainID);
         }
@@ -803,7 +805,7 @@ class CRM_Core_BAO_Setting extends CRM_Core_DAO_Setting {
         civicrm_api('setting', 'fill', array('version' => 3, 'name' => $name, 'domain_id' => $domainID));
       }
 
-      if (empty($spec[$name]['prefetch']) && !empty($values[$configKey])) {
+      if (empty($spec[$name]['prefetch']) && ( !empty($values[$configKey])|| empty($values[$configKey]))) {
         unset($values[$configKey]);
         $domain->config_backend = serialize($values);
         $domain->save();

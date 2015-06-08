@@ -937,7 +937,7 @@ ORDER BY   civicrm_email.is_bulkmail DESC
     $includeMessageId = CRM_Core_BAO_MailSettings::includeMessageId();
 
     if ($includeMessageId && (!array_key_exists('Message-ID', $headers))) {
-      $headers['Message-ID'] = '<' . implode($config->verpSeparator,
+      $headers['Message-ID'] = '<' . implode(CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME, 'verpSeparator'),
         array(
           $localpart . $prefix,
           $job_id,
@@ -1005,7 +1005,7 @@ ORDER BY   civicrm_email.is_bulkmail DESC
     $emailDomain = CRM_Core_BAO_MailSettings::defaultDomain();
 
     foreach ($verpTokens as $key => $value) {
-      $verp[$key] = implode($config->verpSeparator,
+      $verp[$key] = implode(CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME, 'verpSeparator'),
         array(
           $localpart . $value,
           $job_id,
@@ -2661,9 +2661,9 @@ WHERE  civicrm_mailing_job.id = %1
     // check if we are enforcing number of parallel cron jobs
     // CRM-8460
     $gotCronLock = FALSE;
-
-    if (property_exists($config, 'mailerJobsMax') && $config->mailerJobsMax && $config->mailerJobsMax > 1) {
-      $lockArray = range(1, $config->mailerJobsMax);
+    $mailerJobsMax = CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME, 'mailerJobsMax');
+    if ($mailerJobsMax && $mailerJobsMax > 1) {
+      $lockArray = range(1, $mailerJobsMax);
       shuffle($lockArray);
 
       // check if we are using global locks
@@ -2689,7 +2689,7 @@ WHERE  civicrm_mailing_job.id = %1
     // load bootstrap to call hooks
 
     // Split up the parent jobs into multiple child jobs
-    $mailerJobSize = (property_exists($config, 'mailerJobSize')) ? $config->mailerJobSize : NULL;
+    $mailerJobSize = CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME, 'mailerJobSize', NULL, NULL);
     CRM_Mailing_BAO_MailingJob::runJobs_pre($mailerJobSize, $mode);
     CRM_Mailing_BAO_MailingJob::runJobs(NULL, $mode);
     CRM_Mailing_BAO_MailingJob::runJobs_post($mode);

@@ -167,7 +167,7 @@ class CRM_Utils_Mail_EmailProcessor {
     }
 
     $config            = CRM_Core_Config::singleton();
-    $verpSeperator     = preg_quote($config->verpSeparator);
+    $verpSeperator     = preg_quote(CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME, 'verpSeparator'));
     $twoDigitStringMin = $verpSeperator . '(\d+)' . $verpSeperator . '(\d+)';
     $twoDigitString    = $twoDigitStringMin . $verpSeperator;
     $threeDigitString  = $twoDigitString . '(\d+)' . $verpSeperator;

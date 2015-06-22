@@ -56,6 +56,15 @@ class CRM_Core_Permission_Standalone extends CRM_Core_Permission_Base {
                 return true;
             }
         }
+
+        if ($str == CRM_Core_Permission::ALWAYS_DENY_PERMISSION) {
+            return FALSE;
+        }
+
+        if ($str == CRM_Core_Permission::ALWAYS_ALLOW_PERMISSION) {
+            return TRUE;
+        }
+
         require_once 'CRM/ACL/API.php';
         return ( $isAdmin) ? true : CRM_ACL_API::check( $str, null );
     }

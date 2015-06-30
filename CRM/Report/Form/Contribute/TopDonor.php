@@ -377,7 +377,10 @@ class CRM_Report_Form_Contribute_TopDonor extends CRM_Report_Form {
 
   function add2group($groupID) {
     if (is_numeric($groupID)) {
-
+    
+      //set the variable value rank, rows = 0
+      $setVariable = " SET @rows:=0, @rank=0 ";
+      CRM_Core_DAO::singleValueQuery($setVariable);
       $sql = "
 {$this->_select} {$this->_from}  {$this->_where} {$this->_groupBy}
 ORDER BY civicrm_contribution_total_amount_sum DESC

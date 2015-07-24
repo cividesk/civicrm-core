@@ -52,6 +52,10 @@ class CRM_Mailing_MailStore {
     }
 
     $protocols = CRM_Core_PseudoConstant::get('CRM_Core_DAO_MailSettings', 'protocol');
+    if(in_array($protocols[$dao->protocol], array('IMAP', 'POP3')) && empty($dao->server)) {
+      // do not poll if server is not present
+      throw new Exception("Could not find entry named 'server' in civicrm_mail_settings");
+    }
 
     switch ($protocols[$dao->protocol]) {
       case 'IMAP':

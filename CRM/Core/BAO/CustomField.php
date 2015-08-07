@@ -1715,8 +1715,8 @@ SELECT id
       }
       if ($value && is_int($value)) {
         // file is already uploaded then get file details
-        $value = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File', $value, 'uri');
         $fileId = $value;
+        $value = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File', $value, 'uri');
       } else {
         $config = CRM_Core_Config::singleton();
         $fName = $value['name'];

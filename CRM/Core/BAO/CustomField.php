@@ -1713,41 +1713,44 @@ SELECT id
       if (empty($value)) {
         return;
       }
+      if ($value && is_int($value)) {
+        // file is already uploaded then get file details
+        $value = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File', $value, 'uri');
+        $fileId = $value;
+      } else {
+        $config = CRM_Core_Config::singleton();
+        $fName = $value['name'];
+        $mimeType = $value['type'];
+        $filename = pathinfo($fName, PATHINFO_BASENAME);
 
-      $config = CRM_Core_Config::singleton();
+        // rename this file to go into the secure directory
+        if (!rename($fName, $config->customFileUploadDir . $filename)) {
+          CRM_Core_Error::statusBounce(ts('Could not move custom file to custom upload directory'));
+          break;
+        }
 
-      $fName = $value['name'];
-      $mimeType = $value['type'];
+        if ($customValueId) {
+          $query = "
+  SELECT $columnName
+    FROM $tableName
+   WHERE id = %1";
+          $params = array(1 => array($customValueId, 'Integer'));
+          $fileId = CRM_Core_DAO::singleValueQuery($query, $params);
+        }
 
-      $filename = pathinfo($fName, PATHINFO_BASENAME);
+        $fileDAO = new CRM_Core_DAO_File();
 
-      // rename this file to go into the secure directory
-      if (!rename($fName, $config->customFileUploadDir . $filename)) {
-        CRM_Core_Error::statusBounce(ts('Could not move custom file to custom upload directory'));
-        break;
+        if ($fileId) {
+          $fileDAO->id = $fileId;
+        }
+
+        $fileDAO->uri = $filename;
+        $fileDAO->mime_type = $mimeType;
+        $fileDAO->upload_date = date('Ymdhis');
+        $fileDAO->save();
+        $fileId = $fileDAO->id;
+        $value = $filename;
       }
-
-      if ($customValueId) {
-        $query = "
-SELECT $columnName
-  FROM $tableName
- WHERE id = %1";
-        $params = array(1 => array($customValueId, 'Integer'));
-        $fileId = CRM_Core_DAO::singleValueQuery($query, $params);
-      }
-
-      $fileDAO = new CRM_Core_DAO_File();
-
-      if ($fileId) {
-        $fileDAO->id = $fileId;
-      }
-
-      $fileDAO->uri = $filename;
-      $fileDAO->mime_type = $mimeType;
-      $fileDAO->upload_date = date('Ymdhis');
-      $fileDAO->save();
-      $fileId = $fileDAO->id;
-      $value = $filename;
     }
 
     if (!is_array($customFormatted)) {

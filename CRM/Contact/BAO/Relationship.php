@@ -790,7 +790,7 @@ WHERE  relationship_type_id = " . CRM_Utils_Type::escape($type, 'Integer');
     }
 
     // get the total count of relationships
-    $v['totalCount'] = CRM_Contact_BAO_Relationship::getRelationship($params['contact_id'], NULL, NULL, TRUE);
+    $v['totalCount'] = count($v['data']);
 
     $values['relationship']['data'] = &$v['data'];
     $values['relationship']['totalCount'] = &$v['totalCount'];
@@ -1026,8 +1026,10 @@ LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
       while ($relationship->fetch()) {
         $rid = $relationship->civicrm_relationship_id;
         $cid = $relationship->civicrm_contact_id;
-        if (($permissionedContact) &&
-          (!CRM_Contact_BAO_Contact_Permission::relationship($cid, $contactId))
+        if (($permissionedContact &&
+            (!CRM_Contact_BAO_Contact_Permission::relationship($cid, $contactId))
+          ) ||
+          (!CRM_Contact_BAO_Contact_Permission::allow($cid))
         ) {
           continue;
         }
@@ -1356,9 +1358,9 @@ SELECT count(*)
  WHERE membership_type_id = {$membershipValues['membership_type_id']} AND owner_membership_id = {$membershipValues['owner_membership_id']}
     AND is_current_member = 1";
             $result = CRM_Core_DAO::singleValueQuery($query);
-            // Number of inherited memberships available - NULL is interpreted as unlimited, '0' as none
-            if ($result < CRM_Utils_Array::value('max_related', $membershipValues, PHP_INT_MAX))
+            if ($result < CRM_Utils_Array::value('max_related', $membershipValues, PHP_INT_MAX)) {
               CRM_Member_BAO_Membership::create($membershipValues, CRM_Core_DAO::$_nullArray);
+            }
           }
         }
         elseif ($action & CRM_Core_Action::UPDATE) {

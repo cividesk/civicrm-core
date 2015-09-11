@@ -34,7 +34,7 @@
   <field>
        <name>run_frequency</name>
        <type>enum</type>
-       <values>Hourly, Daily, Always</values>
+       <values>Always, Hourly, Daily, Weekly, Monthly, Quarterly</values>
        <default>"Daily"</default>
        <comment>Scheduled job run frequency.</comment>
        <add>4.1</add>

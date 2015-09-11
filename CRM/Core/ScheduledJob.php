@@ -95,25 +95,21 @@ class CRM_Core_ScheduledJob {
     }
 
     // run_frequency check
-    switch ($this->run_frequency) {
-      case 'Always':
+    $intervals = array(
+      'Always' => '1 second',
+      'Hourly' => '1 hour',
+      'Daily' => '1 day',
+      'Weekly' => '1 week',
+      'Monthly' => '1 month',
+      'Quarterly' => '3 month',
+    );
+    if (CRM_Utils_Array::value($this->run_frequency, $intervals)) {
+      $now     = CRM_Utils_Date::currentDBDate();
+      $lastAgo = strtotime('-' . $intervals[$this->run_frequency], strtotime($now));
+      $lastRun = strtotime($this->last_run);
+      if ($lastRun < $lastAgo) {
         return TRUE;
-
-      case 'Hourly':
-        $now     = CRM_Utils_Date::currentDBDate();
-        $hourAgo = strtotime('-1 hour', strtotime($now));
-        $lastRun = strtotime($this->last_run);
-        if ($lastRun < $hourAgo) {
-          return TRUE;
-        }
-
-      case 'Daily':
-        $now     = CRM_Utils_Date::currentDBDate();
-        $dayAgo  = strtotime('-1 day', strtotime($now));
-        $lastRun = strtotime($this->last_run);
-        if ($lastRun < $dayAgo) {
-          return TRUE;
-        }
+      }
     }
 
     return FALSE;

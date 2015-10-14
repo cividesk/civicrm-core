@@ -68,7 +68,7 @@ class CRM_Member_BAO_MembershipPayment extends CRM_Member_DAO_MembershipPayment 
     // however, we can assume at this stage that any contribution id will have only one line item with that membership type in the line item table
     // OR the caller will have taken responsibility for updating the line items themselves so we will update using SQL here
     $membershipTypeID = civicrm_api3('membership', 'getvalue', array('id' => $dao->membership_id, 'return' => 'membership_type_id'));
-    $sql = "UPDATE civicrm_line_item li
+    $sql = "UPDATE IGNORE civicrm_line_item li
       LEFT JOIN civicrm_price_field_value pv ON pv.id = li.price_field_value_id
       SET entity_table = 'civicrm_membership', entity_id = %1
       WHERE pv.membership_type_id = %2

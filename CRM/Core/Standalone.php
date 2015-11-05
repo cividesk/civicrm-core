@@ -77,7 +77,7 @@ class CRM_Core_Standalone {
     // CiviDesk logo block
     if ( defined( 'CIVICRM_LOGO_IMG' ) && CIVICRM_LOGO_IMG ) {
       $content = '<img src="' . str_replace('/persist/contribute/', '/files/', $config->imageUploadURL) . CIVICRM_LOGO_IMG . '" width=170>';
-      if ( defined( 'CIVICRM_LOGO_URL' && CIVICRM_LOGO_URL ))
+      if ( defined( 'CIVICRM_LOGO_URL') && CIVICRM_LOGO_URL)
         $content = '<a href="'. CIVICRM_LOGO_URL . '" target="_blank">'. $content . '</a>';
     } else
       $content = '<a href="http://www.cividesk.com" target="_blank"><img src="' . $config->resourceBase . 'i/logos/cividesk.png" width=170></a>';

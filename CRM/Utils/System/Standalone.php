@@ -242,7 +242,7 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
    * @access public
    *
    */
-  function url($path = null, $query = null, $absolute = true, $fragment = null, $htmlize = true ) {
+  function url($path = null, $query = null, $absolute = true, $fragment = null) {
     $config = CRM_Core_Config::singleton( );
     $script = 'index.php';
 
@@ -256,7 +256,7 @@ class CRM_Utils_System_Standalone extends CRM_Utils_System_Base {
     }
     $base = $absolute ? $config->userFrameworkBaseURL : $config->useFrameworkRelativeBase;
 
-    $separator = $htmlize ? '&amp;' : '&';
+    $separator = '&';
 
     if (! $config->cleanURL ) {
       if ( isset( $path ) ) {

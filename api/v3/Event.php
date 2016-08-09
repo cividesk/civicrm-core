@@ -120,6 +120,8 @@ function civicrm_api3_event_get($params) {
   if (!empty($params['isCurrent'])) {
     $eventDAO->whereAdd('(start_date >= CURDATE() || end_date >= CURDATE())');
   }
+  $domainID = CRM_Core_Config::domainID();
+  $eventDAO->whereAdd("(domain_id IS NULL OR domain_id = $domainID )");
 
   // @todo should replace all this with _civicrm_api3_dao_to_array($bao, $params, FALSE, $entity) - but we still have
   // the return.is_full to deal with.

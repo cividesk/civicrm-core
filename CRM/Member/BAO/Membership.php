@@ -47,7 +47,6 @@ class CRM_Member_BAO_Membership extends CRM_Member_DAO_Membership {
   
   static $_aclCache = NULL;
 
-  static $_aclCache = NULL;
   /**
    * Class constructor.
    *

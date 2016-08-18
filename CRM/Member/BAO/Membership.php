@@ -1240,13 +1240,13 @@ INNER JOIN  civicrm_contact contact_a ON ( contact_a.id = membership.contact_id 
     if (! self::$_aclCache ) { 
       $acl=  new CRM_Contact_BAO_Query();
       $acl->generatePermissionClause(false, true);
-      $aclFrom  = CRM_Utils_Array::value('multisiteGroupTable', $acl->_whereTables);
+      $aclFrom  = CRM_Utils_Array::value('civicrm_group_contact', $acl->_whereTables);
       $aclWhere = $acl->_permissionWhereClause ?  ' AND '.  $acl->_permissionWhereClause : '';
       self::$_aclCache = array('aclFromClause' => $aclFrom, 'aclWhereClause' => $aclWhere);
     }
     return self::$_aclCache;
   }
-
+  
   /**
    * Get a count of membership for a specified membership type,
    * optionally for a specified date.  The date must have the form yyyy-mm-dd.
@@ -1281,10 +1281,10 @@ INNER JOIN  civicrm_contact contact_a ON ( contact_a.id = membership.contact_id 
       2 => array($isTest, 'Boolean'),
     );
     $query = "SELECT  count(civicrm_membership.id ) as member_count
-              FROM   civicrm_membership left join civicrm_membership_status on ( civicrm_membership.status_id = civicrm_membership_status.id  ) 
+              FROM   civicrm_membership left join civicrm_membership_status on ( civicrm_membership.status_id = civicrm_membership_status.id  )
               LEFT JOIN civicrm_contact contact_a ON contact_a.id = civicrm_membership.contact_id ";
     $query .= $acl['aclFromClause'];
-    $query .= " WHERE  civicrm_membership.membership_type_id = %1
+    $query .= " WHERE civicrm_membership.membership_type_id = %1
                   AND civicrm_membership.is_test = %2";
 
     $query .= $acl['aclWhereClause'];
@@ -2166,7 +2166,7 @@ LEFT JOIN civicrm_membership mem ON ( cr.id = mem.contribution_recur_id )
       return 0;
     }
     $acl = self::getAclClause();
-
+    
     $query = "
     SELECT  COUNT(DISTINCT membership.id) as member_count
       FROM  civicrm_membership membership

@@ -1643,7 +1643,7 @@ abstract class CRM_Utils_Hook {
    *   The return value is ignored
    */
   public static function permission_check($permission, &$granted) {
-    return self::singleton()->invoke(2, $permission_name, $permission_value,
+    return self::singleton()->invoke(2, $permission, $granted,
       self::$_nullObject, self::$_nullObject, self::$_nullObject, self::$_nullObject,
       'civicrm_permission_check'
     );

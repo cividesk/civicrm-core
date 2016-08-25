@@ -514,8 +514,10 @@ ORDER BY start_date desc
       }
     }
 
-    $domainID = CRM_Core_Config::domainID();
-    $clauses[] = "(domain_id IS NULL OR domain_id = $domainID )";
+    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_event_per_domain')) {
+      $domainID = CRM_Core_Config::domainID();
+      $clauses[] = "(domain_id IS NULL OR domain_id = $domainID )";
+    }
 
     return !empty($clauses) ? implode(' AND ', $clauses) : '(1)';
   }

@@ -4467,7 +4467,7 @@ civicrm_relationship.is_permission_a_b = 0
       }
     }
 
-    if ($from) {
+    if ($from != NULL) {
       if ($to) {
         $relativeFunction = array('BETWEEN' => array($from, $to));
       }

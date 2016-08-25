@@ -2287,7 +2287,7 @@ SELECT contact_id
           // ternary operators
           case 'BETWEEN':
           case 'NOT BETWEEN':
-            if (empty($criteria[0]) || empty($criteria[1])) {
+            if (!isset($criteria[0]) || !isset($criteria[1])) {
               throw new Exception("invalid criteria for $operator");
             }
             if (!$returnSanitisedArray) {

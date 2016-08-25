@@ -940,14 +940,14 @@ class CRM_Utils_Date {
     if (!$format) {
       $birthDateFormat = self::getDateFormat('birth');
     }
-
+    $config = CRM_Core_Config::singleton();
     $supportableFormats = array(
       'mm/dd' => '%B %E%f',
       'dd-mm' => '%E%f %B',
       'yy-mm' => '%Y %B',
-      'M yy' => '%b %Y',
-      'yy' => '%Y',
-      'dd/mm/yy' => '%E%f %B %Y',
+      'M yy' => $config->dateformatPartial,
+      'yy' => $config->dateformatYear,
+      'dd/mm/yy' => $config->dateformatFull,
     );
 
     if (array_key_exists($birthDateFormat, $supportableFormats)) {
@@ -1783,6 +1783,24 @@ class CRM_Utils_Date {
       $format = $config->dateInputFormat;
     }
     return $format;
+  }
+
+  /**
+   * Get the time in UTC for the current time. You can optionally send an offset from the current time if needed
+   *
+   * @param int $offset
+   *   the offset from the current time in seconds.
+   *
+   * @return string
+   *   the time in UTC
+   */
+  public static function getUTCTime($offset = 0) {
+    $originalTimezone = date_default_timezone_get();
+    date_default_timezone_set('UTC');
+    $time = time() + $offset;
+    $now = date('YmdHis', $time);
+    date_default_timezone_set($originalTimezone);
+    return $now;
   }
 
   /**

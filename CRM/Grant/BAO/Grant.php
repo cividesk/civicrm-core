@@ -57,7 +57,7 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
    *   Array of event summary values
    */
   public static function getGrantSummary($admin = FALSE) {
-    $acl = CRM_Utils_Arcs::getAclClause();
+    $acl = CRM_ACL_BAO_ACL::getAclClause();
     $query = "
             SELECT status_id, count(civicrm_grant.id) as status_total
             FROM civicrm_grant

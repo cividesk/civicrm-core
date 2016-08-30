@@ -1209,8 +1209,7 @@ INNER JOIN  civicrm_membership_type type ON ( type.id = membership.membership_ty
     if (!self::$_signupActType || !self::$_renewalActType) {
       return 0;
     }
-    $acl = self::getAclClause();
-    $acl = self::getAclClause();
+    $acl = CRM_ACL_BAO_ACL::getAclClause();
     $query = "
     SELECT  COUNT(DISTINCT membership.id) as member_count
       FROM  civicrm_membership membership
@@ -1233,17 +1232,6 @@ INNER JOIN  civicrm_contact contact_a ON ( contact_a.id = membership.contact_id 
 
     $memberCount = CRM_Core_DAO::singleValueQuery($query, $params);
     return (int) $memberCount;
-  }
-
-  public static function getAclClause() {
-    if (! self::$_aclCache ) { 
-      $acl=  new CRM_Contact_BAO_Query();
-      $acl->generatePermissionClause(false, true);
-      $aclFrom  = CRM_Utils_Array::value('civicrm_group_contact', $acl->_whereTables);
-      $aclWhere = $acl->_permissionWhereClause ?  ' AND '.  $acl->_permissionWhereClause : '';
-      self::$_aclCache = array('aclFromClause' => $aclFrom, 'aclWhereClause' => $aclWhere);
-    }
-    return self::$_aclCache;
   }
   
   /**
@@ -1273,8 +1261,7 @@ INNER JOIN  civicrm_contact contact_a ON ( contact_a.id = membership.contact_id 
     if (!CRM_Utils_Rule::date($date)) {
       CRM_Core_Error::fatal(ts('Invalid date "%1" (must have form yyyy-mm-dd).', array(1 => $date)));
     }
-    $acl = self::getAclClause();
-    $acl = self::getAclClause();
+    $acl = CRM_ACL_BAO_ACL::getAclClause();
     $params = array(
       1 => array($membershipTypeId, 'Integer'),
       2 => array($isTest, 'Boolean'),
@@ -2164,7 +2151,7 @@ LEFT JOIN civicrm_membership mem ON ( cr.id = mem.contribution_recur_id )
     if (!self::$_signupActType) {
       return 0;
     }
-    $acl = self::getAclClause();
+    $acl = CRM_ACL_BAO_ACL::getAclClause();
     
     $query = "
     SELECT  COUNT(DISTINCT membership.id) as member_count
@@ -2219,8 +2206,7 @@ INNER JOIN  civicrm_contact contact_a ON ( contact_a.id = membership.contact_id 
     if (!self::$_renewalActType) {
       return 0;
     }
-    $acl = self::getAclClause();
-    $acl = self::getAclClause();
+    $acl = CRM_ACL_BAO_ACL::getAclClause();
     $query = "
     SELECT  COUNT(DISTINCT membership.id) as member_count
       FROM  civicrm_membership membership

@@ -4443,7 +4443,7 @@ civicrm_relationship.is_permission_a_b = 0
    *   Submitted field name. (Matches form field not DB field.)
    */
   protected static function convertCustomRelativeFields(&$formValues, &$params, $values, $fieldName) {
-    if (empty($values)) {
+    if (empty($values) && !strlen($values)) {
       // e.g we might have relative set & from & to empty. The form flow is a bit funky &
       // this function gets called again after they fields have been converted which can get ugly.
       return;
@@ -4468,7 +4468,7 @@ civicrm_relationship.is_permission_a_b = 0
     }
 
     if ($from != NULL) {
-      if ($to) {
+      if ($to != NULL) {
         $relativeFunction = array('BETWEEN' => array($from, $to));
       }
       else {

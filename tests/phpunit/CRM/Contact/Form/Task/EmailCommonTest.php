@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.6                                                |
+ | CiviCRM version 4.7                                                |                                    |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2015                                |
+ | Copyright CiviCRM LLC (c) 2004-2016                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -24,31 +24,35 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
  */
+ /**
+  * Test class for CRM_Contact_Form_Task_EmailCommon.
+  * @group headless
+  */
+class CRM_Contact_Form_Task_EmailCommonTest extends CiviUnitTestCase {
 
-/**
- *
- * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2015
- * $Id$
- *
- */
-function run() {
-  session_start();
-
-  require_once '../../civicrm.config.php';
-  require_once 'CRM/Core/Config.php';
-  $config = CRM_Core_Config::singleton();
-
-  // this does not return on failure
-  CRM_Utils_System::authenticateScript(TRUE);
-  if (!CRM_Core_Permission::check('administer CiviCRM')) {
-    CRM_Utils_System::authenticateAbort("User does not have required permission (administer CiviCRM).\n", TRUE);
+  protected function setUp() {
+    parent::setUp();
+    $this->_contactIds = array(
+      $this->individualCreate(array('first_name' => 'Antonia', 'last_name' => 'D`souza')),
+      $this->individualCreate(array('first_name' => 'Anthony', 'last_name' => 'Collins')),
+    );
+    $this->_optionValue = $this->callApiSuccess('optionValue', 'create', array(
+      'label' => '"Seamus Lee" <seamus@example.com>',
+      'option_group_id' => 'from_email_address',
+    ));
   }
 
-  require_once 'CRM/Utils/Migrate/Export.php';
-  $export = new CRM_Utils_Migrate_Export();
-  $export->build();
-  CRM_Utils_System::download('CustomGroupData.xml', 'text/plain', $export->toXML());
-}
+  /**
+   * Test generating domain emails
+   */
+  public function testDomainEmailGeneation() {
+    $emails = CRM_Contact_Form_Task_EmailCommon::domainEmails();
+    $this->assertNotEmpty($emails);
+    $optionValue = $this->callAPISuccess('OptionValue', 'Get', array(
+      'id' => $this->_optionValue['id'],
+    ));
+    $this->assertTrue(array_key_exists('"Seamus Lee" <seamus@example.com>', $emails));
+    $this->assertEquals('"Seamus Lee" <seamus@example.com>', $optionValue['values'][$this->_optionValue['id']]['label']);
+  }
 
-run();
+}

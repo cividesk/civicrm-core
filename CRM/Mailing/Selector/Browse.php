@@ -580,7 +580,8 @@ LEFT JOIN  civicrm_contact scheduledContact ON ( $mailing.scheduled_id = schedul
       }
       $clauses[] = '( campaign_id IN ( ' . implode(' , ', array_values($campainIds)) . ' ) )';
     }
-
+    $domainID = CRM_Core_Config::domainID();
+    $clauses[] = " ( domain_id = $domainID ) ";
     if (empty($clauses)) {
       return 1;
     }

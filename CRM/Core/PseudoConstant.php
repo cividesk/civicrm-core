@@ -108,6 +108,12 @@ class CRM_Core_PseudoConstant {
   private static $groupIterator;
 
   /**
+   * Domain
+   * @var array
+   */
+  private static $domain;
+
+  /**
    * RelationshipType
    * @var array
    */
@@ -1041,6 +1047,36 @@ WHERE  id = %1";
     }
 
     return self::$staticGroup;
+  }
+
+  /**
+   * Get all the domain names from the database.
+   *
+   * The static array domain is returned, and if it's
+   * called the first time, the <b>Domain DAO</b> is used
+   * to get all the domain names.
+   *
+   * Note: any database errors will be trapped by the DAO.
+   *
+   *
+   * @param bool $id
+   *
+   * @return array
+   *   array reference of all domain names.
+   */
+  public static function &domain($id = FALSE) {
+    if (!self::$domain) {
+      self::populate(self::$domain, 'CRM_Core_DAO_Domain', TRUE, 'name');
+    }
+    if ($id) {
+      if (array_key_exists($id, self::$domain)) {
+        return self::$domain[$id];
+      }
+      else {
+        return CRM_Core_DAO::$_nullObject;
+      }
+    }
+    return self::$domain;
   }
 
   /**

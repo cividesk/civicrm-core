@@ -162,8 +162,10 @@ class CRM_Utils_Mail {
     $result = NULL;
     $mailer =& CRM_Core_Config::getMailer();
 
-    // Mail_smtp and Mail_sendmail mailers require Bcc anc Cc emails
-    // be included in both $to and $headers['Cc', 'Bcc']
+    // Mail_mail requires the Cc/Bcc recipients listed ONLY in the $headers variable
+    // All other mailers require that all be recipients in the $to array AND
+    // the Bcc header must not be present as otherwise shown to all recipients
+    // ref. https://pear.php.net/bugs/bug.php?id=8047, answer [2011-04-19 20:48 UTC] cami (Carsten Milkau)
     if (get_class($mailer) != "Mail_mail") {
       //get emails from headers, since these are
       //combination of name and email addresses.
@@ -172,6 +174,7 @@ class CRM_Utils_Mail {
       }
       if (!empty($headers['Bcc'])) {
         $to[] = CRM_Utils_Array::value('Bcc', $headers);
+        unset($headers['Bcc']);
       }
     }
     if (is_object($mailer)) {

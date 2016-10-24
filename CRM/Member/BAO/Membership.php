@@ -1987,7 +1987,7 @@ WHERE  civicrm_membership.contact_id = civicrm_contact.id
    * @return array
    */
   public static function &buildMembershipTypeValues(&$form, $membershipTypeID = NULL) {
-    $whereClause = " WHERE (1) ";//" WHERE domain_id = ". CRM_Core_Config::domainID();
+    $whereClause = " WHERE domain_id = ". CRM_Core_Config::domainID();
 
     if (is_array($membershipTypeID)) {
       $allIDs = implode(',', $membershipTypeID);

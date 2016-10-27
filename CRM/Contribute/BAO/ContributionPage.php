@@ -52,6 +52,11 @@ class CRM_Contribute_BAO_ContributionPage extends CRM_Contribute_DAO_Contributio
     if (isset($params['payment_processor']) && is_array($params['payment_processor'])) {
       $params['payment_processor'] = implode(CRM_Core_DAO::VALUE_SEPARATOR, $params['payment_processor']);
     }
+
+    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_contribution_pages_per_domain')) {
+      $params['domain_id'] = CRM_Core_Config::domainID();
+    }
+
     $hook = empty($params['id']) ? 'create' : 'edit';
     CRM_Utils_Hook::pre($hook, 'ContributionPage', CRM_Utils_Array::value('id', $params), $params);
     $dao = new CRM_Contribute_DAO_ContributionPage();

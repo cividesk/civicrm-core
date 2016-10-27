@@ -206,11 +206,16 @@ class CRM_Contribute_PseudoConstant extends CRM_Core_PseudoConstant {
     else {
       $cacheVarToUse = &self::$contributionPageActive;
     }
+    $condition = NULL;
+    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_contribution_pages_per_domain')) {
+      $domainID = CRM_Core_Config::domainID();
+      $condition = "(domain_id IS NULL OR domain_id = $domainID )";
+    }
 
     if (!$cacheVarToUse) {
       CRM_Core_PseudoConstant::populate($cacheVarToUse,
         'CRM_Contribute_DAO_ContributionPage',
-        $all, 'title'
+        $all, 'title', 'is_active', $condition
       );
     }
     if ($id) {

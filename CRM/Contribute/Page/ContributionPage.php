@@ -619,6 +619,11 @@ ORDER BY is_active desc, title asc
       $this->assign('isSearch', 1);
     }
 
+    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_contribution_pages_per_domain')) {
+      $domainID = CRM_Core_Config::domainID();
+      $clauses[] = "(domain_id IS NULL OR domain_id = $domainID )";
+    }
+
     return implode(' AND ', $clauses);
   }
 

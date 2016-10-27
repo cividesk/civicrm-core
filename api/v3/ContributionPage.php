@@ -72,6 +72,9 @@ function _civicrm_api3_contribution_page_create_spec(&$params) {
  *   API Result array Array of matching contribution_pages
  */
 function civicrm_api3_contribution_page_get($params) {
+  if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_contribution_pages_per_domain')) {
+    $params['domain_id'] = CRM_Core_Config::domainID();
+  }
   return _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params);
 }
 

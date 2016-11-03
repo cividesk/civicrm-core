@@ -28,11 +28,12 @@
     <comment>Contribution Page title. For top of page display</comment>
     <add>1.3</add>
   </field>
- <field>
+  <field>
     <name>domain_id</name>
     <title>Contribution Page Domain ID</title>
     <type>int unsigned</type>
     <required>true</required>
+    <default>NULL</default>
     <comment>Which Domain is this match entry for</comment>
     <pseudoconstant>
       <table>civicrm_domain</table>

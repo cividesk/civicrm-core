@@ -278,6 +278,15 @@ class CRM_Contribute_Form_ContributionBase extends CRM_Core_Form {
       $this->_fields = array();
 
       CRM_Contribute_BAO_ContributionPage::setValues($this->_id, $this->_values);
+
+      // Do not allow to access different domain pages
+      if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_contribution_pages_per_domain')) {
+        $domainID = CRM_Core_Config::domainID();
+        if (!empty($this->_values['domain_id']) && $this->_values['domain_id'] != $domainID) {
+          CRM_Core_Error::fatal(ts('You do not have permission to access this page.'));
+        }
+      }
+
       if (CRM_Financial_BAO_FinancialType::isACLFinancialTypeStatus()
         && !CRM_Core_Permission::check('add contributions of type ' . CRM_Contribute_PseudoConstant::financialType($this->_values['financial_type_id']))
       ) {

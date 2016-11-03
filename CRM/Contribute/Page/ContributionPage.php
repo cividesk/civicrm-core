@@ -613,7 +613,6 @@ ORDER BY is_active desc, title asc
     if (empty($clauses)) {
       // Let template know if user has run a search or not
       $this->assign('isSearch', 0);
-      return 1;
     }
     else {
       $this->assign('isSearch', 1);
@@ -624,7 +623,7 @@ ORDER BY is_active desc, title asc
       $clauses[] = "(domain_id IS NULL OR domain_id = $domainID )";
     }
 
-    return implode(' AND ', $clauses);
+    return !empty($clauses) ? implode(' AND ', $clauses) : '(1)';
   }
 
   /**

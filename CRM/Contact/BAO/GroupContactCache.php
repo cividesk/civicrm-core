@@ -210,7 +210,7 @@ AND    g.refresh_date IS NULL
 
     $returnProperties = array('contact_id');
     foreach ($groupID as $gid) {
-      $params = array(array('group', 'IN', array($gid), 0, 0));
+      $params = array(array('group', 'IN', array($gid => 1), 0, 0));
       // the below call updates the cache table as a byproduct of the query
       CRM_Contact_BAO_Query::apiQuery($params, $returnProperties, NULL, NULL, 0, 0, FALSE);
     }
@@ -600,8 +600,7 @@ AND  civicrm_group_contact.group_id = $groupID ";
 
     if (
       isset($config->smartGroupCacheTimeout) &&
-      is_numeric($config->smartGroupCacheTimeout) &&
-      $config->smartGroupCacheTimeout > 0
+      is_numeric($config->smartGroupCacheTimeout)
     ) {
       return $config->smartGroupCacheTimeout;
     }

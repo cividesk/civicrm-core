@@ -613,7 +613,7 @@ AND         tag_id = ( SELECT id FROM civicrm_tag WHERE name = %2 )";
         $config = CRM_Core_Config::singleton();
         $localpart = CRM_Core_BAO_MailSettings::defaultLocalpart();
 
-        $replyTo = implode($config->verpSeparator,
+        $replyTo = implode(CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME, 'verpSeparator'),
             array(
               $localpart . 'c',
               $se->contact_id,

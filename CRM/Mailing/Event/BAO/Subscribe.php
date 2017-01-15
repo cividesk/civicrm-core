@@ -210,7 +210,7 @@ SELECT     civicrm_email.id as email_id
     $localpart = CRM_Core_BAO_MailSettings::defaultLocalpart();
     $emailDomain = CRM_Core_BAO_MailSettings::defaultDomain();
 
-    $confirm = implode($config->verpSeparator,
+    $confirm = implode(CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME, 'verpSeparator'),
       array(
         $localpart . 'c',
         $this->contact_id,

@@ -37,7 +37,15 @@
  * This class generates form components for CiviMail
  */
 class CRM_Admin_Form_Setting_Mail extends CRM_Admin_Form_Setting {
-
+  
+  protected $_settings = array(
+    'replyTo' => CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME,
+    'verpSeparator' => CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME,
+    'mailerBatchLimit' => CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME,
+    'mailThrottleTime' => CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME,
+    'mailerJobSize' => CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME,
+    'mailerJobsMax' => CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME,
+  );
   /**
    * Function to build the form
    *
@@ -45,26 +53,17 @@ class CRM_Admin_Form_Setting_Mail extends CRM_Admin_Form_Setting {
    * @access public
    */
   public function buildQuickForm() {
-    CRM_Utils_System::setTitle(ts('Settings - CiviMail'));
-    $this->addElement('text', 'verpSeparator', ts('VERP Separator'));
-    $this->addElement('text', 'mailerBatchLimit', ts('Mailer Batch Limit'));
-    $this->addElement('text', 'mailThrottleTime', ts('Mailer Throttle Time'));
-    $this->addElement('text', 'mailerJobSize', ts('Mailer Job Size'));
-    $this->addElement('advcheckbox', 'replyTo', ts('Enable Custom Reply-To'));
-    $this->addElement('text', 'mailerJobsMax', ts('Mailer CRON job limit'));
+    CRM_Utils_System::setTitle(ts('Settings - CiviMail'));   
     $check = TRUE;
-
+    parent::buildQuickForm($check);
     // redirect to Administer Section After hitting either Save or Cancel button.
     $session = CRM_Core_Session::singleton();
     $session->pushUserContext(CRM_Utils_System::url('civicrm/admin', 'reset=1'));
-
     $this->addFormRule(array('CRM_Admin_Form_Setting_Mail', 'formRule'));
     $this->addRule('mailerBatchLimit', ts('Must be an integer'), 'integer');
     $this->addRule('mailThrottleTime', ts('Must be an integer'), 'integer');
     $this->addRule('mailerJobSize', ts('Must be an integer'), 'integer');
-    $this->addRule('mailerJobsMax', ts('Must be an integer'), 'integer');
-
-    parent::buildQuickForm($check);
+    $this->addRule('mailerJobsMax', ts('Must be an integer'), 'integer');    
   }
 
   static function formRule($fields) {

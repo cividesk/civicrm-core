@@ -235,7 +235,8 @@ class CRM_Mailing_Form_Upload extends CRM_Core_Form {
     );
 
     //Added code to add custom field as Reply-To on form when it is enabled from Mailer settings
-    if (isset($config->replyTo) && !empty($config->replyTo) &&
+    $replyTo =CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MAILING_PREFERENCES_NAME, 'replyTo');
+    if (isset($replyTo) && !empty($replyTo) &&
       ! CRM_Utils_Array::value( 'override_verp', $options ) ) {
       $this->add('select', 'reply_to_address', ts('Reply-To'),
         array('' => '- select -') + $fromEmailAddress

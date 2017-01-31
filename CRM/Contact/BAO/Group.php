@@ -315,7 +315,7 @@ class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
     $allGroups = CRM_Core_PseudoConstant::allGroup(NULL, $excludeHidden);
 
     $permissions = NULL;
-    if (CRM_Core_Permission::check('edit all contacts') ||
+    if (CRM_Core_Permission::check('edit all contacts') || CRM_Core_Permission::check('edit all contacts in domain') ||
       CRM_ACL_API::groupPermission(CRM_ACL_API::EDIT, $id, NULL,
         'civicrm_saved_search', $allGroups
       )
@@ -323,7 +323,7 @@ class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
       $permissions[] = CRM_Core_Permission::EDIT;
     }
 
-    if (CRM_Core_Permission::check('view all contacts') ||
+    if (CRM_Core_Permission::check('view all contacts') || CRM_Core_Permission::check('edit all contacts in domain') ||
       CRM_ACL_API::groupPermission(CRM_ACL_API::VIEW, $id, NULL,
         'civicrm_saved_search', $allGroups
       )
@@ -517,7 +517,7 @@ class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
    * and store it for future use
    */
   public function buildClause() {
-    $params = array(array('group', 'IN', array($this->id => 1), 0, 0));
+    $params = array(array('group', 'IN', array($this->id), 0, 0));
 
     if (!empty($params)) {
       $tables = $whereTables = array();
@@ -870,7 +870,7 @@ class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
     $visibility = CRM_Core_SelectValues::ufVisibility();
 
     while ($object->fetch()) {
-      $permission = CRM_Contact_BAO_Group::checkPermission($object->id, $object->title);
+      $permission = CRM_Contact_BAO_Group::checkPermission($object->id, TRUE);
       //@todo CRM-12209 introduced an ACL check in the whereClause function
       // it may be that this checking is now obsolete - or that what remains
       // should be removed to the whereClause (which is also accessed by getCount)

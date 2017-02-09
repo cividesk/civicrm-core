@@ -575,21 +575,31 @@ HTACCESS;
   public static function baseFilePath() {
     static $_path = NULL;
     if (!$_path) {
-      // Note: Don't rely on $config; that creates a dependency loop.
-      if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
-        throw new RuntimeException("Undefined constant: CIVICRM_TEMPLATE_COMPILEDIR");
+      /*
+       default path : ROOT/sites/default/fiels/civicrm/templates_c|ConfigAndLog
+       cividesk path: /var/tmp/templates_c/customername and /home/customername/log/civicrm/ConfigAndLog
+       So we can not rely on default fucntaiontiy to find file path, so created one more constanst in civicrm.settings.php file
+      */
+      if (defined('CIVICRM_FILE_BASE_PATH')) {
+        $path = CIVICRM_FILE_BASE_PATH;
       }
-      $templateCompileDir = CIVICRM_TEMPLATE_COMPILEDIR;
+      else {
+        // Note: Don't rely on $config; that creates a dependency loop.
+        if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
+          throw new RuntimeException("Undefined constant: CIVICRM_TEMPLATE_COMPILEDIR");
+        }
+        $templateCompileDir = CIVICRM_TEMPLATE_COMPILEDIR;
 
-      $path = dirname($templateCompileDir);
+        $path = dirname($templateCompileDir);
 
-      //this fix is to avoid creation of upload dirs inside templates_c directory
-      $checkPath = explode(DIRECTORY_SEPARATOR, $path);
+        //this fix is to avoid creation of upload dirs inside templates_c directory
+        $checkPath = explode(DIRECTORY_SEPARATOR, $path);
 
-      $cnt = count($checkPath) - 1;
-      if ($checkPath[$cnt] == 'templates_c') {
-        unset($checkPath[$cnt]);
-        $path = implode(DIRECTORY_SEPARATOR, $checkPath);
+        $cnt = count($checkPath) - 1;
+        if ($checkPath[$cnt] == 'templates_c') {
+          unset($checkPath[$cnt]);
+          $path = implode(DIRECTORY_SEPARATOR, $checkPath);
+        }
       }
 
       $_path = CRM_Utils_File::addTrailingSlash($path);

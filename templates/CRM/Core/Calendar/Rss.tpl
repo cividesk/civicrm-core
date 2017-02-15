@@ -55,6 +55,8 @@
 </description>
 {if $event.event_type}<category>{$event.event_type|escape:'html'}</category>
 {/if}
+<startdate>{$event.start_date|crmDate}</startdate>
+<enddate>{$event.end_date|crmDate}</enddate>
 {if $event.contact_email}<author>{$event.contact_email}</author>
 {/if}
 <guid isPermaLink="false">{$event.uid}</guid>

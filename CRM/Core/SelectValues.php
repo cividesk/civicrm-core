@@ -580,6 +580,7 @@ class CRM_Core_SelectValues {
       '{contribution.contribution_status_id}' => ts('Contribution Status'),
       //'{contribution.honor_type_id}' => ts('Honor Type ID'),
       //'{contribution.address_id}' => ts('Address ID'),
+      '{contribution.financial_type}' => ts('Financial Type'),
       '{contribution.check_number}' => ts('Check Number'),
       '{contribution.campaign}' => ts('Contribution Campaign'),
     ), CRM_Utils_Token::getCustomFieldTokens('contribution', TRUE));

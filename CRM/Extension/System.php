@@ -224,7 +224,9 @@ class CRM_Extension_System {
   public function getBrowser() {
     if ($this->browser === NULL) {
       $cacheDir = NULL;
-      if (!empty($this->parameters['uploadDir'])) {
+      if (defined('CIVICRM_EXT_CACHE') && CIVICRM_EXT_CACHE) {
+        $cacheDir = CIVICRM_EXT_CACHE;
+      } else if (!empty($this->parameters['uploadDir'])) {
         $cacheDir = CRM_Utils_File::addTrailingSlash($this->parameters['uploadDir']) . 'cache';
       }
       $this->browser = new CRM_Extension_Browser($this->getRepositoryUrl(), '', $cacheDir);

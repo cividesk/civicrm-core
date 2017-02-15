@@ -149,10 +149,12 @@ LEFT JOIN civicrm_email   email   ON ( email.contact_id = contact_a.id AND
     $low = CRM_Utils_Array::value('postal_code_low',
       $this->_formValues
     );
+    $low_length = mb_strlen($low);
     $high = CRM_Utils_Array::value('postal_code_high',
       $this->_formValues
     );
     $errorMessage = NULL;
+    $high_length = mb_strlen($high);
     if ($low == NULL || $high == NULL) {
       $errorMessage = ts('Please provide start and end postal codes.');
     }

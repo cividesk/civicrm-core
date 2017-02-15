@@ -535,7 +535,7 @@ DESC limit 1");
     }
 
     $this->add('text', 'source', ts('Source'),
-      CRM_Core_DAO::getAttribute('CRM_Member_DAO_Membership', 'source')
+      CRM_Core_DAO::getAttribute('CRM_Member_DAO_Membership', 'membership_source')
     );
 
     //CRM-7362 --add campaigns.

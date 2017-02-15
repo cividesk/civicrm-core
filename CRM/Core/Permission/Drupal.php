@@ -127,6 +127,7 @@ class CRM_Core_Permission_Drupal extends CRM_Core_Permission_DrupalBase {
    * @inheritDoc
    */
   public function upgradePermissions($permissions) {
+    if (defined('CIVICRM_STANDALONE_PLUS')) return;
     if (empty($permissions)) {
       throw new CRM_Core_Exception("Cannot upgrade permissions: permission list missing");
     }

@@ -166,9 +166,11 @@ LEFT JOIN civicrm_email   email   ON ( email.contact_id = contact_a.id AND
     $low = CRM_Utils_Array::value('postal_code_low',
       $this->_formValues
     );
+    $low_length = mb_strlen($low);
     $high = CRM_Utils_Array::value('postal_code_high',
       $this->_formValues
     );
+    $high_length = mb_strlen($high);
     if ($low == NULL || $high == NULL) {
       CRM_Core_Error::statusBounce(ts('Please provide start and end postal codes'),
         CRM_Utils_System::url('civicrm/contact/search/custom',
@@ -177,11 +179,12 @@ LEFT JOIN civicrm_email   email   ON ( email.contact_id = contact_a.id AND
         )
       );
     }
-
+    $min_length = min($low_length, $high_length);
     $where = "ROUND(address.postal_code) >= %1 AND ROUND(address.postal_code) <= %2";
+    $where = "LENGTH(address.postal_code) >= $min_length AND LEFT(address.postal_code, $low_length) >= %1 AND LEFT(address.postal_code, $high_length) <= %2";
     $params = array(
-      1 => array(trim($low), 'Integer'),
-      2 => array(trim($high), 'Integer'),
+      1 => array(trim($low), 'String'),
+      2 => array(trim($high), 'String'),
     );
 
     if ($this->_aclWhere) {

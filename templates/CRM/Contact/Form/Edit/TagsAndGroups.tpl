@@ -90,12 +90,16 @@
     <table class="form-layout-compressed{if $context EQ 'profile'} crm-profile-tagsandgroups{/if}">
       <tr>
         {if !$type || $type eq 'group'}
-          <td>
-            {if $groupElementType eq 'select'}
-              <span class="label">{if $title}{$form.group.label}{/if}</span>
-            {/if}
-            {$form.group.html}
-          </td>
+          {if $groupElementType eq 'checkbox'}
+            {include file="CRM/Contact/Form/Edit/Groups.tpl"}
+          {else}
+            <td>
+              {if $groupElementType eq 'select'}
+                <span class="label">{if $title}{$form.group.label}{/if}</span>
+              {/if}
+              {$form.group.html}
+            </td>
+          {/if}
         {/if}
         {if (!$type || $type eq 'tag') && $tree}
           <td width="70%">{if $title}<span class="label">{$form.tag.label}</span>{/if}

@@ -362,7 +362,10 @@ class CRM_Utils_System_Joomla extends CRM_Utils_System_Base {
       $row = $users[0];
     }
 
-    $joomlaBase = dirname(dirname(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__))))))));
+    //$joomlaBase = dirname(dirname(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__))))))));
+    global $civicrm_root;
+    $joomlaPath = explode('/administrator', $civicrm_root);
+    $joomlaBase = $joomlaPath[0];
     if (!defined('JVERSION')) {
       require $joomlaBase . '/libraries/cms/version/version.php';
       $jversion = new JVersion();
@@ -522,7 +525,10 @@ class CRM_Utils_System_Joomla extends CRM_Utils_System_Base {
    */
   public function loadBootStrap($params = array(), $loadUser = TRUE, $throwError = TRUE, $realPath = NULL, $loadDefines = TRUE) {
     // Setup the base path related constant.
-    $joomlaBase = dirname(dirname(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__))))))));
+    //$joomlaBase = dirname(dirname(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__))))))));
+    global $civicrm_root;
+    $joomlaPath = explode('/administrator', $civicrm_root);
+    $joomlaBase = $joomlaPath[0];
 
     // load BootStrap here if needed
     // We are a valid Joomla entry point.

@@ -116,7 +116,10 @@ class CRM_Utils_Geocode_Google {
     }
 
     if (!empty($config->geoAPIKey)) {
-      $add .= '&key=' . urlencode($config->geoAPIKey);
+      $add .= '&new_forward_geocoder=false&key=' . urlencode($config->geoAPIKey);
+    }
+    else if (!empty($config->mapAPIKey)) {
+      $add .= '&new_forward_geocoder=false&key=' . urlencode($config->mapAPIKey);
     }
 
     $query = 'https://' . self::$_server . self::$_uri . $add;

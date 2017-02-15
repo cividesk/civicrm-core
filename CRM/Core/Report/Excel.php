@@ -64,6 +64,34 @@ class CRM_Core_Report_Excel {
     $escaped = $enclosed;
     $add_character = "\015\012";
 
+    // Add BOM for additional compatibility with Excel 2007 SP3 or more
+    // cf. http://stackoverflow.com/questions/155097/microsoft-excel-mangles-diacritics-in-csv-files
+    // and http://www.unicode.org/faq/utf_bom.html#bom1
+    $BOM = array(
+      'UTF-8' => "\xEF\xBB\xBF",
+      // Commented because these do not seem to work on Windows
+      // (we might need to use the 'pack' / 'unpack' functions)
+      // 'UTF-16BE' => "\xFE\xFF",
+      // 'UTF-16LE' => "\xFF\xFE",
+      // 'UTF-32BE' => "\x00\x00\xFE\xFF",
+      // 'UTF-32LE' => "\xFF\xFE\x00\x00",
+    );
+    if (empty($config->legacyEncoding)) {
+      $out = $BOM['UTF-8'];
+    }
+    elseif (array_key_exists($config->legacyEncoding, $BOM)) {
+      $out = $BOM[$config->legacyEncoding];
+    }
+    else {
+      $out = '';
+    }
+    if ($print) {
+      echo $out;
+    }
+    else {
+      $result .= $out;
+    }
+
     $schema_insert = '';
     foreach ($header as $field) {
       if ($enclosed == '') {

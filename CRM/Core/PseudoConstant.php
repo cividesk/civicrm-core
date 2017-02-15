@@ -362,6 +362,10 @@ class CRM_Core_PseudoConstant {
           elseif (in_array('weight', $availableFields)) {
             $order = "ORDER BY weight";
           }
+          // sort by 'is_default' for location type
+          elseif (isset($pseudoconstant['table']) && $pseudoconstant['table'] === 'civicrm_location_type') {
+            $order = "ORDER BY is_default desc";
+          }
 
           $output = array();
           $query = "$select $from";

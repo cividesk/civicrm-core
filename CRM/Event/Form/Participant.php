@@ -857,6 +857,10 @@ class CRM_Event_Form_Participant extends CRM_Contribute_Form_AbstractEditPayment
         $dupeCheck->contact_id = $contactId;
         $dupeCheck->event_id = $eventId;
         $dupeCheck->whereAdd("status_id != {$cancelledStatusID} ");
+        $dupeCheck->is_test = 0;
+        if ($self->_mode && $self->_mode == 'test') {
+          $dupeCheck->is_test = 1;
+        }
         $dupeCheck->find(TRUE);
         if (!empty($dupeCheck->id)) {
           $errorMsg['event_id'] = ts("This contact has already been assigned to this event.");

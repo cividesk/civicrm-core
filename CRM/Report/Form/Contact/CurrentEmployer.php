@@ -165,6 +165,7 @@ class CRM_Report_Form_Contact_CurrentEmployer extends CRM_Report_Form {
         'grouping' => 'contact-fields',
         'fields' => array(
           'street_address' => NULL,
+          'supplemental_address_1' => NULL,
           'city' => NULL,
           'postal_code' => NULL,
           'state_province_id' => array(

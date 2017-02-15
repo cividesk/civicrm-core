@@ -582,7 +582,7 @@ class CRM_Member_Form_Membership extends CRM_Member_Form {
     }
 
     $this->add('text', 'source', ts('Source'),
-      CRM_Core_DAO::getAttribute('CRM_Member_DAO_Membership', 'source')
+      CRM_Core_DAO::getAttribute('CRM_Member_DAO_Membership', 'membership_source')
     );
 
     //CRM-7362 --add campaigns.

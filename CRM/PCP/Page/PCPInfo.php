@@ -82,9 +82,11 @@ class CRM_PCP_Page_PCPInfo extends CRM_Core_Page {
     // check if PCP is created by anonymous user
     $anonymousPCP = CRM_Utils_Request::retrieve('ap', 'Boolean', $this);
     if ($anonymousPCP) {
-      $loginURL = $config->userSystem->getLoginURL();
-      $anonMessage = ts('Once you\'ve received your new account welcome email, you can <a href=%1>click here</a> to login and promote your campaign page.', array(1 => $loginURL));
-      CRM_Core_Session::setStatus($anonMessage, ts('Success'), 'success');
+      if(!defined('CIVICRM_STANDALONE_PLUS')) {
+        $loginURL = $config->userSystem->getLoginURL();
+        $anonMessage = ts('Once you\'ve received your new account welcome email, you can <a href=%1>click here</a> to login and promote your campaign page.', array(1 => $loginURL));
+        CRM_Core_Session::setStatus($anonMessage, ts('Success'), 'success');
+      }
     }
     else {
       $statusMessage = ts('The personal campaign page you requested is currently unavailable. However you can still support the campaign by making a contribution here.');

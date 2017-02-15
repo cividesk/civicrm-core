@@ -516,10 +516,12 @@ class CRM_Core_BAO_Address extends CRM_Core_DAO_Address {
       if (!empty($address->state_province_id)) {
         $address->state = CRM_Core_PseudoConstant::stateProvinceAbbreviation($address->state_province_id, FALSE);
         $address->state_name = CRM_Core_PseudoConstant::stateProvince($address->state_province_id, FALSE);
+        $values['state_province'] = $address->state;
       }
 
       if (!empty($address->country_id)) {
         $address->country = CRM_Core_PseudoConstant::country($address->country_id);
+        $values['country'] = $address->country;
 
         //get world region
         $regionId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Country', $address->country_id, 'region_id');

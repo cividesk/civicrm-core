@@ -615,7 +615,6 @@ class CRM_Report_Form_Contact_Detail extends CRM_Report_Form {
       $this->_where .= " AND {$this->_aclWhere} ";
     }
 
-    $this->_where .= " GROUP BY {$this->_aliases['civicrm_contact']}.id ";
   }
 
   /**

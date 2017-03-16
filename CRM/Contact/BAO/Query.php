@@ -5810,6 +5810,17 @@ AND   displayRelType.is_active = 1
     if ($config->includeOrderByClause ||
       isset($this->_distinctComponentClause)
     ) {
+      $desc = '';
+      $multiCustomTable = array();
+      foreach ($this->_tables as $tableName => $_) {
+        if (CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup', $tableName, 'is_multiple', 'table_name')) {
+          $multiCustomTable[] = $tableName .'_id DESC';
+        }
+      }
+      if (!empty($multiCustomTable)) {
+        $desc = implode(', ', $multiCustomTable) . ',';
+      }
+
       if ($sort) {
         if (is_string($sort)) {
           $orderBy = $sort;
@@ -5847,7 +5858,7 @@ AND   displayRelType.is_active = 1
         $order = " ORDER BY UPPER(LEFT(contact_a.sort_name, 1)) asc";
       }
       else {
-        $order = " ORDER BY contact_a.sort_name asc, contact_a.id";
+        $order = " ORDER BY {$desc} contact_a.sort_name asc, contact_a.id";
       }
     }
 

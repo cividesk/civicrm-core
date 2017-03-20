@@ -2094,6 +2094,42 @@ class api_v3_ContributionTest extends CiviUnitTestCase {
     $this->assertEquals($contributionRecur['values'][1]['is_test'], $repeatedContribution['values'][2]['is_test']);
     $this->quickCleanUpFinancialEntities();
   }
+  /**
+   * CRM-19945 Tests repeattransaction is using a completed contribution for the template.
+   *  ( Tests membership is renewed after repeattransaction. )
+   */
+  public function testRepeatTransactionUsesCompleted() {
+    list($originalContribution, $membership) = $this->setUpAutoRenewMembership();
+
+    $this->callAPISuccess('contribution', 'create', array(
+          'contact_id' => $originalContribution['values'][1]['contact_id'],
+          'financial_type_id' => $originalContribution['values'][1]['financial_type_id'],
+          'total_amount' => $originalContribution['values'][1]['total_amount'],
+          'contribution_recur_id' => $originalContribution['values'][1]['contribution_recur_id'],
+          'contribution_status_id' => "Failed",
+    ));
+
+    $this->callAPISuccess('membership', 'create', array(
+       'id' => $membership['id'],
+       'end_date' => 'yesterday',
+       'status_id' => 4,
+    ));
+
+    $this->callAPISuccess('contribution', 'repeattransaction', array(
+       'contribution_recur_id' => $originalContribution['values'][1]['contribution_recur_id'],
+       'contribution_status_id' => 'Completed',
+       'trxn_id' => uniqid(),
+    ));
+
+    $membershipStatus = $this->callAPISuccess('membership', 'getvalue', array(
+      'id' => $membership['id'],
+      'return' => 'status_id',
+    ));
+
+    $this->assertEquals('1', $membershipStatus);
+    $this->quickCleanUpFinancialEntities();
+    $this->contactDelete($originalContribution['values'][1]['contact_id']);
+  }
 
   /**
    * CRM-16397 test appropriate action if total amount has changed for single line items.
@@ -3147,6 +3183,76 @@ class api_v3_ContributionTest extends CiviUnitTestCase {
   }
 
   /**
+   * Set up a basic auto-renew membership for tests.
+   *
+   * @param array $generalParams
+   *   Parameters that can be merged into the recurring AND the contribution.
+   *
+   * @param array $recurParams
+   *   Parameters to merge into the recur only.
+   *
+   * @return array|int
+   */
+  protected function setUpAutoRenewMembership($generalParams = array(), $recurParams = array()) {
+    $newContact = $this->callAPISuccess('Contact', 'create', array(
+       'contact_type' => 'Individual',
+       'sort_name' => 'McTesterson, Testy',
+       'display_name' => 'Testy McTesterson',
+       'preferred_language' => 'en_US',
+       'preferred_mail_format' => 'Both',
+       'first_name' => 'Testy',
+       'last_name' => 'McTesterson',
+       'contact_is_deleted' => '0',
+       'email_id' => '4',
+       'email' => 'tmctesterson@example.com',
+       'on_hold' => '0',
+    ));
+    $membershipType = $this->callAPISuccess('MembershipType', 'create', array(
+      'domain_id' => "Default Domain Name",
+      'member_of_contact_id' => 1,
+      'financial_type_id' => "Member Dues",
+      'duration_unit' => "month",
+      'duration_interval' => 1,
+      'period_type' => 'rolling',
+      'name' => "Standard Member",
+      'minimum_fee' => 100,
+    ));
+    $contributionRecur = $this->callAPISuccess('contribution_recur', 'create', array_merge(array(
+      'contact_id' => $newContact['id'],
+      'installments' => '12',
+      'frequency_interval' => '1',
+      'amount' => '100',
+      'contribution_status_id' => 1,
+      'start_date' => '2012-01-01 00:00:00',
+      'currency' => 'USD',
+      'frequency_unit' => 'month',
+      'payment_processor_id' => $this->paymentProcessorID,
+    ), $generalParams, $recurParams));
+    $originalContribution = $this->callAPISuccess('contribution', 'create', array_merge(
+      $this->_params,
+      array(
+        'contact_id' => $newContact['id'],
+        'contribution_recur_id' => $contributionRecur['id'],
+        'financial_type_id' => "Member Dues",
+        'contribution_status_id' => 1,
+        'invoice_id' => uniqid(),
+      ), $generalParams)
+    );
+    $membership = $this->callAPISuccess('membership', 'create', array(
+      'contact_id' => $newContact['id'],
+      'contribution_recur_id' => $contributionRecur['id'],
+      'financial_type_id' => "Member Dues",
+      'membership_type_id' => $membershipType['id'],
+      'num_terms' => 1,
+    ));
+
+    $this->callAPISuccess('MembershipPayment', 'create', array(
+        'contribution_id' => $originalContribution['id'],
+        'membership_id' => $membership['id'],
+    ));
+    return array($originalContribution, $membership);
+  }
+  /**
    * Set up a repeat transaction.
    *
    * @param array $recurParams
@@ -3216,6 +3322,172 @@ class api_v3_ContributionTest extends CiviUnitTestCase {
     $params = array_merge($this->_params, array('contribution_status_id' => 2, 'receipt_date' => 'now'));
     $contribution = $this->callAPISuccess('contribution', 'create', $params);
     return $contribution;
+  }
+
+  /**
+   * Test repeat contribution uses the Payment Processor' payment_instrument setting.
+   */
+  public function testRepeatTransactionWithNonCreditCardDefault() {
+    $contributionRecur = $this->callAPISuccess('contribution_recur', 'create', array(
+      'contact_id' => $this->_individualId,
+      'installments' => '12',
+      'frequency_interval' => '1',
+      'amount' => '100',
+      'contribution_status_id' => 1,
+      'start_date' => '2012-01-01 00:00:00',
+      'currency' => 'USD',
+      'frequency_unit' => 'month',
+      'payment_processor_id' => $this->paymentProcessorID,
+    ));
+    $contribution1 = $this->callAPISuccess('contribution', 'create', array_merge(
+        $this->_params,
+        array('contribution_recur_id' => $contributionRecur['id'], 'payment_instrument_id' => 2))
+    );
+    $paymentInstruments = CRM_Contribute_PseudoConstant::paymentInstrument('name');
+    $contribution2 = $this->callAPISuccess('contribution', 'repeattransaction', array(
+      'contribution_status_id' => 'Completed',
+      'trxn_id' => uniqid(),
+      'original_contribution_id' => $contribution1,
+    ));
+    $this->assertEquals(array_search('Debit Card', $paymentInstruments), $contribution2['values'][$contribution2['id']]['payment_instrument_id']);
+    $this->quickCleanUpFinancialEntities();
+  }
+
+  /**
+   * Test sending a mail via the API.
+   */
+  public function testSendMailWithAPISetFromDetails() {
+    $mut = new CiviMailUtils($this, TRUE);
+    $contribution = $this->callAPISuccess('contribution', 'create', $this->_params);
+    $this->callAPISuccess('contribution', 'sendconfirmation', array(
+      'id' => $contribution['id'],
+      'receipt_from_email' => 'api@civicrm.org',
+      'receipt_from_name' => 'CiviCRM LLC',
+    ));
+    $mut->checkMailLog(array(
+        'From: CiviCRM LLC <api@civicrm.org>',
+        'Contribution Information',
+        'Please print this confirmation for your records',
+      ), array(
+        'Event',
+      )
+    );
+    $mut->stop();
+  }
+
+  /**
+   * Test sending a mail via the API.
+   */
+  public function testSendMailWithNoFromSetFallToDomain() {
+    $this->createLoggedInUser();
+    $mut = new CiviMailUtils($this, TRUE);
+    $contribution = $this->callAPISuccess('contribution', 'create', $this->_params);
+    $this->callAPISuccess('contribution', 'sendconfirmation', array(
+      'id' => $contribution['id'],
+    ));
+    $domain = $this->callAPISuccess('domain', 'getsingle', array('id' => 1));
+    $mut->checkMailLog(array(
+        'From: ' . $domain['from_name'] . ' <' . $domain['from_email'] . '>',
+        'Contribution Information',
+        'Please print this confirmation for your records',
+      ), array(
+        'Event',
+      )
+    );
+    $mut->stop();
+  }
+
+  /**
+   * Test sending a mail via the API.
+   */
+  public function testSendMailWithRepeatTransactionAPIFalltoDomain() {
+    $this->createLoggedInUser();
+    $mut = new CiviMailUtils($this, TRUE);
+    $contribution = $this->setUpRepeatTransaction(array(), 'single');
+    $this->callAPISuccess('contribution', 'repeattransaction', array(
+      'contribution_status_id' => 'Completed',
+      'trxn_id' => uniqid(),
+      'original_contribution_id' => $contribution,
+    ));
+    $domain = $this->callAPISuccess('domain', 'getsingle', array('id' => 1));
+    $mut->checkMailLog(array(
+        'From: ' . $domain['from_name'] . ' <' . $domain['from_email'] . '>',
+        'Contribution Information',
+        'Please print this confirmation for your records',
+      ), array(
+        'Event',
+      )
+    );
+    $mut->stop();
+  }
+
+  /**
+   * Test sending a mail via the API.
+   */
+  public function testSendMailWithRepeatTransactionAPIFalltoContributionPage() {
+    $mut = new CiviMailUtils($this, TRUE);
+    $contributionPage = $this->contributionPageCreate(array('receipt_from_name' => 'CiviCRM LLC', 'receipt_from_email' => 'contributionpage@civicrm.org', 'is_email_receipt' => 1));
+    $paymentProcessorID = $this->paymentProcessorCreate();
+    $contributionRecur = $this->callAPISuccess('contribution_recur', 'create', array(
+      'contact_id' => $this->_individualId,
+      'installments' => '12',
+      'frequency_interval' => '1',
+      'amount' => '500',
+      'contribution_status_id' => 1,
+      'start_date' => '2012-01-01 00:00:00',
+      'currency' => 'USD',
+      'frequency_unit' => 'month',
+      'payment_processor_id' => $paymentProcessorID,
+    ));
+    $originalContribution = $this->callAPISuccess('contribution', 'create', array_merge(
+      $this->_params,
+      array(
+        'contribution_recur_id' => $contributionRecur['id'],
+        'contribution_page_id' => $contributionPage['id']))
+    );
+    $this->callAPISuccess('contribution', 'repeattransaction', array(
+      'contribution_status_id' => 'Completed',
+      'trxn_id' => uniqid(),
+      'original_contribution_id' => $originalContribution,
+      )
+    );
+    $mut->checkMailLog(array(
+        'From: CiviCRM LLC <contributionpage@civicrm.org>',
+        'Contribution Information',
+        'Please print this confirmation for your records',
+      ), array(
+        'Event',
+      )
+    );
+    $mut->stop();
+  }
+
+  /**
+   * Test sending a mail via the API.
+   */
+  public function testSendMailWithRepeatTransactionAPIFalltoSystemFromNoDefaultFrom() {
+    $mut = new CiviMailUtils($this, TRUE);
+    $originalContribution = $contribution = $this->setUpRepeatTransaction(array(), 'single');
+    $fromEmail = $this->CallAPISuccess('optionValue', 'get', array('is_default' => 1, 'option_group_id' => 'from_email_address', 'sequential' => 1));
+    foreach ($fromEmail['values'] as $from) {
+      $this->callAPISuccess('optionValue', 'create', array('is_default' => 0, 'id' => $from['id']));
+    }
+    $domain = $this->callAPISuccess('domain', 'getsingle', array('id' => CRM_Core_Config::domainID()));
+    $this->callAPISuccess('contribution', 'repeattransaction', array(
+      'contribution_status_id' => 'Completed',
+      'trxn_id' => uniqid(),
+      'original_contribution_id' => $originalContribution,
+      )
+    );
+    $mut->checkMailLog(array(
+        'From: ' . $domain['name'] . ' <' . $domain['domain_email'] . '>',
+        'Contribution Information',
+        'Please print this confirmation for your records',
+      ), array(
+        'Event',
+      )
+    );
+    $mut->stop();
   }
 
 }

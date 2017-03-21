@@ -157,6 +157,10 @@ class CRM_Contact_Page_View extends CRM_Core_Page {
       //CRM-7265 --time being fix.
       $config = CRM_Core_Config::singleton();
       $image_URL = str_replace('https://', 'http://', $image_URL);
+
+      // Make sure Image url domain is same as current domain. If user don't have access to other chapter, it get logged out.
+      $image_URL = str_replace(parse_url($image_URL, PHP_URL_HOST), parse_url(CIVICRM_UF_BASEURL, PHP_URL_HOST), $image_URL);
+
       if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'enableSSL')) {
         $image_URL = str_replace('http://', 'https://', $image_URL);
       }

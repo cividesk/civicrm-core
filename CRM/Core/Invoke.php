@@ -347,7 +347,7 @@ class CRM_Core_Invoke {
    * @param CRM_Core_Smarty $template
    */
   public static function statusCheck($template) {
-    if (!CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'securityAlert', NULL, TRUE) ||
+    if (!CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'systemStatusCheck', NULL, TRUE) ||
       CRM_Core_Config::isUpgradeMode() || !CRM_Core_Permission::check('administer CiviCRM')) {
       return;
     }

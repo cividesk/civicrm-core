@@ -305,9 +305,10 @@ class CRM_Contribute_Form_ContributionBase extends CRM_Core_Form {
 
       CRM_Contribute_BAO_ContributionPage::setValues($this->_id, $this->_values);
       if (CRM_Financial_BAO_FinancialType::isACLFinancialTypeStatus()
+&& CRM_Contribute_PseudoConstant::financialType($this->_values['financial_type_id'])
         && !CRM_Core_Permission::check('add contributions of type ' . CRM_Contribute_PseudoConstant::financialType($this->_values['financial_type_id']))
       ) {
-        CRM_Core_Error::fatal(ts('You do not have permission to access this page.'));
+        CRM_Core_Error::fatal(ts('You do not have permission to access this page. -'.CRM_Contribute_PseudoConstant::financialType($this->_values['financial_type_id'])));
       }
       if (empty($this->_values['is_active'])) {
         throw new CRM_Contribute_Exception_InactiveContributionPageException(ts('The page you requested is currently unavailable.'), $this->_id);

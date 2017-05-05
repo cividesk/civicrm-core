@@ -80,7 +80,22 @@ class CRM_Utils_System_WordPress extends CRM_Utils_System_Base {
     $cmsUrl = CRM_Utils_System::languageNegotiationURL($config->userFrameworkBaseURL, FALSE, TRUE);
     $cmsPath = $this->cmsRootPath();
     $filesPath = CRM_Utils_File::baseFilePath();
-    $filesRelPath = CRM_Utils_File::relativize($filesPath, $cmsPath);
+    /*
+     CMS path : /var/www/html/wordpress-trunk|wordpress-stable
+     filesPath : /home/username/www/files/civicrm/
+
+     For Default installation file path is like : /var/www/html/wordpress-trunk/wp-content/plugins/files/civicrm
+     Here CMS path is part of file path and it get correct file path from wp-content
+
+     In our case both are different, So we can not rely on default functionality to get correct file path
+    */
+    if (defined('CIVICRM_FILE_BASE_PATH')) {
+      $filesRelPath = 'wp-content/files/civicrm';
+    }
+    else {
+      $filesRelPath = CRM_Utils_File::relativize($filesPath, $cmsPath);
+    }
+
     $filesURL = rtrim($cmsUrl, '/') . '/' . ltrim($filesRelPath, ' /');
     return array(
       'url' => CRM_Utils_File::addTrailingSlash($filesURL, '/'),
@@ -112,7 +127,13 @@ class CRM_Utils_System_WordPress extends CRM_Utils_System_Base {
     if (CRM_Utils_System::isSSL()) {
       $cmsUrl = str_replace('http://', 'https://', $cmsUrl);
     }
-    $civiRelPath = CRM_Utils_File::relativize(realpath($civicrm_root), realpath($cmsPath));
+
+    /*
+    civicrm_root : /var/www/html/civicrm-trunk-4.7
+    cmsPath   : /var/www/html/wordpress-trunk
+    Here also not having common path in CMS and CiviCRM, calculate wrong url path
+    */
+    $civiRelPath = 'wp-content/plugins/civicrm/civicrm';
     $civiUrl = rtrim($cmsUrl, '/') . '/' . ltrim($civiRelPath, ' /');
     return array(
       'url' => CRM_Utils_File::addTrailingSlash($civiUrl, '/'),

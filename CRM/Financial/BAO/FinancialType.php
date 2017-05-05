@@ -257,7 +257,7 @@ class CRM_Financial_BAO_FinancialType extends CRM_Financial_DAO_FinancialType {
    *
    * @return array
    */
-  public static function getAvailableFinancialTypes(&$financialTypes = NULL, $action = CRM_Core_Action::VIEW, $resetCache = FALSE) {
+  public static function getAvailableFinancialTypes(&$financialTypes = NULL, $action = CRM_Core_Action::ADD, $resetCache = FALSE) {
     if (empty($financialTypes)) {
       $financialTypes = CRM_Contribute_PseudoConstant::financialType();
     }

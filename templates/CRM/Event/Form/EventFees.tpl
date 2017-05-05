@@ -25,6 +25,13 @@
 *}
 {assign var=isRecordPayment value=1 }
 {capture assign="isShowBillingBlock"}{if $action neq 2}1{else}0{/if}{/capture}
+{if $isFTPermissionDenied}
+  <script>
+  {literal}
+    CRM.alert(ts('You do not have all the permissions needed for this page.'), 'Permission Denied', 'error');
+  {/literal}
+  </script>
+{/if}
 {if $paid} {* We retrieve this tpl when event is selected - keep it empty if event is not paid *}
     <table class="form-layout">
     {if $priceSet}

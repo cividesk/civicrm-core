@@ -581,7 +581,7 @@ HTACCESS;
        So we can not rely on default functionality to find civicrm file path, so created one more constanst in civicrm.settings.php file
       */
       if (defined('CIVICRM_FILE_BASE_PATH')) {
-        $path = CIVICRM_FILE_BASE_PATH;
+        $path = CIVICRM_FILE_BASE_PATH; // /home/username/www/files/civicrm
       }
       else {
         // Note: Don't rely on $config; that creates a dependency loop.

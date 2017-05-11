@@ -524,10 +524,9 @@ GROUP BY {$this->_aliases['civicrm_contribution']}.currency";
     }
 
     // 1. use main contribution query to build temp table 1
-    $sql = $this->buildQuery();
+    $sql = $this->buildQuery(FALSE);
     $tempQuery = "CREATE TEMPORARY TABLE civireport_contribution_detail_temp1 {$this->_databaseAttributes} AS {$sql}";
     CRM_Core_DAO::executeQuery($tempQuery);
-    $this->setPager();
 
     // 2. customize main contribution query for soft credit, and build temp table 2 with soft credit contributions only
     $this->softCreditFrom();
@@ -549,7 +548,7 @@ GROUP BY {$this->_aliases['civicrm_contribution']}.currency";
       'soft_credits_only'
     ) {
       // revise pager : prev, next based on soft-credits only
-      $this->setPager();
+      //$this->setPager();
     }
 
     // copy _from for later use of stats calculation for soft credits, and reset $this->_from to main query
@@ -611,7 +610,9 @@ UNION ALL
 
     // 6. show result set from temp table 3
     $rows = array();
-    $sql = "SELECT * FROM civireport_contribution_detail_temp3 {$orderBy}";
+    // apply limit on final query and add SQL_CALC_FOUND_ROWS to count total rows
+    $this->limit();
+    $sql = "SELECT SQL_CALC_FOUND_ROWS * FROM civireport_contribution_detail_temp3 {$orderBy} {$this->_limit}";
     $this->buildRows($sql, $rows);
 
     // format result set.

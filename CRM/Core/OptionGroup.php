@@ -41,6 +41,7 @@ class CRM_Core_OptionGroup {
   static $_domainIDGroups = array(
     'from_email_address',
     'grant_type',
+    'accept_creditcard',
   );
 
   /**

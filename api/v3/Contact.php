@@ -761,9 +761,12 @@ function civicrm_api3_contact_getquick($params) {
 
   // add acl clause here
   list($aclFrom, $aclWhere) = CRM_Contact_BAO_Contact_Permission::cacheClause('cc');
+  $acl = CRM_ACL_BAO_ACL::getAclClause();
+  $aclFrom  = str_replace('contact_a', 'cc', $acl['aclFromClause']);
+  $aclWhere = str_replace('contact_a', 'cc', $acl['aclWhereClause']);
 
   if ($aclWhere) {
-    $where .= " AND $aclWhere ";
+    $where .= " $aclWhere ";
   }
 
   if (!empty($params['org'])) {

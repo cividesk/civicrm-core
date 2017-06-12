@@ -59,7 +59,6 @@ class CRM_Custom_Page_AJAX {
       'value',
       'description',
       'is_default',
-      'is_active',
       'links',
       'class',
     );

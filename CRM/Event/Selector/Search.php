@@ -64,6 +64,8 @@ class CRM_Event_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
     'contact_type',
     'sort_name',
     'event_id',
+    'current_employer' => 1,
+    'current_employer_id' => 1,
     'participant_status_id',
     'event_title',
     'participant_fee_level',
@@ -351,6 +353,8 @@ class CRM_Event_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
       //carry campaign on selectors.
       $row['campaign'] = CRM_Utils_Array::value($result->participant_campaign_id, $allCampaigns);
       $row['campaign_id'] = $result->participant_campaign_id;
+      $row['current_employer'] = $result->current_employer;
+      $row['current_employer_id'] = $result->current_employer_id;
 
       // gross hack to show extra information for pending status
       $statusClass = NULL;
@@ -517,6 +521,11 @@ class CRM_Event_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
           array(
             'name' => ts('Participant'),
             'sort' => 'sort_name',
+            'direction' => CRM_Utils_Sort::DONTCARE,
+          ),
+          array(
+            'name' => ts('Employer'),
+            'sort' => 'current_employer',
             'direction' => CRM_Utils_Sort::DONTCARE,
           ),
         );

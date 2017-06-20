@@ -57,8 +57,12 @@
         {/if}
   <td class="crm-participant-contact_type">{$row.contact_type}</td>
       <td class="crm-participant-sort_name"><a href="{crmURL p='civicrm/contact/view' q="reset=1&cid=`$row.contact_id`"}" title="{ts}View contact record{/ts}">{$row.sort_name}</a></td>
+  <td class="crm-participant-employer">
+    {if $row.current_employer_id}
+      <a href="{crmURL p='civicrm/contact/view' q="reset=1&cid=`$row.current_employer_id`"}" title="{ts}View employer record{/ts}">{$row.current_employer}</a>
     {/if}
-
+  </td>
+    {/if}
     <td class="crm-participant-event_title"><a href="{crmURL p='civicrm/event/info' q="id=`$row.event_id`&reset=1"}" title="{ts}View event info page{/ts}">{$row.event_title}</a>
         {if $contactId}<br /><a href="{crmURL p='civicrm/event/search' q="reset=1&force=1&event=`$row.event_id`"}" title="{ts}List participants for this event (all statuses){/ts}">({ts}participants{/ts})</a>{/if}
     </td>

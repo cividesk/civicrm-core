@@ -53,6 +53,7 @@ class CRM_Member_Tokens extends \Civi\Token\AbstractTokenSubscriber {
         'end_date' => ts('Membership End Date'),
         'status' => ts('Membership Status'),
         'type' => ts('Membership Type'),
+        'membership_type_id' => ts('Membership Type ID'),
       ),
       CRM_Utils_Token::getCustomFieldTokens('Membership')
     ));
@@ -81,7 +82,7 @@ class CRM_Member_Tokens extends \Civi\Token\AbstractTokenSubscriber {
     // FIXME: `select('e.*')` seems too broad.
     $e->query
       ->select('e.*')
-      ->select('mt.minimum_fee as fee, e.id as id , e.join_date, e.start_date, e.end_date, ms.name as status, mt.name as type')
+      ->select('mt.minimum_fee as fee, e.id as id , e.join_date, e.start_date, e.end_date, ms.name as status, mt.name as type, e.membership_type_id')
       ->join('mt', "!casMailingJoinType civicrm_membership_type mt ON e.membership_type_id = mt.id")
       ->join('ms', "!casMailingJoinType civicrm_membership_status ms ON e.status_id = ms.id");
   }

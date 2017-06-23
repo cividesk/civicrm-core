@@ -521,6 +521,7 @@ class CRM_Core_SelectValues {
       '{membership.id}' => ts('Membership ID'),
       '{membership.status}' => ts('Membership Status'),
       '{membership.type}' => ts('Membership Type'),
+      '{membership.membership_type_id}' => ts('Membership Type ID'),
       '{membership.start_date}' => ts('Membership Start Date'),
       '{membership.join_date}' => ts('Membership Join Date'),
       '{membership.end_date}' => ts('Membership End Date'),

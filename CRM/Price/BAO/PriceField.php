@@ -176,7 +176,9 @@ class CRM_Price_BAO_PriceField extends CRM_Price_DAO_PriceField {
           throw new CRM_Core_Exception($e->getMessage());
         }
       }
-      elseif (!empty($optionsIds)) {
+
+      /*commenting this bit since it doesn't let add fee label in event/contribution page
+      elseif (!empty($optionsIds))  {
         $optionsLoad = civicrm_api3('price_field_value', 'get', array('id' => $optionsIds['id']));
         $options = $optionsLoad['values'][$optionsIds['id']];
         $options['is_active'] = CRM_Utils_Array::value('is_active', $params, 1);
@@ -188,6 +190,7 @@ class CRM_Price_BAO_PriceField extends CRM_Price_DAO_PriceField {
           throw new CRM_Core_Exception($e->getMessage());
         }
       }
+      */
     }
 
     $transaction->commit();

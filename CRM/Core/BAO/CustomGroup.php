@@ -1870,11 +1870,20 @@ SELECT IF( EXISTS(SELECT name FROM civicrm_contact_type WHERE name like %1), 1, 
             $details[$groupID][$values['id']]['collapse_display'] = $group['collapse_display'] ?? NULL;
             $details[$groupID][$values['id']]['collapse_adv_display'] = $group['collapse_adv_display'] ?? NULL;
             $details[$groupID][$values['id']]['style'] = $group['style'] ?? NULL;
+            if ($properties['html_type'] == 'File' && !empty($values['fid'])) {
+              $url = CRM_Core_BAO_CustomField::getFileURL($entityId, $properties['id'], $values['fid']);
+              if ($url) {
+                $fieldValue = $url['file_url'];
+              }
+            }
+            else {
+              $fieldValue = CRM_Core_BAO_CustomField::displayValue($values['data'], $properties['id'], $entityId);
+            }
             $details[$groupID][$values['id']]['fields'][$k] = [
               'field_title' => $properties['label'] ?? NULL,
               'field_type' => $properties['html_type'] ?? NULL,
               'field_data_type' => $properties['data_type'] ?? NULL,
-              'field_value' => CRM_Core_BAO_CustomField::displayValue($values['data'], $properties['id'], $entityId),
+              'field_value' => $fieldValue,
               'options_per_line' => $properties['options_per_line'] ?? NULL,
             ];
             // editable = whether this set contains any non-read-only fields

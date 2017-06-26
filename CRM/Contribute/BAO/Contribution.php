@@ -2156,8 +2156,7 @@ LEFT JOIN  civicrm_contribution contribution ON ( componentPayment.contribution_
       FROM civicrm_contribution contribution
       LEFT JOIN civicrm_line_item i ON i.contribution_id = contribution.id AND i.entity_table = 'civicrm_contribution' $liWhere
       WHERE contribution.is_test = 0 AND contribution.contact_id = {$contactId}
-      $additionalWhere
-      AND i.id IS NULL";
+      $additionalWhere";
 
     $contactSoftCreditContributionsSQL = "
       SELECT contribution.id

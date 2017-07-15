@@ -242,10 +242,6 @@ class CRM_Contribute_Form_SoftCredit {
           if (empty($fields['soft_credit_amount'][$key])) {
             $errors["soft_credit_amount[$key]"] = ts('Please enter the soft credit amount.');
           }
-          $contactType = CRM_Contact_BAO_Contact::getContactType($fields['soft_credit_contact_id'][$key]);
-          if ($self->_honoreeProfileType && $self->_honoreeProfileType != $contactType) {
-            $errors["soft_credit_contact_id[$key]"] = ts('Please choose a contact of type %1', array(1 => $self->_honoreeProfileType));
-          }
         }
       }
     }

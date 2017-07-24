@@ -363,6 +363,7 @@ class CRM_Contribute_Form_AdditionalPayment extends CRM_Contribute_Form_Abstract
       'id' => $this->_contributionId,
     ));
     $contributionStatusId = CRM_Utils_Array::value('contribution_status_id', $contribution);
+    $this->_params['trxn_date'] = CRM_Utils_Date::processDate($this->_params['trxn_date']);
     $result = CRM_Contribute_BAO_Contribution::recordAdditionalPayment($this->_contributionId, $this->_params, $this->_paymentType, $participantId);
     // Fetch the contribution & do proportional line item assignment
     $params = array('id' => $this->_contributionId);

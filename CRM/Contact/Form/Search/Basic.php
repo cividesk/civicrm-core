@@ -179,7 +179,7 @@ class CRM_Contact_Form_Search_Basic extends CRM_Contact_Form_Search {
     }
 
     if (isset($this->_groupID) && empty($this->_formValues['group'])) {
-      $this->_formValues['group'][$this->_groupID] = 1;
+      $this->_formValues['group'] = $this->_groupID;
     }
     elseif (isset($this->_ssID) && empty($_POST)) {
       // if we are editing / running a saved search and the form has not been posted

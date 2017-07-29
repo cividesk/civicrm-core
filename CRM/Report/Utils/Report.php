@@ -230,6 +230,11 @@ WHERE  inst.report_id = %1";
     // and it continues to work on Libre Office, Numbers, Notes etc.
     $csv = "\xEF\xBB\xBF";
 
+    // Add BOM for additional compatibility with Excel 2007 SP3 or more
+    // cf. http://stackoverflow.com/questions/155097/microsoft-excel-mangles-diacritics-in-csv-files
+    // and http://www.unicode.org/faq/utf_bom.html#bom1
+    $csv .= "\xEF\xBB\xBF";
+
     // Add headers if this is the first row.
     $columnHeaders = array_keys($form->_columnHeaders);
 

@@ -3890,7 +3890,98 @@ INNER JOIN civicrm_activity ON civicrm_activity_contact.activity_id = civicrm_ac
   public static function recordAdditionalPayment($contributionId, $trxnsData, $paymentType = 'owed', $participantId = NULL, $updateStatus = TRUE) {
 
     if ($paymentType == 'owed') {
-      $financialTrxn = CRM_Financial_BAO_Payment::recordPayment($contributionId, $trxnsData, $participantId);
+      $params['partial_payment_total'] = $contributionDAO->total_amount;
+      $params['partial_amount_to_pay'] = $trxnsData['total_amount'];
+      $trxnsData['net_amount'] = !empty($trxnsData['net_amount']) ? $trxnsData['net_amount'] : $trxnsData['total_amount'];
+      $params['pan_truncation'] = CRM_Utils_Array::value('pan_truncation', $trxnsData);
+      $params['card_type_id'] = CRM_Utils_Array::value('card_type_id', $trxnsData);
+
+      // record the entry
+      $financialTrxn = CRM_Contribute_BAO_Contribution::recordFinancialAccounts($params, $trxnsData);
+      $toFinancialAccount = $arAccountId;
+      $trxnId = CRM_Core_BAO_FinancialTrxn::getBalanceTrxnAmt($contributionId, $contributionDAO->financial_type_id);
+      if (!empty($trxnId)) {
+        $trxnId = $trxnId['trxn_id'];
+      }
+      elseif (!empty($contributionDAO->payment_instrument_id)) {
+        $trxnId = CRM_Financial_BAO_FinancialTypeAccount::getInstrumentFinancialAccount($contributionDAO->payment_instrument_id);
+      }
+      else {
+        $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('financial_account_type', NULL, " AND v.name LIKE 'Asset' "));
+        $queryParams = array(1 => array($relationTypeId, 'Integer'));
+        $trxnId = CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_financial_account WHERE is_default = 1 AND financial_account_type_id = %1", $queryParams);
+      }
+
+      // update statuses
+      // criteria for updates contribution total_amount == financial_trxns of partial_payments
+      $sql = "SELECT SUM(ft.total_amount) as sum_of_payments, SUM(ft.net_amount) as net_amount_total
+FROM civicrm_financial_trxn ft
+LEFT JOIN civicrm_entity_financial_trxn eft
+  ON (ft.id = eft.financial_trxn_id)
+WHERE eft.entity_table = 'civicrm_contribution'
+  AND eft.entity_id = {$contributionId}
+  AND ft.to_financial_account_id != {$toFinancialAccount}
+  AND ft.status_id = {$statusId}
+";
+      $query = CRM_Core_DAO::executeQuery($sql);
+      $query->fetch();
+      $sumOfPayments = $query->sum_of_payments;
+
+      // update statuses
+      if ($contributionDAO->total_amount == $sumOfPayments) {
+        // update contribution status and
+        // clean cancel info (if any) if prev. contribution was updated in case of 'Refunded' => 'Completed'
+        $contributionDAO->contribution_status_id = $statusId;
+        $contributionDAO->cancel_date = 'null';
+        $contributionDAO->cancel_reason = NULL;
+        $netAmount = !empty($trxnsData['net_amount']) ? NULL : $trxnsData['total_amount'];
+        $contributionDAO->net_amount = $query->net_amount_total + $netAmount;
+        $contributionDAO->fee_amount = $contributionDAO->total_amount - $contributionDAO->net_amount;
+        $contributionDAO->save();
+
+        //Change status of financial record too
+        $financialTrxn->status_id = $statusId;
+        $financialTrxn->save();
+
+        // note : not using the self::add method,
+        // the reason because it performs 'status change' related code execution for financial records
+        // which in 'Partial Paid' => 'Completed' is not useful, instead specific financial record updates
+        // are coded below i.e. just updating financial_item status to 'Paid'
+
+        if ($participantId) {
+          // update participant status
+          $participantStatuses = CRM_Event_PseudoConstant::participantStatus();
+          $ids = CRM_Event_BAO_Participant::getParticipantIds($contributionId);
+          foreach ($ids as $val) {
+            $participantUpdate['id'] = $val;
+            $participantUpdate['status_id'] = array_search('Registered', $participantStatuses);
+            CRM_Event_BAO_Participant::add($participantUpdate);
+          }
+        }
+
+        // update membership details
+        if (!empty($contributionDAO->_relatedObjects['membership'])) {
+          self::updateMembershipBasedOnCompletionOfContribution(
+            $contributionDAO,
+            $contributionDAO->_relatedObjects['membership'],
+            $contributionId,
+            $trxnsData['trxn_date']
+          );
+        }
+
+        // update financial item statuses
+        $financialItemStatus = CRM_Core_PseudoConstant::get('CRM_Financial_DAO_FinancialItem', 'status_id');
+        $paidStatus = CRM_Core_PseudoConstant::getKey('CRM_Financial_BAO_FinancialItem', 'status_id', 'Paid');
+        $baseTrxnId = CRM_Core_BAO_FinancialTrxn::getFinancialTrxnId($contributionId);
+        $sqlFinancialItemUpdate = "
+UPDATE civicrm_financial_item fi
+  LEFT JOIN civicrm_entity_financial_trxn eft
+    ON (eft.entity_id = fi.id AND eft.entity_table = 'civicrm_financial_item')
+SET status_id = {$paidStatus}
+WHERE eft.financial_trxn_id IN ({$trxnId}, {$baseTrxnId['financialTrxnId']})
+";
+        CRM_Core_DAO::executeQuery($sqlFinancialItemUpdate);
+      }
     }
     elseif ($paymentType == 'refund') {
       $financialTrxn = CRM_Financial_BAO_Payment::recordRefundPayment($contributionId, $trxnsData, $updateStatus);
@@ -5631,7 +5722,8 @@ LIMIT 1;";
       $paid = $entityParams['line_item_amount'] * ($entityParams['trxn_total_amount'] / $entityParams['contribution_total_amount']);
     }
     // Record Entity Financial Trxn; CRM-20145
-    $eftParams['amount'] = CRM_Contribute_BAO_Contribution_Utils::formatAmount($paid);
+    $eftParams['amount'] = round($paid, 2);
+    //$eftParams['amount'] = CRM_Contribute_BAO_Contribution_Utils::formatAmount($paid);
     civicrm_api3('EntityFinancialTrxn', 'create', $eftParams);
   }
 

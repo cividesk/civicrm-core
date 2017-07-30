@@ -426,7 +426,7 @@ class CRM_Activity_BAO_Query {
         break;
 
       case 'parent_id':
-        $from = "$side JOIN civicrm_activity AS parent_id ON civicrm_activity.id = parent_id.parent_id";
+        $from = " $side JOIN civicrm_activity AS parent_id ON civicrm_activity.id = parent_id.parent_id";
         break;
     }
 

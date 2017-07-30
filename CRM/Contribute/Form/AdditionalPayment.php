@@ -335,6 +335,8 @@ class CRM_Contribute_Form_AdditionalPayment extends CRM_Contribute_Form_Abstract
       $participantId = $this->_id;
     }
 
+    $participantId = CRM_Core_DAO::getFieldValue('CRM_Event_DAO_ParticipantPayment', $this->_contributionId, 'participant_id', 'contribution_id');
+
     if ($this->_mode) {
       // process credit card
       $this->assign('contributeMode', 'direct');

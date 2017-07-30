@@ -5258,7 +5258,7 @@ LIMIT 1;";
       $paid = $entityParams['line_item_amount'] * ($entityParams['trxn_total_amount'] / $entityParams['contribution_total_amount']);
     }
     // Record Entity Financial Trxn; CRM-20145
-    $eftParams['amount'] = $paid;
+    $eftParams['amount'] = round($paid, 2);
     civicrm_api3('EntityFinancialTrxn', 'create', $eftParams);
   }
 

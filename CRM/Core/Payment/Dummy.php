@@ -98,7 +98,7 @@ class CRM_Core_Payment_Dummy extends CRM_Core_Payment {
     $params['trxn_id'] = $this->getTrxnID();;
 
     // Add a fee_amount so we can make sure fees are handled properly in underlying classes.
-    $params['fee_amount'] = 1.50;
+    $params['fee_amount'] = 1;
     $params['description'] = $this->getPaymentDescription($params);
 
     return $params;

@@ -616,7 +616,7 @@ UNION ALL
     $this->buildRows($sql, $rows);
 
     // format result set.
-    $this->formatDisplay($rows, FALSE);
+    $this->formatDisplay($rows, TRUE);
 
     // assign variables to templates
     $this->doTemplateAssignment($rows);

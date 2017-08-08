@@ -34,8 +34,8 @@
     <tr>
       <th data-data="relation" class='crm-contact-relationship-type'>{ts}Relationship{/ts}</th>
       <th data-data="sort_name" class='crm-contact-relationship-contact_name'>&nbsp;</th>
-      <th data-data="start_date" class='crm-contact-relationship-start_date'>{ts}Start{/ts}</th>
-      <th data-data="end_date" class='crm-contact-relationship-end_date'>{ts}End{/ts}</th>
+      <th data-data="start_date" class='crm-contact-relationship-start_date'>{ts}Since{/ts}</th>
+      <th data-data="job_title" class='crm-contact-relationship-job_title'>{ts}Position{/ts}</th>
       <th data-data="city" class='crm-contact-relationship-city'>{ts}City{/ts}</th>
       <th data-data="state" class='crm-contact-relationship-state'>{ts}State/Prov{/ts}</th>
       <th data-data="email" class='crm-contact-relationship-email'>{ts}Email{/ts}</th>

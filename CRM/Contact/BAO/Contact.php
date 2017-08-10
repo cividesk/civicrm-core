@@ -1991,7 +1991,7 @@ ORDER BY civicrm_email.is_primary DESC";
       if (!empty($params['gid'])) {
         $title = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_UFGroup', $params['gid'], 'title');
         $now = date('d/m/Y');
-        $params['source'] = "Profile '{$title}' on {$now}";
+        $params['source'] = ts("Profile '%1' on %2", array(1 => $title, 2 => $now));
       }
 
       $editHook = FALSE;

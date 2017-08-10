@@ -1967,6 +1967,12 @@ ORDER BY civicrm_email.is_primary DESC";
       CRM_Utils_Hook::pre('edit', 'Profile', $contactID, $params);
     }
     else {
+      if (!empty($params['gid'])) {
+        $title = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_UFGroup', $params['gid'], 'title');
+        $now = date('d/m/Y');
+        $params['source'] = "Profile '{$title}' on {$now}";
+      }
+
       $editHook = FALSE;
       CRM_Utils_Hook::pre('create', 'Profile', NULL, $params);
     }

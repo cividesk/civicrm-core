@@ -2042,7 +2042,16 @@ FROM   civicrm_membership_type
   public static function getContactMembershipCount($contactID, $activeOnly = FALSE) {
     $select = "SELECT count(*) FROM civicrm_membership ";
     $where = "WHERE civicrm_membership.contact_id = {$contactID} AND civicrm_membership.is_test = 0 ";
-
+    $isEnabled = civicrm_api('setting', 'getvalue', array(
+      'version' => 3,
+      'name' => 'is_enabled',
+      'group' => 'Multi Site Preferences')
+    );
+    if ($isEnabled) {
+      $membershipTypes = CRM_Member_PseudoConstant::membershipType();
+      $membershipTypes = array_keys($membershipTypes);
+      $where .= ' AND membership_type_id IN ( ' . implode(',', $membershipTypes) . ')';
+    }
     // CRM-6627, all status below 3 (active, pending, grace) are considered active
     if ($activeOnly) {
       $select .= " INNER JOIN civicrm_membership_status ON civicrm_membership.status_id = civicrm_membership_status.id ";

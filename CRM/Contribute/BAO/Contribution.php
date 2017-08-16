@@ -3015,7 +3015,7 @@ INNER JOIN civicrm_activity ON civicrm_activity_contact.activity_id = civicrm_ac
       //PCP Info
       $softDAO = new CRM_Contribute_DAO_ContributionSoft();
       $softDAO->contribution_id = $this->id;
-      if ($softDAO->find(TRUE)) {
+      if ($softDAO->find(TRUE) && !empty( $softDAO->pcp_id)) {
         $pcpParams['pcpBlock'] = TRUE;
         $pcpParams['pcp_display_in_roll'] = $softDAO->pcp_display_in_roll;
         $pcpParams['pcp_roll_nickname'] = $softDAO->pcp_roll_nickname;

@@ -121,6 +121,19 @@ class CRM_Core_Payment_BaseIPN {
       }
     }
 
+    // CRM-16272 (& maybe CRM-13839) - we want to get the last recurring contribution in the series as a template for creating the next
+    if ($ids['contributionRecur']) {
+      $last_contribution = new CRM_Contribute_BAO_Contribution();
+      $last_contribution->contribution_recur_id = $ids['contributionRecur'];
+      $last_contribution->orderBy('id DESC');
+      if ($last_contribution->find(TRUE)) {
+        $contribution = $last_contribution;
+      }
+    }
+
+    $contribution->receive_date = CRM_Utils_Date::isoToMysql($contribution->receive_date);
+    $contribution->receipt_date = CRM_Utils_Date::isoToMysql($contribution->receipt_date);
+
     $objects['contact'] = &$contact;
     $objects['contribution'] = &$contribution;
 

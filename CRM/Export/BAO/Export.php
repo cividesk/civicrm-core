@@ -1304,6 +1304,7 @@ INSERT INTO {$componentTable} SELECT distinct gc.contact_id FROM civicrm_group_c
           }
           break;
 
+        case 'text':
         case CRM_Utils_Type::T_TEXT:
         case CRM_Utils_Type::T_LONGTEXT:
         case CRM_Utils_Type::T_BLOB:

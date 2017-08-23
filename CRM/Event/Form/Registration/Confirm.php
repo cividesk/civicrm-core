@@ -555,7 +555,7 @@ class CRM_Event_Form_Registration_Confirm extends CRM_Event_Form_Registration {
       // required only if paid event
       if ($this->_values['event']['is_monetary'] && !($this->_allowWaitlist || $this->_requireApproval)) {
         if (is_array($this->_paymentProcessor)) {
-          $payment = $this->_paymentProcessor['object'];
+          $payment = Civi\Payment\System::singleton()->getByProcessor($this->_paymentProcessor);
         }
         if (!empty($this->_paymentProcessor) &&  $this->_paymentProcessor['object']->supports('preApproval')) {
           $preApprovalParams = $this->_paymentProcessor['object']->getPreApprovalDetails($this->get('pre_approval_parameters'));

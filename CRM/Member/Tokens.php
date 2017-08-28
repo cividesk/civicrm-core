@@ -55,7 +55,7 @@ class CRM_Member_Tokens extends \Civi\Token\AbstractTokenSubscriber {
         'type' => ts('Membership Type'),
         'membership_type_id' => ts('Membership Type ID'),
       ),
-      $this->getCustomTokens('Membership')
+      CRM_Utils_Token::getCustomFieldTokens('Membership')
     ));
   }
 

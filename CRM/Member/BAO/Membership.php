@@ -629,6 +629,11 @@ INNER JOIN  civicrm_membership_type type ON ( type.id = membership.membership_ty
     $memValues = array();
     $memberships = self::getValues($params, $memValues);
 
+    // check membership exist before deleting it
+    if (empty($memberships[$membershipId])) {
+      return;
+    }
+
     $membership = $memberships[$membershipId];
 
     CRM_Utils_Hook::pre('delete', 'Membership', $membershipId, $memValues);

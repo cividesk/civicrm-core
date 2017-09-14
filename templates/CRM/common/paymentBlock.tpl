@@ -39,7 +39,6 @@
     // might be that the unselecting of the processor should cause it
     // to be hidden (or removed) in which case it can go from this function.
     var billing_block = cj("div#billing-payment-block");
-    isHide = false;
     if (isHide) {
       payment_options.hide();
       payment_processor.hide();

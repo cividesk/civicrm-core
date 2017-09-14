@@ -2218,6 +2218,12 @@ LEFT JOIN  civicrm_contribution contribution ON ( componentPayment.contribution_
           // CRM-17718 the campaign id on the contribution recur record should get precedence.
           $contributionParams['financial_type_id'] = $recurringContribution['financial_type_id'];
         }
+
+        // In case of recurring use payment instrument from recur record.
+        if (!empty($recurringContribution['payment_instrument_id'])) {
+          $contributionParams['payment_instrument_id'] = $recurringContribution['payment_instrument_id'];
+        }
+
       }
       $templateContribution = CRM_Contribute_BAO_ContributionRecur::getTemplateContribution(
         $contributionParams['contribution_recur_id'],

@@ -2490,12 +2490,24 @@ LEFT JOIN  civicrm_contribution contribution ON ( componentPayment.contribution_
         $contribution->total_amount = $contributionParams['total_amount'] = $input['amount'];
       }
 
-      $recurringContribution = civicrm_api3('ContributionRecur', 'getsingle', [
-        'id' => $contributionParams['contribution_recur_id'],
-      ]);
-      if (!empty($recurringContribution['financial_type_id'])) {
-        // CRM-17718 the campaign id on the contribution recur record should get precedence.
-        $contributionParams['financial_type_id'] = $recurringContribution['financial_type_id'];
+      if (!empty($contributionParams['contribution_recur_id'])) {
+        $recurringContribution = civicrm_api3('ContributionRecur', 'getsingle', [
+          'id' => $contributionParams['contribution_recur_id'],
+        ]);
+        if (!empty($recurringContribution['campaign_id'])) {
+          // CRM-17718 the campaign id on the contribution recur record should get precedence.
+          $contributionParams['campaign_id'] = $recurringContribution['campaign_id'];
+        }
+        if (!empty($recurringContribution['financial_type_id'])) {
+          // CRM-17718 the campaign id on the contribution recur record should get precedence.
+          $contributionParams['financial_type_id'] = $recurringContribution['financial_type_id'];
+        }
+
+        // In case of recurring use payment instrument from recur record.
+        if (!empty($recurringContribution['payment_instrument_id'])) {
+          $contributionParams['payment_instrument_id'] = $recurringContribution['payment_instrument_id'];
+        }
+
       }
       $templateContribution = CRM_Contribute_BAO_ContributionRecur::getTemplateContribution(
         $contributionParams['contribution_recur_id'],

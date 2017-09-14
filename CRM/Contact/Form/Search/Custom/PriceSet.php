@@ -37,6 +37,7 @@ class CRM_Contact_Form_Search_Custom_PriceSet extends CRM_Contact_Form_Search_Cu
   protected $_aclWhere = NULL;
   protected $_tableName = NULL;
   public $_permissionedComponent;
+  protected $_activePriceSetValue;
 
   /**
    * Class constructor.
@@ -140,8 +141,10 @@ ORDER BY c.id, l.price_field_value_id;
       if (!isset($rows[$participantID])) {
         $rows[$participantID] = array();
       }
-
-      $rows[$participantID][] = "price_field_{$dao->price_field_value_id} = {$dao->qty}";
+      // build query only for active price field options
+      if (in_array($dao->price_field_value_id, $this->_activePriceSetValue)) {
+        $rows[$participantID][] = "price_field_{$dao->price_field_value_id} = {$dao->qty}";
+      }
     }
 
     foreach (array_keys($rows) as $participantID) {
@@ -253,7 +256,9 @@ AND    p.entity_id    = e.id
             if (CRM_Utils_Array::value('html_type', $value) != 'Text') {
               $columnHeader .= ' - ' . $oValue['label'];
             }
-
+            if (!empty($oValue['id'])) {
+              $this->_activePriceSetValue[$oValue['id']] = $oValue['id'];
+            }
             $this->_columns[$columnHeader] = "price_field_{$oValue['id']}";
           }
         }

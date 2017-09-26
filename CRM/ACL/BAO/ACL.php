@@ -42,6 +42,7 @@ class CRM_ACL_BAO_ACL extends CRM_ACL_DAO_ACL {
   static $_objectTable = NULL;
   static $_operation = NULL;
 
+  static $_aclCache = NULL;
   static $_fieldKeys = NULL;
 
   /**
@@ -1002,6 +1003,22 @@ ORDER BY a.object_id
     $acl = new CRM_ACL_DAO_ACL();
     $acl->id = $aclId;
     $acl->delete();
+  }
+
+  public static function getAclClause() {
+    if (! self::$_aclCache ) {
+      $acl=  new CRM_Contact_BAO_Query();
+      $acl->generatePermissionClause(false, true);
+      if (array_key_exists('multisiteGroupTable', $acl->_whereTables)) {
+        $aclFrom  = CRM_Utils_Array::value('multisiteGroupTable', $acl->_whereTables);
+      }
+      else {
+        $aclFrom  = CRM_Utils_Array::value('civicrm_group_contact', $acl->_whereTables);
+      }
+      $aclWhere = $acl->_permissionWhereClause ?  ' AND '.  $acl->_permissionWhereClause : '';
+      self::$_aclCache = array('aclFromClause' => $aclFrom, 'aclWhereClause' => $aclWhere);
+    }
+    return self::$_aclCache;
   }
 
 }

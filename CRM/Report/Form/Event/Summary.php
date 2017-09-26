@@ -172,6 +172,10 @@ class CRM_Report_Form_Event_Summary extends CRM_Report_Form_Event {
       }
     }
     $clauses[] = "{$this->_aliases['civicrm_event']}.is_template = 0";
+    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_event_per_domain')) {
+      $domainID = CRM_Core_Config::domainID();
+      $clauses[] = "({$this->_aliases['civicrm_event']}.domain_id IS NULL OR {$this->_aliases['civicrm_event']}.domain_id = $domainID ) ";
+    }
     $this->_where = 'WHERE  ' . implode(' AND ', $clauses);
   }
 

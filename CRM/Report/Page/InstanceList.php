@@ -216,13 +216,13 @@ class CRM_Report_Page_InstanceList extends CRM_Core_Page {
         $this->assign('title', $this->title);
       }
       else {
-        CRM_Utils_System::setTitle(ts('%1 Reports', array(1 => $this->_compName)));
+        CRM_Utils_System::setTitle(ts('%1 Reports', array(1 => ts($this->_compName))));
       }
     }
     // assign link to template list for users with appropriate permissions
     if (CRM_Core_Permission::check('administer Reports')) {
       if ($this->compID) {
-        $newButton = ts('New %1 Report', array(1 => $this->_compName));
+        $newButton = ts('New %1 Report', array(1 => ts($this->_compName)));
         $templateUrl = CRM_Utils_System::url('civicrm/report/template/list', "reset=1&compid={$this->compID}");
       }
       else {
@@ -231,7 +231,7 @@ class CRM_Report_Page_InstanceList extends CRM_Core_Page {
       }
       $this->assign('newButton', $newButton);
       $this->assign('templateUrl', $templateUrl);
-      $this->assign('compName', $this->_compName);
+      $this->assign('compName', ts($this->_compName));
       $this->assign('myReports', $this->myReports);
     }
     return parent::run();

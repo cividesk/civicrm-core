@@ -170,6 +170,7 @@ class CRM_Report_Form_Event_ParticipantListing extends CRM_Report_Form_Event {
           'participant_fee_level' => NULL,
           'participant_fee_amount' => array('title' => ts('Participant Fee')),
           'participant_register_date' => array('title' => ts('Registration Date')),
+          'participant_source' => array('title' => ts('Event Source')),
           'total_paid' => array(
             'title' => ts('Total Paid'),
             'dbAlias' => 'IFNULL(SUM(ft.total_amount), 0)',

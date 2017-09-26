@@ -51,9 +51,14 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
    *   Array of event summary values
    */
   public static function getGrantSummary($admin = FALSE) {
+    $acl = CRM_ACL_BAO_ACL::getAclClause();
     $query = "
-            SELECT status_id, count(id) as status_total
-            FROM civicrm_grant  GROUP BY status_id";
+            SELECT status_id, count(civicrm_grant.id) as status_total
+            FROM civicrm_grant
+            INNER JOIN civicrm_contact contact_a ON ( contact_a.id = civicrm_grant.contact_id AND contact_a.is_deleted = 0 ) ";
+    $query .= $acl['aclFromClause'];
+    $query .= " WHERE (1) ". $acl['aclWhereClause'];
+    $query .= " GROUP BY civicrm_grant.status_id";
 
     $dao = CRM_Core_DAO::executeQuery($query);
 

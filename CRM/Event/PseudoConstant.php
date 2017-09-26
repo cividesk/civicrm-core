@@ -98,6 +98,16 @@ class CRM_Event_PseudoConstant extends CRM_Core_PseudoConstant {
    *   array of all events if any
    */
   public static function event($id = NULL, $all = FALSE, $condition = NULL) {
+    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_event_per_domain')) {
+      $domainID = CRM_Core_Config::domainID();
+      $domainCondition = "(domain_id IS NULL OR domain_id = $domainID )";
+      if (!empty($condition)) {
+        $condition .= ' AND '. $domainCondition;
+      }
+      else {
+        $condition = $domainCondition;
+      }
+    }
     $key = "{$id}_{$all}_{$condition}";
 
     if (!isset(self::$event[$key])) {

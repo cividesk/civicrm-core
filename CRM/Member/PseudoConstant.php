@@ -63,9 +63,10 @@ class CRM_Member_PseudoConstant extends CRM_Core_PseudoConstant {
    */
   public static function membershipType($id = NULL, $force = TRUE) {
     if (!self::$membershipType || $force) {
+      $domain_id = 'domain_id = '. CRM_Core_Config::domainID();
       CRM_Core_PseudoConstant::populate(self::$membershipType,
         'CRM_Member_DAO_MembershipType',
-        FALSE, 'name', 'is_active', NULL, 'weight', 'id', TRUE
+        FALSE, 'name', 'is_active', $domain_id, 'weight', 'id', TRUE
       );
     }
     if ($id) {

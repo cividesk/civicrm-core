@@ -396,8 +396,17 @@ class CRM_Member_BAO_Query extends CRM_Core_BAO_Query {
         break;
 
       case 'civicrm_membership_type':
+        $isEnabled = civicrm_api('setting', 'getvalue', array(
+            'version' => 3,
+            'name' => 'is_enabled',
+            'group' => 'Multi Site Preferences')
+        );
+        $domain_membership_type = '';
+        if ($isEnabled) {
+          $domain_membership_type = ' AND civicrm_membership_type.domain_id = '. CRM_Core_Config::domainID();
+        }
         if ($mode & CRM_Contact_BAO_Query::MODE_MEMBER) {
-          $from = " INNER JOIN civicrm_membership_type ON civicrm_membership.membership_type_id = civicrm_membership_type.id ";
+          $from = " INNER JOIN civicrm_membership_type ON civicrm_membership.membership_type_id = civicrm_membership_type.id {$domain_membership_type}";
         }
         else {
           $from = " $side JOIN civicrm_membership_type ON civicrm_membership.membership_type_id = civicrm_membership_type.id ";

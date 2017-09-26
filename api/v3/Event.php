@@ -129,6 +129,10 @@ function civicrm_api3_event_get($params) {
   if (!empty($params['isCurrent'])) {
     $sql->where('(start_date >= CURDATE() || end_date >= CURDATE())');
   }
+  if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_event_per_domain')) {
+    $domainID = CRM_Core_Config::domainID();
+    $sql->where(" (domain_id IS NULL OR domain_id = $domainID ) ");
+  }
 
   $events = _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params, FALSE, 'Event', $sql, TRUE);
   $options = _civicrm_api3_get_options_from_params($params, TRUE);

@@ -258,6 +258,7 @@ class CRM_Member_BAO_MembershipType extends CRM_Member_DAO_MembershipType {
   public static function getMembershipTypes($public = TRUE) {
     $membershipTypes = array();
     $membershipType = new CRM_Member_DAO_MembershipType();
+    $membershipType->domain_id = CRM_Core_Config::domainID();
     $membershipType->is_active = 1;
     if ($public) {
       $membershipType->visibility = 'Public';

@@ -190,11 +190,11 @@ class CRM_Grant_BAO_Query extends CRM_Core_BAO_Query {
 
         if (strstr($name, 'type')) {
           $name = 'grant_type_id';
-          $label = 'Grant Type(s)';
+          $label = ts('Grant Type(s)');
         }
         else {
           $name = 'status_id';
-          $label = 'Grant Status(s)';
+          $label = ts('Grant Status(s)');
         }
 
         $query->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("civicrm_grant.$name", $op, $value, "Integer");

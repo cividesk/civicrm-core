@@ -125,6 +125,10 @@ class CRM_Event_BAO_Event extends CRM_Event_DAO_Event {
     if (empty($params['is_template'])) {
       $params['is_template'] = 0;
     }
+
+    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_event_per_domain')) {
+      $params['domain_id'] = CRM_Core_Config::domainID();
+    }
     // check if new event, if so set the created_id (if not set)
     // and always set created_date to now
     if (empty($params['id'])) {

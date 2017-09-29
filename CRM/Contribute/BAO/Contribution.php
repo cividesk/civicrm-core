@@ -4758,7 +4758,7 @@ LIMIT 1;";
    * Generate From email and from name in an array values
    */
   public static function generateFromEmailAndName($input, $contribution) {
-    // Use input valuse if supplied.
+    // Use input value if supplied.
     if (!empty($input['receipt_from_email'])) {
       return array(CRM_Utils_array::value('receipt_from_name', $input, ''), $input['receipt_from_email']);
     }

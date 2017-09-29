@@ -87,6 +87,192 @@ class CRM_Contact_Form_Task_PDFLetterCommon extends CRM_Core_Form_Task_PDFLetter
   }
 
   /**
+   * Build the form object.
+   *
+   * @var CRM_Core_Form $form
+   */
+  public static function buildQuickForm(&$form) {
+    // This form outputs a file so should never be submitted via ajax
+    $form->preventAjaxSubmit();
+
+    //Added for CRM-12682: Add activity subject and campaign fields
+    CRM_Campaign_BAO_Campaign::addCampaign($form);
+    $form->add(
+      'text',
+      'subject',
+      ts('Activity Subject'),
+      array('size' => 45, 'maxlength' => 255),
+      FALSE
+    );
+
+    $form->add('select', 'from_email_address', ts('From Email Address'), $form->_fromEmails, TRUE);
+
+    $form->add('static', 'pdf_format_header', NULL, ts('Page Format: %1', array(1 => '<span class="pdf-format-header-label"></span>')));
+    $form->addSelect('format_id', array(
+      'label' => ts('Select Format'),
+      'placeholder' => ts('Default'),
+      'entity' => 'message_template',
+      'field' => 'pdf_format_id',
+      'option_url' => 'civicrm/admin/pdfFormats',
+    ));
+    $form->add(
+      'select',
+      'paper_size',
+      ts('Paper Size'),
+      array(0 => ts('- default -')) + CRM_Core_BAO_PaperSize::getList(TRUE),
+      FALSE,
+      array('onChange' => "selectPaper( this.value ); showUpdateFormatChkBox();")
+    );
+    $form->add('static', 'paper_dimensions', NULL, ts('Width x Height'));
+    $form->add(
+      'select',
+      'orientation',
+      ts('Orientation'),
+      CRM_Core_BAO_PdfFormat::getPageOrientations(),
+      FALSE,
+      array('onChange' => "updatePaperDimensions(); showUpdateFormatChkBox();")
+    );
+    $form->add(
+      'select',
+      'metric',
+      ts('Unit of Measure'),
+      CRM_Core_BAO_PdfFormat::getUnits(),
+      FALSE,
+      array('onChange' => "selectMetric( this.value );")
+    );
+    $form->add(
+      'text',
+      'margin_left',
+      ts('Left Margin'),
+      array('size' => 8, 'maxlength' => 8, 'onkeyup' => "showUpdateFormatChkBox();"),
+      TRUE
+    );
+    $form->add(
+      'text',
+      'margin_right',
+      ts('Right Margin'),
+      array('size' => 8, 'maxlength' => 8, 'onkeyup' => "showUpdateFormatChkBox();"),
+      TRUE
+    );
+    $form->add(
+      'text',
+      'margin_top',
+      ts('Top Margin'),
+      array('size' => 8, 'maxlength' => 8, 'onkeyup' => "showUpdateFormatChkBox();"),
+      TRUE
+    );
+    $form->add(
+      'text',
+      'margin_bottom',
+      ts('Bottom Margin'),
+      array('size' => 8, 'maxlength' => 8, 'onkeyup' => "showUpdateFormatChkBox();"),
+      TRUE
+    );
+
+    $config = CRM_Core_Config::singleton();
+    /** CRM-15883 Suppressing Stationery path field until we switch from DOMPDF to a library that supports it.
+    if ($config->wkhtmltopdfPath == FALSE) {
+    $form->add(
+    'text',
+    'stationery',
+    ts('Stationery (relative path to PDF you wish to use as the background)'),
+    array('size' => 25, 'maxlength' => 900, 'onkeyup' => "showUpdateFormatChkBox();"),
+    FALSE
+    );
+    }
+     */
+    $form->add('checkbox', 'bind_format', ts('Always use this Page Format with the selected Template'));
+    $form->add('checkbox', 'update_format', ts('Update Page Format (this will affect all templates that use this format)'));
+
+    $form->assign('useThisPageFormat', ts('Always use this Page Format with the new template?'));
+    $form->assign('useSelectedPageFormat', ts('Should the new template always use the selected Page Format?'));
+    $form->assign('totalSelectedContacts', count($form->_contactIds));
+
+    $form->add('select', 'document_type', ts('Document Type'), CRM_Core_SelectValues::documentFormat());
+
+    $documentTypes = implode(',', CRM_Core_SelectValues::documentApplicationType());
+    $form->addElement('file', "document_file", 'Upload Document', 'size=30 maxlength=255 accept="' . $documentTypes . '"');
+    $form->addUploadElement("document_file");
+
+    CRM_Mailing_BAO_Mailing::commonCompose($form);
+
+    $buttons = array();
+    if ($form->get('action') != CRM_Core_Action::VIEW) {
+      $buttons[] = array(
+        'type' => 'upload',
+        'name' => ts('Download Document'),
+        'isDefault' => TRUE,
+        'icon' => 'fa-download',
+      );
+      $buttons[] = array(
+        'type' => 'submit',
+        'name' => ts('Preview'),
+        'subName' => 'preview',
+        'icon' => 'fa-search',
+        'isDefault' => FALSE,
+      );
+    }
+    $buttons[] = array(
+      'type' => 'cancel',
+      'name' => $form->get('action') == CRM_Core_Action::VIEW ? ts('Done') : ts('Cancel'),
+    );
+    $form->addButtons($buttons);
+
+    $form->addFormRule(array('CRM_Contact_Form_Task_PDFLetterCommon', 'formRule'), $form);
+  }
+
+  /**
+   * Set default values.
+   */
+  public static function setDefaultValues() {
+    $defaultFormat = CRM_Core_BAO_PdfFormat::getDefaultValues();
+    $defaultFormat['format_id'] = $defaultFormat['id'];
+    return $defaultFormat;
+  }
+
+  /**
+   * Form rule.
+   *
+   * @param array $fields
+   *   The input form values.
+   * @param array $files
+   * @param array $self
+   *   Additional values form 'this'.
+   *
+   * @return bool
+   *   TRUE if no errors, else array of errors.
+   */
+  public static function formRule($fields, $files, $self) {
+    $errors = array();
+    $template = CRM_Core_Smarty::singleton();
+
+    // If user uploads non-document file other than odt/docx
+    if (empty($fields['template']) &&
+      !empty($files['document_file']['tmp_name']) &&
+      array_search($files['document_file']['type'], CRM_Core_SelectValues::documentApplicationType()) == NULL
+    ) {
+      $errors['document_file'] = ts('Invalid document file format');
+    }
+    //Added for CRM-1393
+    if (!empty($fields['saveTemplate']) && empty($fields['saveTemplateName'])) {
+      $errors['saveTemplateName'] = ts("Enter name to save message template");
+    }
+    if (!is_numeric($fields['margin_left'])) {
+      $errors['margin_left'] = 'Margin must be numeric';
+    }
+    if (!is_numeric($fields['margin_right'])) {
+      $errors['margin_right'] = 'Margin must be numeric';
+    }
+    if (!is_numeric($fields['margin_top'])) {
+      $errors['margin_top'] = 'Margin must be numeric';
+    }
+    if (!is_numeric($fields['margin_bottom'])) {
+      $errors['margin_bottom'] = 'Margin must be numeric';
+    }
+    return empty($errors) ? TRUE : $errors;
+  }
+
+  /**
    * Part of the post process which prepare and extract information from the template.
    *
    *

@@ -1328,6 +1328,13 @@ LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
         $tempMask = $mask;
       }
 
+      // Get job_title from source contact
+      $contact = new CRM_Contact_BAO_Contact();
+      $contact->id = $contactId;
+      if ($contact->find(TRUE)) {
+        $job_title = $contact->job_title;
+      }
+
       while ($relationship->fetch()) {
         $rid = $relationship->civicrm_relationship_id;
         $cid = $relationship->civicrm_contact_id;
@@ -1359,6 +1366,10 @@ LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
         $values[$rid]['name'] = $relationship->sort_name;
         $values[$rid]['display_name'] = $relationship->display_name;
         $values[$rid]['job_title'] = $relationship->job_title;
+        if (($relationship->civicrm_relationship_type_id == 4) &&  // Employee/employer
+          ($relationship->contact_id_a == $contactId)) { // We are looking at the employee
+          $values[$rid]['job_title'] = $job_title;
+        }
         $values[$rid]['email'] = $relationship->email;
         $values[$rid]['phone'] = $relationship->phone;
         $values[$rid]['employer_id'] = $relationship->employer_id;

@@ -178,10 +178,10 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
       'fields' => array(
         'delivered_count' => array(
           'name' => 'event_queue_id',
-          'title' => ts('Delivered'),
+          'title' => ts('Successful Deliveries'),
         ),
         'accepted_rate' => array(
-          'title' => ts('Accepted Rate'),
+          'title' => ts('Successful Delivery Rate'),
           'statistics' => array(
             'calc' => 'PERCENTAGE',
             'top' => 'civicrm_mailing_event_delivered.delivered_count',
@@ -196,7 +196,7 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
       'fields' => array(
         'bounce_count' => array(
           'name' => 'event_queue_id',
-          'title' => ts('Bounce'),
+          'title' => ts('Bounces'),
         ),
         'bounce_rate' => array(
           'title' => ts('Bounce Rate'),
@@ -249,7 +249,7 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
           'title' => ts('Unique Clicks'),
         ),
         'CTR' => array(
-          'title' => ts('Click through Rate'),
+          'title' => ts('Click-through Rate'),
           'default' => 0,
           'statistics' => array(
             'calc' => 'PERCENTAGE',
@@ -258,7 +258,7 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
           ),
         ),
         'CTO' => array(
-          'title' => ts('Click to Open Rate'),
+          'title' => ts('Click-through to Open Rate'),
           'default' => 0,
           'statistics' => array(
             'calc' => 'PERCENTAGE',
@@ -274,13 +274,13 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
       'fields' => array(
         'unsubscribe_count' => array(
           'name' => 'id',
-          'title' => ts('Unsubscribe'),
+          'title' => ts('Unsubscribe Requests'),
           'alias' => 'mailing_event_unsubscribe_civireport',
           'dbAlias' => 'mailing_event_unsubscribe_civireport.event_queue_id',
         ),
         'optout_count' => array(
           'name' => 'id',
-          'title' => ts('Opt-outs'),
+          'title' => ts('Opt-out Requests'),
           'alias' => 'mailing_event_optout_civireport',
           'dbAlias' => 'mailing_event_optout_civireport.event_queue_id',
         ),
@@ -416,7 +416,7 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
         AND {$this->_aliases['civicrm_mailing_event_bounce']}.id IS null
       LEFT JOIN civicrm_mailing_event_opened {$this->_aliases['civicrm_mailing_event_opened']}
         ON {$this->_aliases['civicrm_mailing_event_opened']}.event_queue_id = {$this->_aliases['civicrm_mailing_event_queue']}.id
-      LEFT JOIN (select * from civicrm_mailing_event_trackable_url_open group by trackable_url_id ) as {$this->_aliases['civicrm_mailing_event_trackable_url_open']}
+      LEFT JOIN (SELECT * FROM civicrm_mailing_event_trackable_url_open GROUP BY trackable_url_id) AS {$this->_aliases['civicrm_mailing_event_trackable_url_open']}
         ON {$this->_aliases['civicrm_mailing_event_trackable_url_open']}.event_queue_id = {$this->_aliases['civicrm_mailing_event_queue']}.id
       LEFT JOIN civicrm_mailing_event_unsubscribe {$this->_aliases['civicrm_mailing_event_unsubscribe']}
         ON {$this->_aliases['civicrm_mailing_event_unsubscribe']}.event_queue_id = {$this->_aliases['civicrm_mailing_event_queue']}.id AND {$this->_aliases['civicrm_mailing_event_unsubscribe']}.org_unsubscribe = 0
@@ -525,20 +525,20 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
   public static function getChartCriteria() {
     return array(
       'count' => array(
-        'civicrm_mailing_event_delivered_delivered_count' => ts('Delivered'),
-        'civicrm_mailing_event_bounce_bounce_count' => ts('Bounce'),
+        'civicrm_mailing_event_delivered_delivered_count' => ts('Successful Deliveries'),
+        'civicrm_mailing_event_bounce_bounce_count' => ts('Bounces'),
         'civicrm_mailing_event_opened_open_count' => ts('Total Opens'),
         'civicrm_mailing_event_opened_unique_open_count' => ts('Unique Opens'),
         'civicrm_mailing_event_trackable_url_open_click_count' => ts('Unique Clicks'),
         'civicrm_mailing_event_unsubscribe_unsubscribe_count' => ts('Unsubscribe'),
       ),
       'rate' => array(
-        'civicrm_mailing_event_delivered_accepted_rate' => ts('Accepted Rate'),
+        'civicrm_mailing_event_delivered_accepted_rate' => ts('Successful Delivery Rate'),
         'civicrm_mailing_event_bounce_bounce_rate' => ts('Bounce Rate'),
         'civicrm_mailing_event_opened_open_rate' => ts('Total Open Rate'),
         'civicrm_mailing_event_opened_unique_open_rate' => ts('Unique Open Rate'),
-        'civicrm_mailing_event_trackable_url_open_CTR' => ts('Click through Rate'),
-        'civicrm_mailing_event_trackable_url_open_CTO' => ts('Click to Open Rate'),
+        'civicrm_mailing_event_trackable_url_open_CTR' => ts('Click-through Rate'),
+        'civicrm_mailing_event_trackable_url_open_CTO' => ts('Click-through to Open Rate'),
       ),
     );
   }

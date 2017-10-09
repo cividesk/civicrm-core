@@ -546,9 +546,9 @@ class CRM_Member_Form_Membership extends CRM_Member_Form {
       }
       $totalAmount = CRM_Utils_Array::value('minimum_fee', $values);
       //CRM-18827 - override the default value if total_amount is submitted
-      if (!empty($this->_submitValues['total_amount'])) {
-        $totalAmount = $this->_submitValues['total_amount'];
-      }
+      //if (!empty($this->_submitValues['total_amount'])) {
+      //  $totalAmount = $this->_submitValues['total_amount'];
+      //}
       // build membership info array, which is used when membership type is selected to:
       // - set the payment information block
       // - set the max related block
@@ -580,7 +580,7 @@ class CRM_Member_Form_Membership extends CRM_Member_Form {
       'onChange' => "buildMaxRelated(this.value,true); CRM.buildCustomData('Membership', this.value);",
     );
 
-    if (!empty($this->_recurPaymentProcessors)) {
+    if ($this->_mode && !empty($this->_recurPaymentProcessors)) {
       $memTypeJs['onChange'] = "" . $memTypeJs['onChange'] . "buildAutoRenew(this.value, null, '{$this->_mode}');";
     }
 

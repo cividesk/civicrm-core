@@ -167,7 +167,10 @@ class CRM_Contribute_Form_ContributionView extends CRM_Core_Form {
             'return' => 'is_quick_config, id',
           ));
           $displayLineItems = !$priceSet['is_quick_config'];
-        }
+          if ($firstLineItem['qty'] != 1) {
+            $displayLineItems = TRUE;
+          }
+       }
         catch (CiviCRM_API3_Exception $e) {
           throw new CRM_Core_Exception('Cannot find price set by ID');
         }

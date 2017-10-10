@@ -1165,6 +1165,9 @@ class CRM_Utils_Token {
    *   The mailing list jobID - this is a legacy param.
    *
    * @return array - e.g [[1 => ['first_name' => 'bob'...], 34 => ['first_name' => 'fred'...]]]
+   * @param  int $componentID
+   *   The id of membership, contribution etc.
+   * @return array
    */
   public static function getTokenDetails(
     $contactIDs,
@@ -1174,7 +1177,8 @@ class CRM_Utils_Token {
     $extraParams = NULL,
     $tokens = [],
     $className = NULL,
-    $jobID = NULL
+    $jobID = NULL,
+    $componentID = NULL
   ) {
 
     $params = [];
@@ -1267,7 +1271,8 @@ class CRM_Utils_Token {
       $contactIDs,
       $jobID,
       $tokens,
-      $className
+      $className,
+      $componentID
     );
     return [$contactDetails];
   }

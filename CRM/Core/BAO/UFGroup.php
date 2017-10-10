@@ -1756,6 +1756,10 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
 
       if (CRM_Contact_BAO_ContactType::isaSubType($profileType)) {
         $profileType = CRM_Contact_BAO_ContactType::getBasicType($profileType);
+        // $profileType has to be string
+        if (is_array($profileType)) {
+          $profileType = reset($profileType);
+        }
       }
 
       //allow special mix profiles for Contribution and Participant

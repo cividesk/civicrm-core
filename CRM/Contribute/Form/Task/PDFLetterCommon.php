@@ -309,10 +309,18 @@ class CRM_Contribute_Form_Task_PDFLetterCommon extends CRM_Contact_Form_Task_PDF
         $skipDeceased,
         NULL,
         $messageToken,
-        $task
+        $task,
+        NULL,
+        $contributionId
       );
-      $contacts[$contactID] = array_merge($tokenResolvedContacts[0][$contactID], $contact);
+      $contacts[$contactID] = array_merge($tokenResolvedContacts[0][$contactID], $contacts[$contactID]);
     }
+
+    // Assign the available contributions before calling tokens so hooks parsing smarty can access it.
+    // Note that in core code you can only use smarty here if enable if for the whole site, incl
+    // CiviMail, with a big performance impact.
+    // Hooks allow more nuanced smarty usage here.
+    CRM_Core_Smarty::singleton()->assign('contributions', $contributions);
     return [$contributions, $contacts];
   }
 

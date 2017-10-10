@@ -782,7 +782,8 @@ abstract class CRM_Utils_Hook {
    *   The list of tokens associated with the content.
    * @param string $className
    *   The top level className from where the hook is invoked.
-   *
+   * @param  int $componentID
+   *   The id of membership, contribution etc.
    * @return null
    */
   public static function tokenValues(
@@ -790,10 +791,11 @@ abstract class CRM_Utils_Hook {
     $contactIDs,
     $jobID = NULL,
     $tokens = [],
-    $className = NULL
+    $className = NULL,
+    $componentID = NULL
   ) {
     return self::singleton()
-      ->invoke(['details', 'contactIDs', 'jobID', 'tokens', 'className'], $details, $contactIDs, $jobID, $tokens, $className, self::$_nullObject, 'civicrm_tokenValues');
+      ->invoke(array('details', 'contactIDs', 'jobID', 'tokens', 'className', 'componentID'), $details, $contactIDs, $jobID, $tokens, $className, $componentID, self::$_nullObject, 'civicrm_tokenValues');
   }
 
   /**

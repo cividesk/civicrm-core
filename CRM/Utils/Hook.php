@@ -779,7 +779,7 @@ abstract class CRM_Utils_Hook {
     $componentID = NULL
   ) {
     return self::singleton()
-      ->invoke(array('details', 'contactIDs', 'jobID', 'tokens', 'className', 'componentID'), $details, $contactIDs, $jobID, $tokens, $className, $componentID, self::$_nullObject, 'civicrm_tokenValues');
+      ->invoke(array('details', 'contactIDs', 'jobID', 'tokens', 'className', 'componentID'), $details, $contactIDs, $jobID, $tokens, $className, $componentID, 'civicrm_tokenValues');
   }
 
   /**

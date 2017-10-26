@@ -3538,6 +3538,10 @@ INNER JOIN civicrm_activity ON civicrm_activity_contact.activity_id = civicrm_ac
           // & this can be removed
           return;
         }
+        if (empty($params['trxnParams']['currency'])) {
+          // This is an update so original currency if none passed in.
+          $params['trxnParams']['currency'] = isset($params['currency']) ? $params['currency'] : $params['prevContribution']->currency;
+        }
         self::recordAlwaysAccountsReceivable($params['trxnParams'], $params);
         $trxn = CRM_Core_BAO_FinancialTrxn::create($params['trxnParams']);
         $params['entity_id'] = self::$_trxnIDs[] = $trxn->id;

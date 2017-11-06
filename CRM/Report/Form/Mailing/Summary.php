@@ -47,6 +47,8 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
 
   public $campaignEnabled = FALSE;
 
+  protected $_distinctCountColumns = array();
+
   /**
    * Class constructor.
    */
@@ -178,10 +180,10 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
       'fields' => array(
         'delivered_count' => array(
           'name' => 'event_queue_id',
-          'title' => ts('Successful Deliveries'),
+          'title' => ts('Delivered'),
         ),
         'accepted_rate' => array(
-          'title' => ts('Successful Delivery Rate'),
+          'title' => ts('Accepted Rate'),
           'statistics' => array(
             'calc' => 'PERCENTAGE',
             'top' => 'civicrm_mailing_event_delivered.delivered_count',
@@ -196,7 +198,7 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
       'fields' => array(
         'bounce_count' => array(
           'name' => 'event_queue_id',
-          'title' => ts('Bounces'),
+          'title' => ts('Bounce'),
         ),
         'bounce_rate' => array(
           'title' => ts('Bounce Rate'),
@@ -249,7 +251,7 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
           'title' => ts('Unique Clicks'),
         ),
         'CTR' => array(
-          'title' => ts('Click-through Rate'),
+          'title' => ts('Click through Rate'),
           'default' => 0,
           'statistics' => array(
             'calc' => 'PERCENTAGE',
@@ -258,7 +260,7 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
           ),
         ),
         'CTO' => array(
-          'title' => ts('Click-through to Open Rate'),
+          'title' => ts('Click to Open Rate'),
           'default' => 0,
           'statistics' => array(
             'calc' => 'PERCENTAGE',
@@ -274,13 +276,13 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
       'fields' => array(
         'unsubscribe_count' => array(
           'name' => 'id',
-          'title' => ts('Unsubscribe Requests'),
+          'title' => ts('Unsubscribe'),
           'alias' => 'mailing_event_unsubscribe_civireport',
           'dbAlias' => 'mailing_event_unsubscribe_civireport.event_queue_id',
         ),
         'optout_count' => array(
           'name' => 'id',
-          'title' => ts('Opt-out Requests'),
+          'title' => ts('Opt-outs'),
           'alias' => 'mailing_event_optout_civireport',
           'dbAlias' => 'mailing_event_optout_civireport.event_queue_id',
         ),
@@ -314,6 +316,16 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
         ),
       );
     }
+    $this->_distinctCountColumns = array(
+      'civicrm_mailing_event_queue.queue_count',
+      'civicrm_mailing_event_delivered.delivered_count',
+      'civicrm_mailing_event_bounce.bounce_count',
+      'civicrm_mailing_event_opened.unique_open_count',
+      'civicrm_mailing_event_opened.open_count',
+      'civicrm_mailing_event_trackable_url_open.click_count',
+      'civicrm_mailing_event_unsubscribe.unsubscribe_count',
+      'civicrm_mailing_event_unsubscribe.optout_count',
+    );
     parent::__construct();
   }
 
@@ -326,20 +338,137 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
    * manipulate the select function to query count functions.
    */
   public function select() {
+
+    $count_tables = array(
+      'civicrm_mailing_event_queue',
+      'civicrm_mailing_event_delivered',
+      'civicrm_mailing_event_opened',
+      'civicrm_mailing_event_bounce',
+      'civicrm_mailing_event_trackable_url_open',
+      'civicrm_mailing_event_unsubscribe',
+    );
+
+    $select = array();
     $this->_columnHeaders = array();
     foreach ($this->_columns as $tableName => $table) {
       if (array_key_exists('fields', $table)) {
         foreach ($table['fields'] as $fieldName => $field) {
           if (!empty($field['required']) || !empty($this->_params['fields'][$fieldName])) {
+
+            # for statistics
+            if (!empty($field['statistics'])) {
+              switch ($field['statistics']['calc']) {
+                case 'PERCENTAGE':
+                  $base_table_column = explode('.', $field['statistics']['base']);
+                  $top_table_column = explode('.', $field['statistics']['top']);
+
+                  $select[] = PHP_EOL. "CONCAT(round({$top_table_column[0]}_{$top_table_column[1]}/{$base_table_column[0]}_{$base_table_column[1]}  * 100, 2), '%') as {$tableName}_{$fieldName}";
+                  break;
+              }
+            }
+            else {
+              if (in_array($tableName, $count_tables)) {
+                $tableIndex = array_search($tableName.'.'.$fieldName, $this->_distinctCountColumns);
+                $select[] = PHP_EOL. "if (a{$tableIndex}.{$tableName}_{$fieldName}, a{$tableIndex}.{$tableName}_{$fieldName}, 0) as {$tableName}_{$fieldName}";
+              }
+              else {
+                $select[] = PHP_EOL . "{$field['dbAlias']} as {$tableName}_{$fieldName}";
+              }
+            }
             $this->_columnHeaders["{$tableName}_{$fieldName}"]['type'] = CRM_Utils_Array::value('type', $field);
             $this->_columnHeaders["{$tableName}_{$fieldName}"]['title'] = $field['title'];
           }
         }
       }
     }
+
+    $this->_selectClauses = $select;
+    $this->_select = "SELECT " . implode(', ', $select) . " ";
+    //print_r($this->_select);
   }
 
   public function from() {
+    // Custom Query
+    $additionalForm = '';
+    $additionalSelect = '';
+    if ($this->isTableSelected('civicrm_mailing_group')) {
+      $additionalForm .= "
+        LEFT JOIN civicrm_mailing_group {$this->_aliases['civicrm_mailing_group']}
+    ON {$this->_aliases['civicrm_mailing_group']}.mailing_id = {$this->_aliases['civicrm_mailing']}.id";
+    }
+
+    if ($this->campaignEnabled && $this->isTableSelected('civicrm_campaign')) {
+      $additionalSelect = ' , campaign_civireport.title as civicrm_campaign_title ';
+      $additionalForm .= "
+        LEFT JOIN civicrm_campaign {$this->_aliases['civicrm_campaign']}
+        ON {$this->_aliases['civicrm_campaign']}.id = {$this->_aliases['civicrm_mailing']}.campaign_id";
+    }
+    $this->_from = "
+    FROM civicrm_mailing {$this->_aliases['civicrm_mailing']}
+      LEFT JOIN civicrm_mailing_job {$this->_aliases['civicrm_mailing_job']}
+        ON {$this->_aliases['civicrm_mailing']}.id = {$this->_aliases['civicrm_mailing_job']}.mailing_id
+      LEFT JOIN civicrm_mailing_event_queue {$this->_aliases['civicrm_mailing_event_queue']}
+       ON {$this->_aliases['civicrm_mailing_event_queue']}.job_id = {$this->_aliases['civicrm_mailing_job']}.id
+      {$additionalForm}
+    ";
+
+    $countTablesConditions = array(
+      'queue_count' => array(),
+      'delivered_count' => array(
+        'join' => 'LEFT JOIN civicrm_mailing_event_bounce mailing_event_bounce_civireport 
+                     ON mailing_event_bounce_civireport.event_queue_id = mailing_event_queue_civireport.id',
+        'condition' => 'AND mailing_event_bounce_civireport.id IS null',
+        'distinct' => 'DISTINCT'
+      ),
+      'unique_open_count' => array(
+        'distinct' => 'DISTINCT'
+      ),
+      'open_count' => array(
+
+      ),
+      'bounce_count' => array(
+        'distinct' => 'DISTINCT'
+      ),
+      'click_count' => array(
+      ),
+      'unsubscribe_count' => array(
+        'condition' => 'AND mailing_event_unsubscribe_civireport.org_unsubscribe = 0',
+        'distinct' => 'DISTINCT'
+      ),
+      'optout_count' => array(
+        'condition' => 'AND  mailing_event_unsubscribe_civireport.org_unsubscribe = 1',
+        'distinct' => 'DISTINCT'
+      ),
+    );
+    foreach($this->_distinctCountColumns as $index => $tableAndColumnName){
+      $tableColumn = explode('.', $tableAndColumnName);
+      $tableName  = $tableColumn[0];
+      $columnName = $tableColumn[1];
+      $distinct = $countTablesConditions[$columnName]['distinct'];
+      $additionalTableJoin = $countTablesConditions[$columnName]['join'];
+      $additionalTableCondition = $countTablesConditions[$columnName]['condition'];
+
+      $select = "SELECT {$this->_aliases['civicrm_mailing']}.id, count({$distinct} {$this->_aliases[$tableName]}.event_queue_id) as {$tableName}_{$columnName}";
+      if ($columnName == 'queue_count') {
+        $select = "SELECT {$this->_aliases['civicrm_mailing']}.id, count(*) as {$tableName}_{$columnName}";
+      }
+      $this->_from .= PHP_EOL .
+        " LEFT JOIN (
+        {$select}
+        FROM civicrm_mailing_event_queue {$this->_aliases['civicrm_mailing_event_queue']} 
+          {$additionalTableJoin}
+       ";
+      if ($columnName != 'queue_count') {
+        $this->_from .= " INNER JOIN  {$tableName} {$this->_aliases[$tableName]} 
+          ON ({$this->_aliases[$tableName]}.event_queue_id = {$this->_aliases['civicrm_mailing_event_queue']}.id {$additionalTableCondition}) " ;
+      }
+      $this->_from .= "  INNER JOIN civicrm_mailing_job {$this->_aliases['civicrm_mailing_job']} ON ({$this->_aliases['civicrm_mailing_job']}.id = {$this->_aliases['civicrm_mailing_event_queue']}.job_id)
+        INNER JOIN civicrm_mailing {$this->_aliases['civicrm_mailing']} ON ({$this->_aliases['civicrm_mailing_job']}.mailing_id = {$this->_aliases['civicrm_mailing']}.id)
+          {$additionalForm}
+        {$this->_where}
+        GROUP BY {$this->_aliases['civicrm_mailing']}.id
+      ) as a{$index} ON ({$this->_aliases['civicrm_mailing']}.id = a{$index}.id)";
+    }
 
   }
 
@@ -392,6 +521,13 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
     }
   }
 
+  public function groupBy() {
+    $groupBy = array(
+      "{$this->_aliases['civicrm_mailing']}.id",
+    );
+    $this->_groupBy = CRM_Contact_BAO_Query::getGroupByFromSelectColumns($this->_selectClauses, $groupBy);
+  }
+
 
   public function orderBy() {
     parent::orderBy();
@@ -406,6 +542,8 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
     $this->buildACLClause(CRM_Utils_Array::value('civicrm_contact', $this->_aliases));
 
     $sql = $this->buildQuery(TRUE);
+
+    // print_r($sql);
 
     $rows = $graphRows = array();
     $this->buildRows($sql, $rows);
@@ -425,186 +563,53 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
   public function buildQuery($applyLimit = TRUE) {
     $this->buildGroupTempTable();
     $this->select();
-    $this->buildPermissionClause();
+    // we need where clause in from sub query, so where called before from clause
     $this->where();
+    $this->from();
+    $this->customDataFrom();
+    $this->buildPermissionClause();
+    if (array_key_exists('civicrm_contribution', $this->getVar('_columns'))) {
+      $this->getPermissionedFTQuery($this);
+    }
+    $this->groupBy();
     $this->orderBy();
+
+    // order_by columns not selected for display need to be included in SELECT
+    $unselectedSectionColumns = $this->unselectedSectionColumns();
+    foreach ($unselectedSectionColumns as $alias => $section) {
+      $this->_select .= ", {$section['dbAlias']} as {$alias}";
+    }
 
     if ($applyLimit && empty($this->_params['charts'])) {
       $this->limit();
     }
-    // Custom Query
-    $additionalForm = '';
-    $additionalSelect = '';
-    if ($this->isTableSelected('civicrm_mailing_group')) {
-      $additionalForm .= "
-        LEFT JOIN civicrm_mailing_group {$this->_aliases['civicrm_mailing_group']}
-    ON {$this->_aliases['civicrm_mailing_group']}.mailing_id = {$this->_aliases['civicrm_mailing']}.id";
-    }
-
-    if ($this->campaignEnabled && $this->isTableSelected('civicrm_campaign')) {
-      $additionalSelect = ' , campaign_civireport.title as civicrm_campaign_title ';
-      $additionalForm .= "
-        LEFT JOIN civicrm_campaign {$this->_aliases['civicrm_campaign']}
-        ON {$this->_aliases['civicrm_campaign']}.id = {$this->_aliases['civicrm_mailing']}.campaign_id";
-    }
-
-    $tmp_where_partial = $this->_where;
-    $sql = "SELECT SQL_CALC_FOUND_ROWS 
-      mailing_civireport.id as civicrm_mailing_id, 
-      mailing_civireport.created_date as civicrm_mailing_created_date,
-      mailing_civireport.subject as civicrm_mailing_subject,
-      mailing_job_civireport.start_date as civicrm_mailing_job_start_date,
-      mailing_civireport.name as civicrm_mailing_name, 
-      mailing_job_civireport.end_date as civicrm_mailing_job_end_date,
-      if (a1.civicrm_mailing_event_queue_queue_count,               a1.civicrm_mailing_event_queue_queue_count, 0 )              as civicrm_mailing_event_queue_queue_count,
-      if (a2.civicrm_mailing_event_delivered_delivered_count,       a2.civicrm_mailing_event_delivered_delivered_count, 0 )      as civicrm_mailing_event_delivered_delivered_count,
-      if (a3.civicrm_mailing_event_bounce_bounce_count  ,           a3.civicrm_mailing_event_bounce_bounce_count, 0 )            as civicrm_mailing_event_bounce_bounce_count,
-      if (a4.civicrm_mailing_event_opened_unique_open_count,        a4.civicrm_mailing_event_opened_unique_open_count, 0 )       as civicrm_mailing_event_opened_unique_open_count,
-      if (a5.civicrm_mailing_event_opened_open_count,               a5.civicrm_mailing_event_opened_open_count, 0 )              as civicrm_mailing_event_opened_open_count,
-      if (a6.civicrm_mailing_event_trackable_url_open_click_count,  a6.civicrm_mailing_event_trackable_url_open_click_count, 0 ) as civicrm_mailing_event_trackable_url_open_click_count,
-      if (a7.civicrm_mailing_event_unsubscribe_unsubscribe_count,   a7.civicrm_mailing_event_unsubscribe_unsubscribe_count, 0 )  as civicrm_mailing_event_unsubscribe_unsubscribe_count,
-      if (a8.civicrm_mailing_event_unsubscribe_optout_count,        a8.civicrm_mailing_event_unsubscribe_optout_count, 0 )       as civicrm_mailing_event_unsubscribe_optout_count,
-      
-      CONCAT(round(civicrm_mailing_event_opened_unique_open_count / civicrm_mailing_event_delivered_delivered_count * 100, 2 ),'%') as civicrm_mailing_event_opened_unique_open_rate,
-      CONCAT(round(civicrm_mailing_event_opened_open_count        / civicrm_mailing_event_delivered_delivered_count * 100, 2), '%') as civicrm_mailing_event_opened_open_rate,
-      CONCAT(round(civicrm_mailing_event_trackable_url_open_click_count /civicrm_mailing_event_delivered_delivered_count * 100,2 ),
-      '%') as civicrm_mailing_event_trackable_url_open_CTR,
-      CONCAT(round(civicrm_mailing_event_trackable_url_open_click_count / civicrm_mailing_event_opened_unique_open_count * 100, 2 ),
-      '%') as civicrm_mailing_event_trackable_url_open_CTO,
-      CONCAT(round(civicrm_mailing_event_delivered_delivered_count / civicrm_mailing_event_queue_queue_count* 100, 2), '%') as civicrm_mailing_event_delivered_accepted_rate,
-      CONCAT(round(civicrm_mailing_event_bounce_bounce_count / civicrm_mailing_event_queue_queue_count * 100, 2), '%')      as civicrm_mailing_event_bounce_bounce_rate 
-      {$additionalSelect}
-    FROM civicrm_mailing mailing_civireport
-      
-      LEFT JOIN civicrm_mailing_job mailing_job_civireport
-        ON mailing_civireport.id = mailing_job_civireport.mailing_id
-            
-      LEFT JOIN civicrm_mailing_event_queue mailing_event_queue_civireport
-            ON mailing_event_queue_civireport.job_id = mailing_job_civireport.id  
-      {$additionalForm} 
-      LEFT JOIN (
-        SELECT mailing_civireport.id,  COUNT(*) as civicrm_mailing_event_queue_queue_count
-        FROM civicrm_mailing_event_queue
-        INNER JOIN civicrm_mailing_job mailing_job_civireport ON (mailing_job_civireport.id = civicrm_mailing_event_queue.job_id)
-        INNER JOIN civicrm_mailing mailing_civireport ON (mailing_job_civireport.mailing_id = mailing_civireport.id)
-        {$additionalForm} 
-        {$tmp_where_partial}
-        GROUP BY mailing_civireport.id
-      ) as a1 ON (mailing_civireport.id = a1.id)
-
-      LEFT JOIN (
-        select  mailing_civireport.id, count(DISTINCT mailing_event_delivered_civireport.event_queue_id) as civicrm_mailing_event_delivered_delivered_count 
-        from civicrm_mailing_event_queue mailing_event_queue_civireport
-        LEFT JOIN civicrm_mailing_event_bounce mailing_event_bounce_civireport
-        ON mailing_event_bounce_civireport.event_queue_id = mailing_event_queue_civireport.id
-        INNER JOIN  civicrm_mailing_event_delivered mailing_event_delivered_civireport  
-        ON (mailing_event_delivered_civireport.event_queue_id = mailing_event_queue_civireport.id  AND mailing_event_bounce_civireport.id IS null)
-        INNER JOIN civicrm_mailing_job mailing_job_civireport ON (mailing_job_civireport.id = mailing_event_queue_civireport.job_id)
-        INNER JOIN civicrm_mailing mailing_civireport ON (mailing_job_civireport.mailing_id = mailing_civireport.id)
-        {$additionalForm} 
-        {$tmp_where_partial} 
-        GROUP BY mailing_civireport.id  
-      ) as a2  ON (mailing_civireport.id = a2.id)
-
-      LEFT JOIN (
-        select mailing_civireport.id, count(DISTINCT mailing_event_bounce_civireport.event_queue_id) as civicrm_mailing_event_bounce_bounce_count
-        from civicrm_mailing_event_queue mailing_event_queue_civireport
-        INNER JOIN  civicrm_mailing_event_bounce mailing_event_bounce_civireport  
-        ON (mailing_event_bounce_civireport.event_queue_id = mailing_event_queue_civireport.id )
-        INNER JOIN civicrm_mailing_job mailing_job_civireport ON (mailing_job_civireport.id = mailing_event_queue_civireport.job_id)   
-        INNER JOIN civicrm_mailing mailing_civireport ON (mailing_job_civireport.mailing_id = mailing_civireport.id)
-        {$additionalForm} 
-        {$tmp_where_partial} 
-        GROUP BY mailing_civireport.id  
-      ) as a3  ON (mailing_civireport.id  = a3.id)
-      
-
-      LEFT JOIN (
-        select mailing_civireport.id, count(DISTINCT mailing_event_opened_civireport.event_queue_id) as civicrm_mailing_event_opened_unique_open_count
-        from civicrm_mailing_event_queue mailing_event_queue_civireport
-        INNER JOIN  civicrm_mailing_event_opened mailing_event_opened_civireport  
-        ON (mailing_event_opened_civireport.event_queue_id = mailing_event_queue_civireport.id )
-        INNER JOIN civicrm_mailing_job mailing_job_civireport ON (mailing_job_civireport.id = mailing_event_queue_civireport.job_id)   
-        INNER JOIN civicrm_mailing mailing_civireport ON (mailing_job_civireport.mailing_id = mailing_civireport.id)
-        {$additionalForm} 
-        {$tmp_where_partial}
-        GROUP BY mailing_civireport.id  
-      ) as a4  ON (mailing_civireport.id  = a4.id)
-      
-      LEFT JOIN (
-        select mailing_civireport.id, count(mailing_event_opened_civireport.event_queue_id) as civicrm_mailing_event_opened_open_count
-        from civicrm_mailing_event_queue mailing_event_queue_civireport
-        INNER JOIN  civicrm_mailing_event_opened mailing_event_opened_civireport  
-        ON (mailing_event_opened_civireport.event_queue_id = mailing_event_queue_civireport.id )
-        INNER JOIN civicrm_mailing_job mailing_job_civireport ON (mailing_job_civireport.id = mailing_event_queue_civireport.job_id)   
-        INNER JOIN civicrm_mailing mailing_civireport ON (mailing_job_civireport.mailing_id = mailing_civireport.id)
-        {$additionalForm} 
-        {$tmp_where_partial} 
-        GROUP BY mailing_civireport.id   
-      ) as a5  ON (mailing_civireport.id  = a5.id)
-      
-      LEFT JOIN (
-        select  mailing_civireport.id, count( mailing_event_trackable_url_open_civireport.event_queue_id) as civicrm_mailing_event_trackable_url_open_click_count
-        from civicrm_mailing_event_queue mailing_event_queue_civireport
-        INNER JOIN  civicrm_mailing_event_trackable_url_open mailing_event_trackable_url_open_civireport  
-        ON (mailing_event_trackable_url_open_civireport.event_queue_id = mailing_event_queue_civireport.id )
-        INNER JOIN civicrm_mailing_job mailing_job_civireport ON (mailing_job_civireport.id = mailing_event_queue_civireport.job_id)   
-        INNER JOIN civicrm_mailing mailing_civireport ON (mailing_job_civireport.mailing_id = mailing_civireport.id)
-        {$additionalForm} 
-        {$tmp_where_partial}
-        GROUP BY mailing_civireport.id   
-      ) as a6  ON (mailing_civireport.id  = a6.id)
-      
-      LEFT JOIN (
-        select  mailing_civireport.id, count( DISTINCT mailing_event_unsubscribe_civireport.event_queue_id) as civicrm_mailing_event_unsubscribe_unsubscribe_count
-        from civicrm_mailing_event_queue mailing_event_queue_civireport
-        INNER JOIN  civicrm_mailing_event_unsubscribe mailing_event_unsubscribe_civireport  
-        ON (mailing_event_unsubscribe_civireport.event_queue_id = mailing_event_queue_civireport.id AND  mailing_event_unsubscribe_civireport.org_unsubscribe = 0 )
-        INNER JOIN civicrm_mailing_job mailing_job_civireport ON (mailing_job_civireport.id = mailing_event_queue_civireport.job_id)   
-        INNER JOIN civicrm_mailing mailing_civireport ON (mailing_job_civireport.mailing_id = mailing_civireport.id)
-        {$additionalForm} 
-        {$tmp_where_partial} 
-        GROUP BY mailing_civireport.id
-       ) as a7  ON (mailing_civireport.id  = a7.id)
-      LEFT JOIN (
-        select mailing_civireport.id, count( DISTINCT mailing_event_optout_civireport.event_queue_id) as civicrm_mailing_event_unsubscribe_optout_count
-        from civicrm_mailing_event_queue mailing_event_queue_civireport
-        INNER JOIN  civicrm_mailing_event_unsubscribe mailing_event_optout_civireport  
-        ON (mailing_event_optout_civireport.event_queue_id = mailing_event_queue_civireport.id AND mailing_event_optout_civireport.org_unsubscribe = 1)
-        INNER JOIN civicrm_mailing_job mailing_job_civireport ON (mailing_job_civireport.id = mailing_event_queue_civireport.job_id)   
-        INNER JOIN civicrm_mailing mailing_civireport ON (mailing_job_civireport.mailing_id = mailing_civireport.id)
-        {$additionalForm} 
-        {$tmp_where_partial} 
-        GROUP BY mailing_civireport.id
-       ) as a8  ON (mailing_civireport.id  = a8.id) 
-     {$tmp_where_partial}
-     GROUP BY mailing_civireport.id  
-     {$this->_orderBy}  
-     {$this->_limit}";
     CRM_Utils_Hook::alterReportVar('sql', $this, $this);
+
+    $sql = "{$this->_select} {$this->_from} {$this->_where} {$this->_groupBy} {$this->_having} {$this->_orderBy} {$this->_limit}";
     $this->addToDeveloperTab($sql);
     return $sql;
   }
+
   /**
    * @return array
    */
   public static function getChartCriteria() {
     return array(
       'count' => array(
-        'civicrm_mailing_event_delivered_delivered_count' => ts('Successful Deliveries'),
-        'civicrm_mailing_event_bounce_bounce_count' => ts('Bounces'),
+        'civicrm_mailing_event_delivered_delivered_count' => ts('Delivered'),
+        'civicrm_mailing_event_bounce_bounce_count' => ts('Bounce'),
         'civicrm_mailing_event_opened_open_count' => ts('Total Opens'),
         'civicrm_mailing_event_opened_unique_open_count' => ts('Unique Opens'),
         'civicrm_mailing_event_trackable_url_open_click_count' => ts('Unique Clicks'),
         'civicrm_mailing_event_unsubscribe_unsubscribe_count' => ts('Unsubscribe'),
       ),
       'rate' => array(
-        'civicrm_mailing_event_delivered_accepted_rate' => ts('Successful Delivery Rate'),
+        'civicrm_mailing_event_delivered_accepted_rate' => ts('Accepted Rate'),
         'civicrm_mailing_event_bounce_bounce_rate' => ts('Bounce Rate'),
         'civicrm_mailing_event_opened_open_rate' => ts('Total Open Rate'),
         'civicrm_mailing_event_opened_unique_open_rate' => ts('Unique Open Rate'),
-        'civicrm_mailing_event_trackable_url_open_CTR' => ts('Click-through Rate'),
-        'civicrm_mailing_event_trackable_url_open_CTO' => ts('Click-through to Open Rate'),
+        'civicrm_mailing_event_trackable_url_open_CTR' => ts('Click through Rate'),
+        'civicrm_mailing_event_trackable_url_open_CTO' => ts('Click to Open Rate'),
       ),
     );
   }
@@ -754,4 +759,3 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
   }
 
 }
-

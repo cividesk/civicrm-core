@@ -1668,7 +1668,9 @@ WHERE  id = $cfID
               $htmlType = $dao->html_type;
 
               if ($htmlType == 'File') {
-                $values[$index] = $params[$index];
+                $path = CRM_Utils_Array::value('name', $params[$name]);
+                $fileType = CRM_Utils_Array::value('type', $params[$name]);
+                $values[$index] = CRM_Utils_File::getFileURL($path, $fileType);
               }
               else {
                 if ($dao->data_type == 'Int' ||

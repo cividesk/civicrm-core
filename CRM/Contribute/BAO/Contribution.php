@@ -2472,6 +2472,9 @@ INNER JOIN civicrm_activity ON civicrm_activity_contact.activity_id = civicrm_ac
       $ids['paymentProcessor'] = $paymentProcessorID;
       $this->_relatedObjects['paymentProcessor'] = $paymentProcessor;
     }
+
+    // Add contribution id to $ids. CRM-20401
+    $ids['contribution'] = $this->id;
     return TRUE;
   }
 

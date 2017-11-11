@@ -84,6 +84,84 @@ class CRM_Admin_Form_Preferences extends CRM_Core_Form {
   public function buildQuickForm() {
     parent::buildQuickForm();
 
+    if (!empty($this->_varNames)) {
+      CRM_Core_Error::deprecatedFunctionWarning('deprecated use of preferences form. This will be removed from core soon');
+      foreach ($this->_varNames as $groupName => $groupValues) {
+        $formName = CRM_Utils_String::titleToVar($groupName);
+        $this->assign('formName', $formName);
+        $fields = [];
+        foreach ($groupValues as $fieldName => $fieldValue) {
+          $fields[$fieldName] = $fieldValue;
+
+          switch ($fieldValue['html_type']) {
+            case 'text':
+              $this->addElement('text',
+                $fieldName,
+                $fieldValue['title'],
+                [
+                  'maxlength' => 64,
+                  'size' => 32,
+                ]
+              );
+              break;
+
+            case 'textarea':
+            case 'checkbox':
+              $this->add($fieldValue['html_type'],
+                $fieldName,
+                $fieldValue['title']
+              );
+              break;
+
+            case 'radio':
+              $options = CRM_Core_OptionGroup::values($fieldName, FALSE, FALSE, TRUE);
+              $this->addRadio($fieldName, $fieldValue['title'], $options, NULL, '&nbsp;&nbsp;');
+              break;
+
+            case 'YesNo':
+              $this->addRadio($fieldName, $fieldValue['title'], [0 => 'No', 1 => 'Yes'], NULL, '&nbsp;&nbsp;');
+              break;
+
+            case 'checkboxes':
+              $options = array_flip(CRM_Core_OptionGroup::values($fieldName, FALSE, FALSE, TRUE));
+              $newOptions = [];
+              foreach ($options as $key => $val) {
+                $newOptions[$key] = $val;
+              }
+              $this->addCheckBox($fieldName,
+                $fieldValue['title'],
+                $newOptions,
+                NULL, NULL, NULL, NULL,
+                ['&nbsp;&nbsp;', '&nbsp;&nbsp;', '<br/>']
+              );
+              break;
+
+            case 'select':
+              $this->addElement('select',
+                $fieldName,
+                $fieldValue['title'],
+                $fieldValue['option_values']
+              );
+              break;
+
+            case 'advmultiselect':
+              $this->addElement('advmultiselect', $fieldName, $fieldValue['title'], $fieldValue['options'], $fieldValue['attributes']);
+              break;
+
+            case 'wysiwyg':
+              $this->add('wysiwyg', $fieldName, $fieldValue['title'], $fieldValue['attributes']);
+              break;
+
+            case 'entity_reference':
+              $this->addEntityRef($fieldName, $fieldValue['title'], CRM_Utils_Array::value('options', $fieldValue, []));
+          }
+        }
+
+        $fields = CRM_Utils_Array::crmArraySortByField($fields, 'weight');
+        $this->assign('fields', $fields);
+      }
+    }
+
     $this->addButtons([
       [
         'type' => 'next',
@@ -126,6 +204,53 @@ class CRM_Admin_Form_Preferences extends CRM_Core_Form {
       CRM_Core_Session::setStatus($e->getMessage(), ts('Save Failed'), 'error');
     }
 
+    foreach ($this->_varNames as $groupName => $groupValues) {
+      foreach ($groupValues as $settingName => $fieldValue) {
+        switch ($fieldValue['html_type']) {
+          case 'checkboxes':
+            if (!empty($this->_params[$settingName]) &&
+              is_array($this->_params[$settingName])
+            ) {
+              $this->_config->$settingName = CRM_Core_DAO::VALUE_SEPARATOR . implode(CRM_Core_DAO::VALUE_SEPARATOR,
+                  array_keys($this->_params[$settingName])
+                ) . CRM_Core_DAO::VALUE_SEPARATOR;
+            }
+            else {
+              $this->_config->$settingName = NULL;
+            }
+            break;
+
+          case 'checkbox':
+            $this->_config->$settingName = !empty($this->_params[$settingName]) ? 1 : 0;
+            break;
+
+          case 'text':
+          case 'select':
+          case 'advmultiselect':
+          case 'radio':
+          case 'YesNo':
+          case 'entity_reference':
+            $this->_config->$settingName = CRM_Utils_Array::value($settingName, $this->_params);
+            break;
+
+          case 'textarea':
+            $value = CRM_Utils_Array::value($settingName, $this->_params);
+            if ($value) {
+              $value = trim($value);
+              $value = str_replace(["\r\n", "\r"], "\n", $value);
+            }
+            $this->_config->$settingName = $value;
+            break;
+        }
+      }
+    }
+
+    foreach ($this->_varNames as $groupName => $groupValues) {
+      foreach ($groupValues as $settingName => $fieldValue) {
+        $settingValue = isset($this->_config->$settingName) ? $this->_config->$settingName : NULL;
+        Civi::settings()->set($settingName, $settingValue);
+      }
+    }
     // Update any settings stored in dynamic js
     CRM_Core_Resources::singleton()->resetCacheCode();
 

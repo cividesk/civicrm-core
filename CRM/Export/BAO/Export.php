@@ -457,7 +457,7 @@ INSERT INTO {$componentTable} SELECT distinct gc.contact_id FROM civicrm_group_c
         $row = $processor->buildRow($query, $iterationDAO, $outputColumns, $metadata, $paymentDetails, $addPaymentHeader, $paymentTableId);
         if ($row === FALSE) {
           continue;
-        }
+	}
 
         // add component info
         // write the row to a file

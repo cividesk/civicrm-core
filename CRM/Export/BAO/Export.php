@@ -945,6 +945,16 @@ INSERT INTO {$componentTable} SELECT distinct gc.contact_id FROM civicrm_group_c
             //check for custom data
             if ($cfID = CRM_Core_BAO_CustomField::getKeyID($field)) {
               $row[$field] = CRM_Core_BAO_CustomField::displayValue($fieldValue, $cfID);
+              // for files, generate plain url, instead of a tag
+              if (!empty($row[$field]) && $query->_fields[$field]['html_type'] == 'File') {
+                preg_match('/<a[^>]+href=([\'"])(?<href>.+?)\1[^>]*>/i', $row[$field], $matches);
+                if (!empty($matches)) {
+                  $row[$field] = $matches['2'];
+                  if ((strpos($row[$field],  "http ")) === false) {
+                    $row[$field] = CIVICRM_UF_BASEURL. html_entity_decode($row[$field]);
+                  }
+                }
+              }
             }
 
             elseif (in_array($field, array(

@@ -1180,6 +1180,16 @@ ORDER BY   civicrm_email.is_bulkmail DESC
     ) {
       $htmlBody = implode('', $html);
       if ($useSmarty) {
+        // While sending email from mosaico, extension insert {literal} tag (for head to handle css block) before parsing template to replace tokens.
+        // But while saving in the DB literal tag not used.
+        // for viewing the email in browser (both traditional and mosaico email template), it uses same url.
+        // for mosaico template, insert literal tag in head section to avoid smarty error
+        // also check any literal tag already present in head section before inserting new one.
+        $withinHead = preg_match_all("|<head.+?{literal}.*</head|si", $htmlBody, $dontCare);
+        if ($this->template_type && $this->template_type !== 'traditional' && !$withinHead) {
+          $htmlBody = str_ireplace(array('<head>', '</head>'),
+            array('{literal}<head>', '</head>{/literal}'), $htmlBody);
+        }
         $htmlBody = $smarty->fetch("string:$htmlBody");
       }
       $mailParams['html'] = $htmlBody;

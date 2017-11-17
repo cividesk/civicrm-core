@@ -256,7 +256,17 @@ WHERE  inst.report_id = %1";
         $value = $row[$v] ?? NULL;
         if (isset($value)) {
           // Remove HTML, unencode entities, and escape quotation marks.
-          $value = str_replace('"', '""', html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML401));
+          if (CRM_Utils_Array::value('type', $form->_columnHeaders[$v]) & 4096) {
+            preg_match('/<a[^>]+href=([\'"])(?<href>.+?)\1[^>]*>/i', $value, $matches);
+            if (!empty($matches)) {
+              $value = $matches['2'];
+              if ((strpos($value,  "http ")) === false) {
+                $value = CIVICRM_UF_BASEURL. html_entity_decode($value);
+              }
+            }
+          } else {
+            $value = str_replace('"', '""', html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML401));
+          }
 
           if (CRM_Utils_Array::value('type', $form->_columnHeaders[$v]) & 4) {
             if (CRM_Utils_Array::value('group_by', $form->_columnHeaders[$v]) == 'MONTH' ||

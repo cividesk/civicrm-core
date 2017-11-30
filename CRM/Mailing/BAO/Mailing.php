@@ -1648,7 +1648,7 @@ ORDER BY   civicrm_email.is_bulkmail DESC
       $cb = Civi\Core\Resolver::singleton()->get($params['_evil_bao_validator_']);
       $errors = call_user_func($cb, $mailing);
       if (!empty($errors)) {
-        $fields = implode(',', array_keys($errors));
+        $fields = implode(',', $errors);
         throw new CRM_Core_Exception("Mailing cannot be sent. There are missing or invalid fields ($fields).", 'cannot-send', $errors);
       }
     }
@@ -1702,6 +1702,10 @@ ORDER BY   civicrm_email.is_bulkmail DESC
     }
     if (empty($mailing->body_html) && empty($mailing->body_text)) {
       $errors['body'] = ts('Field "body_html" or "body_text" is required.');
+    }
+    // check html body content have some text, sometime just images are used to send email without any text.
+    if (!empty($mailing->body_html) && !trim(strip_tags($mailing->body_html))) {
+      $errors['body_html'] = ts('Field "body_html" contain no text, e.g. if you are using image only then please add additional text for it.');
     }
 
     if (!Civi::settings()->get('disable_mandatory_tokens_check')) {

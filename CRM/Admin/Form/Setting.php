@@ -96,6 +96,7 @@ class CRM_Admin_Form_Setting extends CRM_Core_Form {
     );
 
     $descriptions = array();
+    global  $civicrm_setting;
     foreach ($this->_settings as $setting => $group) {
       $settingMetaData = civicrm_api('setting', 'getfields', array('version' => 3, 'name' => $setting));
       $props = $settingMetaData['values'][$setting];
@@ -148,6 +149,10 @@ class CRM_Admin_Form_Setting extends CRM_Core_Form {
           $this->addRule('maxFileSize', ts('Value should be a positive number'), 'positiveInteger');
         }
 
+      }
+      // CRM-21495 (Respect settings override in civicrm.setting.php)
+      if (isset($civicrm_setting[$group][$setting])) {
+        $this->getElement($setting)->freeze();
       }
     }
     $this->assign('setting_descriptions', $descriptions);

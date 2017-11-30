@@ -684,7 +684,7 @@ class CRM_Mailing_BAO_Mailing extends CRM_Mailing_DAO_Mailing {
       }
 
       // To check for an html part strip tags
-      if (trim(strip_tags($this->body_html, '<img>'))) {
+      if (trim(strip_tags($this->body_html))) {
 
         $template = [];
         if ($this->header) {

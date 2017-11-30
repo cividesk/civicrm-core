@@ -95,6 +95,7 @@ class CRM_Admin_Form_Setting extends CRM_Core_Form {
 
     $descriptions = array();
     $settingMetaData = $this->getSettingsMetaData();
+    global  $civicrm_setting;
     foreach ($settingMetaData as $setting => $props) {
       if (isset($props['quick_form_type'])) {
         if (isset($props['pseudoconstant'])) {
@@ -145,6 +146,10 @@ class CRM_Admin_Form_Setting extends CRM_Core_Form {
           $this->addRule('maxFileSize', ts('Value should be a positive number'), 'positiveInteger');
         }
 
+      }
+      // CRM-21495 (Respect settings override in civicrm.setting.php)
+      if (isset($civicrm_setting[$props][$setting])) {
+        $this->getElement($setting)->freeze();
       }
     }
     // setting_description should be deprecated - see Mail.tpl for metadata based tpl.

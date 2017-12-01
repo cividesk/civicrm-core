@@ -191,6 +191,7 @@ class CRM_Core_BAO_UFField extends CRM_Core_DAO_UFField {
     else {
       $ufField->location_type_id = $params['location_type_id'] ?? NULL;
     }
+
     $ufField->phone_type_id = $params['phone_type_id'] ?? NULL;
 
     if (!empty($params['id'])) {

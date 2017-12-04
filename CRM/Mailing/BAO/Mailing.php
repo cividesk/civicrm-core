@@ -1704,8 +1704,8 @@ ORDER BY   civicrm_email.is_bulkmail DESC
       $errors['body'] = ts('Field "body_html" or "body_text" is required.');
     }
     // check html body content have some text, sometime just images are used to send email without any text.
-    if (!empty($mailing->body_html) && !trim(strip_tags($mailing->body_html))) {
-      $errors['body_html'] = ts('Field "body_html" contain no text, e.g. if you are using image only then please add additional text for it.');
+    if (!empty($mailing->body_html) && empty(trim(strip_tags($mailing->body_html)))) {
+      $errors['body_html'] = ts('It looks like you only have images in the body of your email - the inclusion of text in the body of the email is required.');
     }
 
     if (!Civi::settings()->get('disable_mandatory_tokens_check')) {

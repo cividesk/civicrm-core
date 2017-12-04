@@ -165,6 +165,16 @@ CRM.$(function($) {
   $('#format_id', $form).on('change', function() {
     selectFormat($(this).val());
   });
+
+  $('#from_email_address').hide();
+  $('#email_options').on('change', function() {
+    if ($(this).val()) {
+      $('#from_email_address').show();
+    }
+    else {
+      $('#from_email_address').hide();
+    }
+  });
   // After the pdf downloads, the user has to manually close the dialog (which would be nice to fix)
   // But at least we can trigger the underlying list of activities to refresh
   $('[name=_qf_PDF_submit]', $form).click(function() {

@@ -49,7 +49,7 @@
         <td class="label-left">{$form.email_options.label} {help id="id-contribution-email-print"}</td>
         <td>{$form.email_options.html}</td>
       </tr>
-      <tr>
+      <tr id="from_email_address">
         <td class="label-left">{$form.from_email_address.label} {help id="id-from_email" file="CRM/Contact/Form/Task/Email.hlp" isAdmin=$isAdmin}</td>
         <td>{$form.from_email_address.html}</td>
       </tr>

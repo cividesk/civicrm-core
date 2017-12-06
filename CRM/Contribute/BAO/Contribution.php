@@ -2909,6 +2909,12 @@ INNER JOIN civicrm_activity ON civicrm_activity_contact.activity_id = civicrm_ac
     $template->assign('first_name', $this->_relatedObjects['contact']->first_name);
     $template->assign('last_name', $this->_relatedObjects['contact']->last_name);
     $template->assign('displayName', $this->_relatedObjects['contact']->display_name);
+    $template->assign('billing_address', $values['address']);
+    $template->assign('contribution_id', $this->id);
+    $template->assign('trxn_id', $this->trxn_id);
+    $template->assign('check_number', $this->check_number);
+    $template->assign('financial_type', $this->_relatedObjects['financialType']->name);
+
     if (isset($values['priceSetID'])) {
       $template->assign('is_quick_config', CRM_Core_DAO::getFieldValue('CRM_Price_DAO_PriceSet',  $values['priceSetID'], 'is_quick_config'));
     }

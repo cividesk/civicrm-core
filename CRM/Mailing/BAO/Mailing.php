@@ -1322,6 +1322,16 @@ ORDER BY   civicrm_email.is_bulkmail DESC
     ) {
       $htmlBody = implode('', $html);
       if ($useSmarty) {
+        // While sending email from mosaico, extension insert {literal} tag (for head to handle css block) before parsing template to replace tokens.
+        // But while saving in the DB literal tag not used.
+        // for viewing the email in browser (both traditional and mosaico email template), it uses same url.
+        // for mosaico template, insert literal tag in head section to avoid smarty error
+        // also check any literal tag already present in head section before inserting new one.
+        $withinHead = preg_match_all("|<head.+?{literal}.*</head|si", $htmlBody, $dontCare);
+        if ($this->template_type && $this->template_type !== 'traditional' && !$withinHead) {
+          $htmlBody = str_ireplace(array('<head>', '</head>'),
+            array('{literal}<head>', '</head>{/literal}'), $htmlBody);
+        }
         $htmlBody = $smarty->fetch("string:$htmlBody");
       }
       $mailParams['html'] = $htmlBody;
@@ -1700,7 +1710,7 @@ ORDER BY   civicrm_email.is_bulkmail DESC
 
       // Get the default from email address, if not provided.
       if (empty($defaults['from_email'])) {
-        $defaultAddress = CRM_Core_OptionGroup::values('from_email_address', NULL, NULL, NULL, ' AND is_default = 1');
+        $defaultAddress = CRM_Core_BAO_Domain::getNameAndEmail(TRUE, TRUE);
         foreach ($defaultAddress as $id => $value) {
           if (preg_match('/"(.*)" <(.*)>/', $value, $match)) {
             $defaults['from_email'] = $match[2];
@@ -1763,7 +1773,7 @@ ORDER BY   civicrm_email.is_bulkmail DESC
       $cb = Civi\Core\Resolver::singleton()->get($params['_evil_bao_validator_']);
       $errors = call_user_func($cb, $mailing);
       if (!empty($errors)) {
-        $fields = implode(',', array_keys($errors));
+        $fields = implode(',', $errors);
         throw new CRM_Core_Exception("Mailing cannot be sent. There are missing or invalid fields ($fields).", 'cannot-send', $errors);
       }
     }
@@ -1815,6 +1825,10 @@ ORDER BY   civicrm_email.is_bulkmail DESC
     }
     if (empty($mailing->body_html) && empty($mailing->body_text)) {
       $errors['body'] = ts('Field "body_html" or "body_text" is required.');
+    }
+    // check html body content have some text, sometime just images are used to send email without any text.
+    if (!empty($mailing->body_html) && empty(trim(strip_tags($mailing->body_html)))) {
+      $errors['body_html'] = ts('It looks like you only have images in the body of your email - the inclusion of text in the body of the email is required.');
     }
 
     if (!Civi::settings()->get('disable_mandatory_tokens_check')) {

@@ -1,5 +1,4 @@
-{*
- +--------------------------------------------------------------------+
+{*--------------------------------------------------------------------+
  | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2017                                |
@@ -21,21 +20,12 @@
  | at info[AT]civicrm[DOT]org. If you have questions about the        |
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
- +--------------------------------------------------------------------+
-*}
-{* This tpl runs recursively to build each level of the tag tree *}
-<ul class="tree-level-{$level}">
-  {foreach from=$tree item="node" key="id"}
-    <li>
-      <a id="tag_{$id}" class="{if !$node.is_selectable || $permission neq 'edit'}jstree-disabled{/if} {if $tagged[$id]}jstree-clicked{/if}">
-        <span class="crm-tag-item" {if !empty($allTags.$id.color)}style="background-color: {$allTags.$id.color}; color: {$allTags.$id.color|colorContrast};"{/if} title="{$node.description|escape:'html'}">
-          {$node.name}
-        </span>
-      </a>
-      {if $node.children}
-        {* Recurse... *}
-        {include file="CRM/Tag/Form/Tagtree.tpl" tree=$node.children level=$level+1}
-      {/if}
-    </li>
-  {/foreach}
-</ul>
+ +-------------------------------------------------------------------*}
+
+{htxt id='allow_mail_contact_email'}
+{capture assign=adminFromEmailURL}{crmURL p="civicrm/admin/options/from_email_address" q="reset=1"}{/capture}
+{ts 1=$adminFromEmailURL}If this is enabled a logged in user can send email from their own email address as well as the configured
+  <a href="%1"><strong>FROM Email addresses</strong></a>.  This applies to actions such as send Email, Email invoice.. If this setting
+  is disabled then only the system configured FROM Email addresses will be available for selection.{/ts}
+{/htxt}
+

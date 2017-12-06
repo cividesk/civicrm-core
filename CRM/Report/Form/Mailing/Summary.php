@@ -47,6 +47,8 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
 
   public $campaignEnabled = FALSE;
 
+  protected $_distinctCountColumns = array();
+
   /**
    * Class constructor.
    */
@@ -149,11 +151,13 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
       'order_bys' => array(
         'start_date' => array(
           'title' => ts('Start Date'),
+          'dbAlias' => 'MIN(mailing_job_civireport.start_date)',
         ),
         'end_date' => array(
           'title' => ts('End Date'),
           'default_weight' => '1',
           'default_order' => 'DESC',
+          'dbAlias' => 'MAX(mailing_job_civireport.end_date)',
         ),
       ),
       'grouping' => 'mailing-fields',
@@ -310,6 +314,16 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
         ),
       );
     }
+    $this->_distinctCountColumns = array(
+      'civicrm_mailing_event_queue.queue_count',
+      'civicrm_mailing_event_delivered.delivered_count',
+      'civicrm_mailing_event_bounce.bounce_count',
+      'civicrm_mailing_event_opened.unique_open_count',
+      'civicrm_mailing_event_opened.open_count',
+      'civicrm_mailing_event_trackable_url_open.click_count',
+      'civicrm_mailing_event_unsubscribe.unsubscribe_count',
+      'civicrm_mailing_event_unsubscribe.optout_count',
+    );
     parent::__construct();
   }
 
@@ -350,24 +364,6 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
       'civicrm_mailing_event_unsubscribe',
     );
 
-    // Define a list of columns that should be counted with the DISTINCT
-    // keyword. For example, civicrm_mailing_event_opened.unique_open_count
-    // should display the number of unique records, whereas something like
-    // civicrm_mailing_event_opened.open_count should display the total number.
-    // Each string here is in the form $tableName.$fieldName, where $tableName
-    // is the key in $this->_columns, and $fieldName is the key in that array's
-    // ['fields'] array.
-    // Reference: CRM-20660
-    $distinctCountColumns = array(
-      'civicrm_mailing_event_queue.queue_count',
-      'civicrm_mailing_event_delivered.delivered_count',
-      'civicrm_mailing_event_bounce.bounce_count',
-      'civicrm_mailing_event_opened.unique_open_count',
-      'civicrm_mailing_event_trackable_url_open.click_count',
-      'civicrm_mailing_event_unsubscribe.unsubscribe_count',
-      'civicrm_mailing_event_unsubscribe.optout_count',
-    );
-
     $select = array();
     $this->_columnHeaders = array();
     foreach ($this->_columns as $tableName => $table) {
@@ -382,25 +378,17 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
                   $base_table_column = explode('.', $field['statistics']['base']);
                   $top_table_column = explode('.', $field['statistics']['top']);
 
-                  $select[] = "CONCAT(round(
-                    count(DISTINCT {$this->_columns[$top_table_column[0]]['fields'][$top_table_column[1]]['dbAlias']}) /
-                    count(DISTINCT {$this->_columns[$base_table_column[0]]['fields'][$base_table_column[1]]['dbAlias']}) * 100, 2
-                  ), '%') as {$tableName}_{$fieldName}";
+                  $select[] = PHP_EOL. "CONCAT(round({$top_table_column[0]}_{$top_table_column[1]}/{$base_table_column[0]}_{$base_table_column[1]}  * 100, 2), '%') as {$tableName}_{$fieldName}";
                   break;
               }
             }
             else {
               if (in_array($tableName, $count_tables)) {
-                // Use the DISTINCT keyword appropriately, based on the contents
-                // of $distinct_count_columns.
-                $distinct = '';
-                if (in_array("{$tableName}.{$fieldName}", $distinctCountColumns)) {
-                  $distinct = 'DISTINCT';
-                }
-                $select[] = "count($distinct {$field['dbAlias']}) as {$tableName}_{$fieldName}";
+                $tableIndex = array_search($tableName.'.'.$fieldName, $this->_distinctCountColumns);
+                $select[] = PHP_EOL. "if (a{$tableIndex}.{$tableName}_{$fieldName}, a{$tableIndex}.{$tableName}_{$fieldName}, 0) as {$tableName}_{$fieldName}";
               }
               else {
-                $select[] = "{$field['dbAlias']} as {$tableName}_{$fieldName}";
+                $select[] = PHP_EOL . "{$field['dbAlias']} as {$tableName}_{$fieldName}";
               }
             }
             $this->_columnHeaders["{$tableName}_{$fieldName}"]['type'] = CRM_Utils_Array::value('type', $field);
@@ -416,41 +404,88 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
   }
 
   public function from() {
+    // Custom Query
+    $additionalForm = '';
+    $additionalSelect = '';
+    if ($this->isTableSelected('civicrm_mailing_group')) {
+      $additionalForm .= "
+        LEFT JOIN civicrm_mailing_group {$this->_aliases['civicrm_mailing_group']}
+    ON {$this->_aliases['civicrm_mailing_group']}.mailing_id = {$this->_aliases['civicrm_mailing']}.id";
+    }
 
+    if ($this->campaignEnabled && $this->isTableSelected('civicrm_campaign')) {
+      $additionalSelect = ' , campaign_civireport.title as civicrm_campaign_title ';
+      $additionalForm .= "
+        LEFT JOIN civicrm_campaign {$this->_aliases['civicrm_campaign']}
+        ON {$this->_aliases['civicrm_campaign']}.id = {$this->_aliases['civicrm_mailing']}.campaign_id";
+    }
     $this->_from = "
     FROM civicrm_mailing {$this->_aliases['civicrm_mailing']}
       LEFT JOIN civicrm_mailing_job {$this->_aliases['civicrm_mailing_job']}
         ON {$this->_aliases['civicrm_mailing']}.id = {$this->_aliases['civicrm_mailing_job']}.mailing_id
       LEFT JOIN civicrm_mailing_event_queue {$this->_aliases['civicrm_mailing_event_queue']}
-        ON {$this->_aliases['civicrm_mailing_event_queue']}.job_id = {$this->_aliases['civicrm_mailing_job']}.id
-      LEFT JOIN civicrm_mailing_event_bounce {$this->_aliases['civicrm_mailing_event_bounce']}
-        ON {$this->_aliases['civicrm_mailing_event_bounce']}.event_queue_id = {$this->_aliases['civicrm_mailing_event_queue']}.id
-      LEFT JOIN civicrm_mailing_event_delivered {$this->_aliases['civicrm_mailing_event_delivered']}
-        ON {$this->_aliases['civicrm_mailing_event_delivered']}.event_queue_id = {$this->_aliases['civicrm_mailing_event_queue']}.id
-        AND {$this->_aliases['civicrm_mailing_event_bounce']}.id IS null
-      LEFT JOIN civicrm_mailing_event_opened {$this->_aliases['civicrm_mailing_event_opened']}
-        ON {$this->_aliases['civicrm_mailing_event_opened']}.event_queue_id = {$this->_aliases['civicrm_mailing_event_queue']}.id
-      LEFT JOIN (select * from civicrm_mailing_event_trackable_url_open group by trackable_url_id ) as {$this->_aliases['civicrm_mailing_event_trackable_url_open']}
-        ON {$this->_aliases['civicrm_mailing_event_trackable_url_open']}.event_queue_id = {$this->_aliases['civicrm_mailing_event_queue']}.id
-      LEFT JOIN civicrm_mailing_event_unsubscribe {$this->_aliases['civicrm_mailing_event_unsubscribe']}
-        ON {$this->_aliases['civicrm_mailing_event_unsubscribe']}.event_queue_id = {$this->_aliases['civicrm_mailing_event_queue']}.id AND {$this->_aliases['civicrm_mailing_event_unsubscribe']}.org_unsubscribe = 0
-      LEFT JOIN civicrm_mailing_event_unsubscribe mailing_event_optout_civireport
-        ON mailing_event_optout_civireport.event_queue_id = {$this->_aliases['civicrm_mailing_event_queue']}.id AND mailing_event_optout_civireport.org_unsubscribe = 1";
+       ON {$this->_aliases['civicrm_mailing_event_queue']}.job_id = {$this->_aliases['civicrm_mailing_job']}.id
+      {$additionalForm}
+    ";
 
-    if ($this->isTableSelected('civicrm_mailing_group')) {
-      $this->_from .= "
-        LEFT JOIN civicrm_mailing_group {$this->_aliases['civicrm_mailing_group']}
-    ON {$this->_aliases['civicrm_mailing_group']}.mailing_id = {$this->_aliases['civicrm_mailing']}.id";
+    $countTablesConditions = array(
+      'queue_count' => array(),
+      'delivered_count' => array(
+        'join' => 'LEFT JOIN civicrm_mailing_event_bounce mailing_event_bounce_civireport 
+                     ON mailing_event_bounce_civireport.event_queue_id = mailing_event_queue_civireport.id',
+        'condition' => 'AND mailing_event_bounce_civireport.id IS null',
+        'distinct' => 'DISTINCT'
+      ),
+      'unique_open_count' => array(
+        'distinct' => 'DISTINCT'
+      ),
+      'open_count' => array(
+
+      ),
+      'bounce_count' => array(
+        'distinct' => 'DISTINCT'
+      ),
+      'click_count' => array(
+      ),
+      'unsubscribe_count' => array(
+        'condition' => 'AND mailing_event_unsubscribe_civireport.org_unsubscribe = 0',
+        'distinct' => 'DISTINCT'
+      ),
+      'optout_count' => array(
+        'condition' => 'AND  mailing_event_unsubscribe_civireport.org_unsubscribe = 1',
+        'distinct' => 'DISTINCT'
+      ),
+    );
+    foreach($this->_distinctCountColumns as $index => $tableAndColumnName){
+      $tableColumn = explode('.', $tableAndColumnName);
+      $tableName  = $tableColumn[0];
+      $columnName = $tableColumn[1];
+      $distinct = $countTablesConditions[$columnName]['distinct'];
+      $additionalTableJoin = $countTablesConditions[$columnName]['join'];
+      $additionalTableCondition = $countTablesConditions[$columnName]['condition'];
+
+      $select = "SELECT {$this->_aliases['civicrm_mailing']}.id, count({$distinct} {$this->_aliases[$tableName]}.event_queue_id) as {$tableName}_{$columnName}";
+      if ($columnName == 'queue_count') {
+        $select = "SELECT {$this->_aliases['civicrm_mailing']}.id, count(*) as {$tableName}_{$columnName}";
+      }
+      $this->_from .= PHP_EOL .
+        " LEFT JOIN (
+        {$select}
+        FROM civicrm_mailing_event_queue {$this->_aliases['civicrm_mailing_event_queue']} 
+          {$additionalTableJoin}
+       ";
+      if ($columnName != 'queue_count') {
+        $this->_from .= " INNER JOIN  {$tableName} {$this->_aliases[$tableName]} 
+          ON ({$this->_aliases[$tableName]}.event_queue_id = {$this->_aliases['civicrm_mailing_event_queue']}.id {$additionalTableCondition}) " ;
+      }
+      $this->_from .= "  INNER JOIN civicrm_mailing_job {$this->_aliases['civicrm_mailing_job']} ON ({$this->_aliases['civicrm_mailing_job']}.id = {$this->_aliases['civicrm_mailing_event_queue']}.job_id)
+        INNER JOIN civicrm_mailing {$this->_aliases['civicrm_mailing']} ON ({$this->_aliases['civicrm_mailing_job']}.mailing_id = {$this->_aliases['civicrm_mailing']}.id)
+          {$additionalForm}
+        {$this->_where}
+        GROUP BY {$this->_aliases['civicrm_mailing']}.id
+      ) as a{$index} ON ({$this->_aliases['civicrm_mailing']}.id = a{$index}.id)";
     }
-    if ($this->campaignEnabled) {
-      $this->_from .= "
-        LEFT JOIN civicrm_campaign {$this->_aliases['civicrm_campaign']}
-        ON {$this->_aliases['civicrm_campaign']}.id = {$this->_aliases['civicrm_mailing']}.campaign_id";
-    }
 
-    // need group by and order by
-
-    //print_r($this->_from);
   }
 
   public function where() {
@@ -500,10 +535,6 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
     else {
       $this->_where = "WHERE " . implode(' AND ', $clauses);
     }
-
-    // if ( $this->_aclWhere ) {
-    // $this->_where .= " AND {$this->_aclWhere} ";
-    // }
   }
 
   public function groupBy() {
@@ -511,6 +542,10 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
       "{$this->_aliases['civicrm_mailing']}.id",
     );
     $this->_groupBy = CRM_Contact_BAO_Query::getGroupByFromSelectColumns($this->_selectClauses, $groupBy);
+  }
+
+  public function orderBy() {
+    parent::orderBy();
   }
 
   public function postProcess() {
@@ -530,6 +565,43 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
     $this->formatDisplay($rows);
     $this->doTemplateAssignment($rows);
     $this->endPostProcess($rows);
+  }
+
+  /**
+   * Build the report query.
+   *
+   * @param bool $applyLimit
+   *
+   * @return string
+   */
+  public function buildQuery($applyLimit = TRUE) {
+    $this->buildGroupTempTable();
+    $this->select();
+    // we need where clause in from sub query, so where called before from clause
+    $this->where();
+    $this->from();
+    $this->customDataFrom();
+    $this->buildPermissionClause();
+    if (array_key_exists('civicrm_contribution', $this->getVar('_columns'))) {
+      $this->getPermissionedFTQuery($this);
+    }
+    $this->groupBy();
+    $this->orderBy();
+
+    // order_by columns not selected for display need to be included in SELECT
+    $unselectedSectionColumns = $this->unselectedSectionColumns();
+    foreach ($unselectedSectionColumns as $alias => $section) {
+      $this->_select .= ", {$section['dbAlias']} as {$alias}";
+    }
+
+    if ($applyLimit && empty($this->_params['charts'])) {
+      $this->limit();
+    }
+    CRM_Utils_Hook::alterReportVar('sql', $this, $this);
+
+    $sql = "{$this->_select} {$this->_from} {$this->_where} {$this->_groupBy} {$this->_having} {$this->_orderBy} {$this->_limit}";
+    $this->addToDeveloperTab($sql);
+    return $sql;
   }
 
   /**
@@ -593,9 +665,9 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
 
     if ($isError) {
       $errors['_qf_default'] = ts('For Chart view, please select at least one field from %1 OR %2.', array(
-          1 => implode(', ', $criteria['count']),
-          2 => implode(', ', $criteria['rate']),
-        ));
+        1 => implode(', ', $criteria['count']),
+        2 => implode(', ', $criteria['rate']),
+      ));
     }
 
     return $errors;

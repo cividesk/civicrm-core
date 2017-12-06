@@ -2472,6 +2472,9 @@ INNER JOIN civicrm_activity ON civicrm_activity_contact.activity_id = civicrm_ac
       $ids['paymentProcessor'] = $paymentProcessorID;
       $this->_relatedObjects['paymentProcessor'] = $paymentProcessor;
     }
+
+    // Add contribution id to $ids. CRM-20401
+    $ids['contribution'] = $this->id;
     return TRUE;
   }
 
@@ -3537,6 +3540,10 @@ INNER JOIN civicrm_activity ON civicrm_activity_contact.activity_id = civicrm_ac
           // when creating recurring membership payment - there are 2 lines to comment out in contributonPageTest if fixed
           // & this can be removed
           return;
+        }
+        if (empty($params['trxnParams']['currency'])) {
+          // This is an update so original currency if none passed in.
+          $params['trxnParams']['currency'] = isset($params['currency']) ? $params['currency'] : $params['prevContribution']->currency;
         }
         self::recordAlwaysAccountsReceivable($params['trxnParams'], $params);
         $trxn = CRM_Core_BAO_FinancialTrxn::create($params['trxnParams']);
@@ -4751,7 +4758,7 @@ LIMIT 1;";
    * Generate From email and from name in an array values
    */
   public static function generateFromEmailAndName($input, $contribution) {
-    // Use input valuse if supplied.
+    // Use input value if supplied.
     if (!empty($input['receipt_from_email'])) {
       return array(CRM_Utils_array::value('receipt_from_name', $input, ''), $input['receipt_from_email']);
     }

@@ -23,6 +23,7 @@ class CRM_Contribute_Form_Task_PDFLetterCommon extends CRM_Contact_Form_Task_PDF
       $returnProperties['email'] = $returnProperties['on_hold'] = $returnProperties['is_deceased'] = $returnProperties['do_not_email'] = 1;
       $emailParams = array(
         'subject' => $formValues['subject'],
+        'from' => $formValues['from_email_address'],
       );
       // We need display_name for emailLetter() so add to returnProperties here
       $returnProperties['display_name'] = 1;
@@ -285,23 +286,24 @@ class CRM_Contribute_Form_Task_PDFLetterCommon extends CRM_Contact_Form_Task_PDF
         $contacts[$contactID]['combined'][$groupBy][$groupByID] = self::combineContributions($contacts[$contactID]['combined'][$groupBy][$groupByID], $contribution, $separator);
         $contacts[$contactID]['aggregates'][$groupBy][$groupByID] += $contribution['total_amount'];
       }
-    }
-    // Assign the available contributions before calling tokens so hooks parsing smarty can access it.
-    // Note that in core code you can only use smarty here if enable if for the whole site, incl
-    // CiviMail, with a big performance impact.
-    // Hooks allow more nuanced smarty usage here.
-    CRM_Core_Smarty::singleton()->assign('contributions', $contributions);
-    foreach ($contacts as $contactID => $contact) {
+
       $tokenResolvedContacts = CRM_Utils_Token::getTokenDetails(array('contact_id' => $contactID),
         $returnProperties,
         $skipOnHold,
         $skipDeceased,
         NULL,
         $messageToken,
-        $task
+        $task,
+        NULL,
+        $contributionId
       );
-      $contacts[$contactID] = array_merge($tokenResolvedContacts[0][$contactID], $contact);
+      $contacts[$contactID] = array_merge($tokenResolvedContacts[0][$contactID], $contacts[$contactID]);
     }
+    // Assign the available contributions before calling tokens so hooks parsing smarty can access it.
+    // Note that in core code you can only use smarty here if enable if for the whole site, incl
+    // CiviMail, with a big performance impact.
+    // Hooks allow more nuanced smarty usage here.
+    CRM_Core_Smarty::singleton()->assign('contributions', $contributions);
     return array($contributions, $contacts);
   }
 
@@ -378,6 +380,9 @@ class CRM_Contribute_Form_Task_PDFLetterCommon extends CRM_Contact_Form_Task_PDF
         $emails = CRM_Core_BAO_Email::getFromEmail();
         $emails = array_keys($emails);
         $defaults['from'] = array_pop($emails);
+      }
+      else {
+        $defaults['from'] = $params['from'];
       }
       if (!empty($params['subject'])) {
         $defaults['subject'] = $params['subject'];

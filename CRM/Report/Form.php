@@ -3716,6 +3716,11 @@ ORDER BY cg.weight, cf.weight";
           $curFields[$fieldName]['alias'] = "contact_{$fieldName}_civireport";
           break;
 
+        case 'File':
+          $curFields[$fieldName]['type'] = CRM_Utils_Type::T_URL;
+          $curFilters[$fieldName]['type'] = CRM_Utils_Type::T_STRING;
+          break;
+
         default:
           $curFields[$fieldName]['type'] = CRM_Utils_Type::T_STRING;
           $curFilters[$fieldName]['type'] = CRM_Utils_Type::T_STRING;

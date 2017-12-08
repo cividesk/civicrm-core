@@ -2914,9 +2914,13 @@ INNER JOIN civicrm_activity ON civicrm_activity_contact.activity_id = civicrm_ac
     $template->assign('trxn_id', $this->trxn_id);
     $template->assign('check_number', $this->check_number);
     $template->assign('financial_type', $this->_relatedObjects['financialType']->name);
+    $paymentInstrument = CRM_Contribute_BAO_Contribution::buildOptions('payment_instrument_id', 'get');
+    $template->assign('payment_instrument', $paymentInstrument[$this->payment_instrument_id]);
 
+    $domain = civicrm_api3('domain', 'getsingle', array('id' => CRM_Core_Config::domainID(), 'return' => array('name')));
+    $template->assign('org_name', $domain['name']);
     if (isset($values['priceSetID'])) {
-      $template->assign('is_quick_config', CRM_Core_DAO::getFieldValue('CRM_Price_DAO_PriceSet',  $values['priceSetID'], 'is_quick_config'));
+      $template->assign('is_quick_config', CRM_Core_DAO::getFieldValue('CRM_Price_DAO_PriceSet', $values['priceSetID'], 'is_quick_config'));
     }
 
     // For some unit tests contribution cannot contain paymentProcessor information

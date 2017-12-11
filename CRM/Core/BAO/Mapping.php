@@ -359,7 +359,16 @@ class CRM_Core_BAO_Mapping extends CRM_Core_DAO_Mapping {
 
       // exclude the address options disabled in the Address Settings
       $fields[$value] = CRM_Core_BAO_Address::validateAddressOptions($contactFields);
+      $customFieldArray = array();
+      // For sorting keep custom field separate and then merge it because custom field are already sorted using weight of that field in group
+      foreach ($fields[$value] as $keyName => $KeyDetails) {
+        if (substr($keyName, 0, 7) == 'custom_') {
+          unset($fields[$value][$keyName]);
+          $customFieldArray[$keyName] = $KeyDetails;
+        }
+      }
       ksort($fields[$value]);
+      $fields[$value]  = array_merge($fields[$value], $customFieldArray);
       if ($mappingType == 'Export') {
         $relationships = array();
         $relationshipTypes = CRM_Contact_BAO_Relationship::getContactRelationshipType(NULL, NULL, NULL, $value, TRUE);

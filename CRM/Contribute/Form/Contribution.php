@@ -780,7 +780,7 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
     $element = $this->add('select',
       'payment_processor_id',
       ts('Payment Processor'),
-      $this->_processors,
+      array_diff_key($this->_processors, array(0 => 1)),
       NULL,
       $recurJs
     );

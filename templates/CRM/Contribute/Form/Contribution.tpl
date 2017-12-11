@@ -169,7 +169,7 @@
     {/if}
     <tr id="fromEmail" style="display:none;" >
       <td class="label">{$form.from_email_address.label}</td>
-      <td>{$form.from_email_address.html}</td>
+      <td>{$form.from_email_address.html} {help id="id-from_email" file="CRM/Contact/Form/Task/Email.hlp" isAdmin=$isAdmin}</td>
     </tr>
     <tr id="receiptDate" class="crm-contribution-form-block-receipt_date">
       <td class="label">{$form.receipt_date.label}</td>
@@ -231,33 +231,6 @@
         <td class="label">{$form.revenue_recognition_date.label}</td>
         <td>{$form.revenue_recognition_date.html}</td>
       </tr>
-    {/if}
-    {if $email and $outBound_option != 2}
-      <tr class="crm-contribution-form-block-is_email_receipt">
-        <td class="label">{$form.is_email_receipt.label}</td>
-        <td>{$form.is_email_receipt.html}&nbsp;
-          <span class="description">{ts 1=$email}Automatically email a receipt for this payment to %1?{/ts}</span>
-        </td>
-      </tr>
-    {elseif $context eq 'standalone' and $outBound_option != 2 }
-      <tr id="email-receipt" style="display:none;" class="crm-contribution-form-block-is_email_receipt">
-        <td class="label">{$form.is_email_receipt.label}</td>
-        <td>{$form.is_email_receipt.html} <span class="description">{ts}Automatically email a receipt for this payment to {/ts}<span id="email-address"></span>?</span>
-        </td>
-      </tr>
-    {/if}
-    <tr id="fromEmail" class="crm-contribution-form-block-receipt_date" style="display:none;">
-      <td class="label">{$form.from_email_address.label}</td>
-      <td>{$form.from_email_address.html} {help id="id-from_email" file="CRM/Contact/Form/Task/Email.hlp" isAdmin=$isAdmin}</td>
-    </tr>
-    <tr id="receiptDate" class="crm-contribution-form-block-receipt_date">
-      <td class="label">{$form.receipt_date.label}</td>
-      <td>{include file="CRM/common/jcalendar.tpl" elementName=receipt_date}<br />
-        <span class="description">{ts}Date that a receipt was sent to the contributor.{/ts}</span>
-      </td>
-    </tr>
-    {if $form.payment_processor_id}
-      <tr class="crm-contribution-form-block-payment_processor_id"><td class="label nowrap">{$form.payment_processor_id.label}<span class="crm-marker"> * </span></td><td>{$form.payment_processor_id.html}</td></tr>
     {/if}
   </table>
 

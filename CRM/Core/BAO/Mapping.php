@@ -347,6 +347,7 @@ class CRM_Core_BAO_Mapping extends CRM_Core_DAO_Mapping {
     }
 
     $contactType = array('Individual', 'Household', 'Organization');
+    $customFieldArray = array();
     foreach ($contactType as $value) {
       if ($mappingType == 'Search Builder') {
         // get multiple custom group fields in this context
@@ -359,16 +360,17 @@ class CRM_Core_BAO_Mapping extends CRM_Core_DAO_Mapping {
 
       // exclude the address options disabled in the Address Settings
       $fields[$value] = CRM_Core_BAO_Address::validateAddressOptions($contactFields);
-      $customFieldArray = array();
       // For sorting keep custom field separate and then merge it because custom field are already sorted using weight of that field in group
       foreach ($fields[$value] as $keyName => $KeyDetails) {
         if (substr($keyName, 0, 7) == 'custom_') {
           unset($fields[$value][$keyName]);
-          $customFieldArray[$keyName] = $KeyDetails;
+          $customFieldArray[$value][$keyName] = $KeyDetails;
         }
       }
       ksort($fields[$value]);
-      $fields[$value]  = array_merge($fields[$value], $customFieldArray);
+      if (!empty($customFieldArray[$value])) {
+        $fields[$value]  = array_merge($fields[$value], array('custom' => array('title' => ts('- custom data fields -'))), $customFieldArray[$value]);
+      }
       if ($mappingType == 'Export') {
         $relationships = array();
         $relationshipTypes = CRM_Contact_BAO_Relationship::getContactRelationshipType(NULL, NULL, NULL, $value, TRUE);
@@ -535,7 +537,15 @@ class CRM_Core_BAO_Mapping extends CRM_Core_DAO_Mapping {
 
       //custom fields for sub type
       $subTypeFields = CRM_Core_BAO_CustomField::getFieldsForImport($subType);
-      $fields[$subType] += $subTypeFields;
+
+      if (!empty($customFieldArray[$val['parent']]) && !empty($subTypeFields)) {
+        $subTypeFields = $customFieldArray[$val['parent']] + $subTypeFields;
+      }
+      elseif (!empty($customFieldArray[$val['parent']])) {
+        $subTypeFields = $customFieldArray[$val['parent']];
+      }
+      $subTypeFields = array('custom' => array('title' => ts('- custom data fields -'))) + $subTypeFields;
+      $fields[$subType] = array_merge($fields[$subType], $subTypeFields);
 
       if (!empty($subTypeFields) || !empty($csRelationships)) {
         $contactSubTypes[$subType] = $val['label'];
@@ -598,7 +608,8 @@ class CRM_Core_BAO_Mapping extends CRM_Core_DAO_Mapping {
         // sort everything BUT the contactType which is sorted separately by
         // an initial commit of CRM-13278 (check ksort above)
         if (!in_array($key, $contactType)) {
-          asort($mapperFields[$key]);
+          // its already sorted, no need to repeat it
+          //asort($mapperFields[$key]);
         }
         $sel2[$key] = array('' => ts('- select field -')) + $mapperFields[$key];
       }

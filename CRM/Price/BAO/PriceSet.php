@@ -1770,7 +1770,7 @@ WHERE     ct.id = cp.financial_type_id AND
             $field['id'],
             FALSE,
             CRM_Utils_Array::value('is_required', $field, FALSE),
-            NULL,
+            $field['label'],
             $options
           );
         }

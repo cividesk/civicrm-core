@@ -1067,7 +1067,7 @@ WHERE  id = %1";
             $field['id'],
             FALSE,
             CRM_Utils_Array::value('is_required', $field, FALSE),
-            NULL,
+            $field['label'],
             $options
           );
         }

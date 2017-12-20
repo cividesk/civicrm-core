@@ -158,7 +158,8 @@ class CRM_Utils_Geocode_Google {
       }
       else {
         CRM_Core_Error::debug_var("Geocoding failed. Message from Google: ({$xml->status})", (string ) $xml->error_message);
-        $values['geo_code_1'] = $values['geo_code_2'] = 'null';
+        // do not reset geo code for OVER_QUERY_LIMIT
+        //$values['geo_code_1'] = $values['geo_code_2'] = 'null';
         $values['geo_code_error'] = $xml->status;
         return FALSE;
       }

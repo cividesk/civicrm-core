@@ -81,9 +81,10 @@ class CRM_Mailing_BAO_MailingJob extends CRM_Mailing_DAO_MailingJob {
 
     if (!empty($testParams)) {
       $query = "
-      SELECT *
-        FROM $jobTable
-       WHERE id = {$testParams['job_id']}";
+      SELECT j.*, m.template_type
+        FROM $jobTable j,
+        $mailingTable m
+       WHERE m.id = j.mailing_id AND j.id = {$testParams['job_id']}";
       $job->query($query);
     }
     else {
@@ -99,7 +100,7 @@ class CRM_Mailing_BAO_MailingJob extends CRM_Mailing_DAO_MailingJob {
       // Select the first child job that is scheduled
       // CRM-6835
       $query = "
-      SELECT   j.*
+      SELECT   j.*, m.template_type
         FROM   $jobTable     j,
            $mailingTable m
        WHERE   m.id = j.mailing_id AND m.domain_id = {$domainID}
@@ -176,8 +177,8 @@ class CRM_Mailing_BAO_MailingJob extends CRM_Mailing_DAO_MailingJob {
         $mailer = CRM_SMS_Provider::singleton(['mailing_id' => $job->mailing_id]);
       }
 
-      // Compose and deliver each child job
-      if (\CRM_Utils_Constant::value('CIVICRM_FLEXMAILER_HACK_DELIVER')) {
+      // send email through right channel, CIVICRM_FLEXMAILER_HACK_DELIVER always present when flexmailer extension is enabled.
+      if ($job->template_type !== 'traditional' && \CRM_Utils_Constant::value('CIVICRM_FLEXMAILER_HACK_DELIVER')) {
         $isComplete = Civi\Core\Resolver::singleton()->call(CIVICRM_FLEXMAILER_HACK_DELIVER, [$job, $mailer, $testParams]);
       }
       else {

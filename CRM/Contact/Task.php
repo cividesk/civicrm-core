@@ -18,6 +18,7 @@
 /**
  * Class to represent the actions that can be performed on a group of contacts used by the search forms.
  */
+
 class CRM_Contact_Task extends CRM_Core_Task {
 
   /**
@@ -34,7 +35,8 @@ class CRM_Contact_Task extends CRM_Core_Task {
     RESTORE = 108,
     COMMUNICATION_PREFS = 109,
     INDIVIDUAL_CONTACTS = 110,
-    ADD_TO_CASE = 111;
+    ADD_TO_CASE = 111,
+    CREATE_MAILING_TRADITIONAL = 112;
 
   /**
    * @var string
@@ -246,6 +248,14 @@ class CRM_Contact_Task extends CRM_Core_Task {
           'class' => 'CRM_Mailing_Form_Task_AdhocMailing',
           'result' => FALSE,
         );
+        $templateTypes = CRM_Mailing_BAO_Mailing::getTemplateTypes();
+        if (count($templateTypes) > 1) {
+          self::$_tasks[self::CREATE_MAILING_TRADITIONAL] = array(
+            'title' => ts('Email - schedule/send via traditional CiviMail'),
+            'class' => 'CRM_Mailing_Form_Task_AdhocMailing',
+            'result' => FALSE,
+          );
+        }
       }
 
       if (CRM_Core_Permission::access('CiviCase')) {

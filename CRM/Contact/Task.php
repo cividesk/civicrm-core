@@ -277,6 +277,7 @@ class CRM_Contact_Task {
         );
         $templateTypes = CRM_Mailing_BAO_Mailing::getTemplateTypes();
         if (count($templateTypes) > 1) {
+          self::$_tasks[self::CREATE_MAILING]['title'] = ts('Email - schedule/send via Mosaico CiviMail');
           self::$_tasks[self::CREATE_MAILING_TRADITIONAL] = array(
             'title' => ts('Email - schedule/send via traditional CiviMail'),
             'class' => 'CRM_Mailing_Form_Task_AdhocMailing',

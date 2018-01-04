@@ -882,6 +882,13 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
 
     $softErrors = CRM_Contribute_Form_SoftCredit::formRule($fields, $errors, $self);
 
+    if (!empty($fields['total_amount']) && (!empty($fields['net_amount']) || !empty($fields['fee_amount']))) {
+      $sum = CRM_Utils_Rule::cleanMoney($fields['net_amount']) + CRM_Utils_Rule::cleanMoney($fields['fee_amount']);
+      if (round(CRM_Utils_Rule::cleanMoney($fields['total_amount'])) != round($sum)) {
+        $errors['total_amount'] = ts('The sum of fee amount and net amount must be equal to total amount');
+      }
+    }
+
     //CRM-16285 - Function to handle validation errors on form, for recurring contribution field.
     CRM_Contribute_BAO_ContributionRecur::validateRecurContribution($fields, $files, $self, $errors);
 

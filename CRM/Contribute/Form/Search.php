@@ -304,8 +304,11 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
         'payment_instrument_id',
         'contribution_batch_id',
       ];
-      // @todo - stop changing formValues - respect submitted form values, change a working array.
-      CRM_Contact_BAO_Query::processSpecialFormValue($this->_formValues, $specialParams);
+
+      $changeNames = array(
+        'payment_instrument_id' => 'payment_instrument',
+      );
+      CRM_Contact_BAO_Query::processSpecialFormValue($this->_formValues, $specialParams, $changeNames);
 
       $tags = CRM_Utils_Array::value('contact_tags', $this->_formValues);
       if ($tags && !is_array($tags)) {

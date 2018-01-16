@@ -340,7 +340,9 @@ class CRM_Contact_Form_Search_Advanced extends CRM_Contact_Form_Search {
     ];
     $changeNames = [
       'priority_id' => 'activity_priority_id',
+      'payment_instrument_id' => 'payment_instrument',
     ];
+
     CRM_Contact_BAO_Query::processSpecialFormValue($this->_formValues, $specialParams, $changeNames);
 
     $taglist = $this->_formValues['contact_taglist'] ?? NULL;

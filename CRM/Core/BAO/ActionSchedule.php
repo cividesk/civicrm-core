@@ -281,8 +281,8 @@ FROM civicrm_action_schedule cas
     $actionSchedule->mapping_id = $mappingID;
     $actionSchedule->is_active = 1;
     $actionSchedule->find(FALSE);
-
     while ($actionSchedule->fetch()) {
+      $uniqueEmails = array();
       $query = CRM_Core_BAO_ActionSchedule::prepareMailingQuery($mapping, $actionSchedule);
       $dao = CRM_Core_DAO::executeQuery($query,
         array(1 => array($actionSchedule->id, 'Integer'))
@@ -290,6 +290,14 @@ FROM civicrm_action_schedule cas
 
       $multilingual = CRM_Core_I18n::isMultilingual();
       while ($dao->fetch()) {
+        // if same email used by multiple contact then send one email per scheduled job to avoid duplicate email
+        // e.g Employer and employee have same email then send email to either employer or employee
+        $email = CRM_Contact_BAO_Contact::getPrimaryEmail($dao->contactID);
+        if (in_array($email, $uniqueEmails)) {
+          continue;
+        }
+        $uniqueEmails[] = $email;
+
         // switch language if necessary
         if ($multilingual) {
           $preferred_language = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $dao->contactID, 'preferred_language');

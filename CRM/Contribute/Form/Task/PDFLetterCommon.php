@@ -265,7 +265,7 @@ class CRM_Contribute_Form_Task_PDFLetterCommon extends CRM_Contact_Form_Task_PDF
       ));
 
       foreach ($contribution as $token => &$value) {
-	if ($cfID = CRM_Core_BAO_CustomField::getKeyID($token)) {
+        if ($cfID = CRM_Core_BAO_CustomField::getKeyID($token)) {
           $value = CRM_Core_BAO_CustomField::displayValue($value, $token);
         }
       }

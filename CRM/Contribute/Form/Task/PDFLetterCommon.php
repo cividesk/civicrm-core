@@ -258,7 +258,6 @@ class CRM_Contribute_Form_Task_PDFLetterCommon extends CRM_Contact_Form_Task_PDF
     $contributions = $contacts = [];
     foreach ($contributionIDs as $item => $contributionId) {
       $contribution = CRM_Contribute_BAO_Contribution::getContributionTokenValues($contributionId, $messageToken)['values'][$contributionId];
-
       $contribution['campaign'] = CRM_Utils_Array::value('contribution_campaign_title', $contribution);
       $contributions[$contributionId] = $contribution;
 

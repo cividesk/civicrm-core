@@ -99,12 +99,14 @@ class CRM_Contact_BAO_Contact_Permission {
 
     // RUN the query
     $contact_id_list = implode(',', $contact_ids);
+    $domain_id = CRM_Core_Config::domainID();
     $query = "
 SELECT contact_id
  FROM civicrm_acl_contact_cache
  {$LEFT_JOIN_DELETED}
 WHERE contact_id IN ({$contact_id_list})
   AND user_id = {$contactID}
+  AND domain_id = {$domain_id}
   AND operation = '{$operation}'
   {$AND_CAN_ACCESS_DELETED}";
     $result = CRM_Core_DAO::executeQuery($query);
@@ -199,6 +201,7 @@ WHERE contact_a.id = %1 AND $permission
     //   that somebody might flush the cache away from under our feet,
     //   but the alternative would be a SQL call every time this is called,
     //   and a complete rebuild if the result was an empty set...
+    $domain_id = CRM_Core_Config::domainID();
     static $_processed = array(
       CRM_Core_Permission::VIEW => array(),
       CRM_Core_Permission::EDIT => array());
@@ -215,7 +218,7 @@ WHERE contact_a.id = %1 AND $permission
 
     if (!$force) {
       // skip if already calculated
-      if (!empty($_processed[$type][$userID])) {
+      if (!empty($_processed[$type][$domain_id][$userID])) {
         return;
       }
 
@@ -223,12 +226,12 @@ WHERE contact_a.id = %1 AND $permission
       $sql = "
 SELECT count(*)
 FROM   civicrm_acl_contact_cache
-WHERE  user_id = %1
+WHERE  user_id = %1 AND domain_id = $domain_id
 AND    $operationClause
 ";
       $count = CRM_Core_DAO::singleValueQuery($sql, $queryParams);
       if ($count > 0) {
-        $_processed[$type][$userID] = 1;
+        $_processed[$type][$domain_id][$userID] = 1;
         return;
       }
     }
@@ -240,10 +243,10 @@ AND    $operationClause
 
     $from = CRM_Contact_BAO_Query::fromClause($whereTables);
     CRM_Core_DAO::executeQuery("
-INSERT INTO civicrm_acl_contact_cache ( user_id, contact_id, operation )
-SELECT DISTINCT $userID as user_id, contact_a.id as contact_id, '{$operation}' as operation
+INSERT INTO civicrm_acl_contact_cache ( user_id, domain_id, contact_id, operation )
+SELECT DISTINCT $userID as user_id, $domain_id as domain_id, contact_a.id as contact_id, '{$operation}' as operation
          $from
-         LEFT JOIN civicrm_acl_contact_cache ac ON ac.user_id = $userID AND ac.contact_id = contact_a.id AND ac.operation = '{$operation}'
+         LEFT JOIN civicrm_acl_contact_cache ac ON ac.domain_id = $domain_id AND ac.user_id = $userID AND ac.contact_id = contact_a.id AND ac.operation = '{$operation}'
 WHERE    $permission
 AND ac.user_id IS NULL
 ");
@@ -253,8 +256,8 @@ AND ac.user_id IS NULL
     if (CRM_Core_Permission::check('edit my contact') ||
       ($type == CRM_Core_Permission::VIEW && CRM_Core_Permission::check('view my contact'))) {
       if (!CRM_Core_DAO::singleValueQuery("
-        SELECT count(*) FROM civicrm_acl_contact_cache WHERE user_id = %1 AND contact_id = %1 AND operation = '{$operation}' LIMIT 1", $queryParams)) {
-        CRM_Core_DAO::executeQuery("INSERT INTO civicrm_acl_contact_cache ( user_id, contact_id, operation ) VALUES(%1, %1, '{$operation}')", $queryParams);
+        SELECT count(*) FROM civicrm_acl_contact_cache WHERE user_id = %1 AND contact_id = %1 AND domain_id = $domain_id AND operation = '{$operation}' LIMIT 1", $queryParams)) {
+        CRM_Core_DAO::executeQuery("INSERT INTO civicrm_acl_contact_cache ( user_id, contact_id, domain_id, operation ) VALUES(%1, %1, $domain_id, '{$operation}')", $queryParams);
       }
     }
     $_processed[$type][$userID] = 1;
@@ -285,19 +288,19 @@ AND ac.user_id IS NULL
 
     $contactID = (int) CRM_Core_Session::getLoggedInContactID();
     self::cache($contactID);
-
+    $domain_id = CRM_Core_Config::domainID();
     if (is_array($contactAlias) && !empty($contactAlias)) {
       //More than one contact alias
       $clauses = array();
       foreach ($contactAlias as $k => $alias) {
-        $clauses[] = " INNER JOIN civicrm_acl_contact_cache aclContactCache_{$k} ON {$alias}.id = aclContactCache_{$k}.contact_id AND aclContactCache_{$k}.user_id = $contactID ";
+        $clauses[] = " INNER JOIN civicrm_acl_contact_cache aclContactCache_{$k} ON {$alias}.id = aclContactCache_{$k}.contact_id AND aclContactCache_{$k}.user_id = $contactID AND aclContactCache_{$k}.domain_id = {$domain_id}";
       }
 
       $fromClause = implode(" ", $clauses);
       $whereClase = NULL;
     }
     else {
-      $fromClause = " INNER JOIN civicrm_acl_contact_cache aclContactCache ON {$contactAlias}.id = aclContactCache.contact_id ";
+      $fromClause = " INNER JOIN civicrm_acl_contact_cache aclContactCache ON {$contactAlias}.id = aclContactCache.contact_id AND aclContactCache.domain_id = {$domain_id}";
       $whereClase = " aclContactCache.user_id = $contactID AND $contactAlias.is_deleted = 0";
     }
 
@@ -315,7 +318,8 @@ AND ac.user_id IS NULL
     if (!CRM_Core_Permission::check(array(array('view all contacts', 'edit all contacts')))) {
       $contactID = (int) CRM_Core_Session::getLoggedInContactID();
       self::cache($contactID);
-      return "IN (SELECT contact_id FROM civicrm_acl_contact_cache WHERE user_id = $contactID)";
+      $domain_id = CRM_Core_Config::domainID();
+      return "IN (SELECT contact_id FROM civicrm_acl_contact_cache WHERE user_id = $contactID AND domain_id = $domain_id)";
     }
     return NULL;
   }

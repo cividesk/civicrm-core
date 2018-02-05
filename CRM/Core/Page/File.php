@@ -69,6 +69,8 @@ class CRM_Core_Page_File extends CRM_Core_Page {
       $path = CRM_Core_Config::singleton()->customFileUploadDir . $fileName;
     }
 
+    $disposition = strpos($mimeType, 'image') === FALSE ? 'download' : 'inline';
+
     if (!$path) {
       CRM_Core_Error::statusBounce('Could not retrieve the file');
     }

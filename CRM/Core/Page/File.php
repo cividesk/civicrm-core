@@ -53,6 +53,8 @@ class CRM_Core_Page_File extends CRM_Core_Page {
       list($path, $mimeType) = CRM_Core_BAO_File::path($id, $eid, NULL, $quest);
     }
 
+    $disposition = strpos($mimeType, 'image') === FALSE ? 'download' : 'inline';
+
     if (!$path) {
       CRM_Core_Error::statusBounce('Could not retrieve the file');
     }
@@ -76,7 +78,10 @@ class CRM_Core_Page_File extends CRM_Core_Page {
       CRM_Utils_System::download(
         CRM_Utils_File::cleanFileName(basename($path)),
         $mimeType,
-        $buffer
+        $buffer,
+        NULL,
+        TRUE,
+        $disposition
       );
     }
   }

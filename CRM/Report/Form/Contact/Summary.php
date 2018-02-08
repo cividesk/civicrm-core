@@ -215,6 +215,11 @@ class CRM_Report_Form_Contact_Summary extends CRM_Report_Form {
     }
   }
 
+  public function where() {
+    parent::where();
+    $this->_where .= " AND {$this->_aliases['civicrm_contact']}.is_deleted = 0 ";
+  }
+
   public function postProcess() {
 
     $this->beginPostProcess();

@@ -295,7 +295,11 @@ class CRM_Report_Form_Mailing_Opened extends CRM_Report_Form {
     else {
       $groupBy = "civicrm_mailing_event_queue.email_id";
     }
-    $this->_groupBy = CRM_Contact_BAO_Query::getGroupByFromSelectColumns($this->_selectClauses, $groupBy);
+    // Do not use group by clause if distinct = 0 mentioned in url params. flag is used in mailing report screen, default value is TRUE
+    // this report is used to show total opened and unique opened
+    if (CRM_Utils_Request::retrieve('distinct', 'Boolean', CRM_Core_DAO::$_nullObject, FALSE, TRUE)) {
+      $this->_groupBy = CRM_Contact_BAO_Query::getGroupByFromSelectColumns($this->_selectClauses, $groupBy);
+    }
   }
 
   public function postProcess() {

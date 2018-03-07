@@ -1000,6 +1000,8 @@ WHERE civicrm_event.is_active = 1
       ['entity_value' => $copyEvent->id, 'mapping_id' => $copyMapping->getId()]
     );
 
+    self::copyCustomFields($id, $copyEvent->id);
+
     $copyEvent->save();
 
     if ($blockCopyOfCustomValue) {

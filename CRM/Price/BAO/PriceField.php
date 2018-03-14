@@ -161,7 +161,6 @@ class CRM_Price_BAO_PriceField extends CRM_Price_DAO_PriceField {
           throw new CRM_Core_Exception($e->getMessage());
         }
       }
-      */
     }
 
     $transaction->commit();

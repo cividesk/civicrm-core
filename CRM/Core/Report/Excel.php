@@ -67,7 +67,7 @@ class CRM_Core_Report_Excel {
     // Add BOM for additional compatibility with Excel 2007 SP3 or more
     // cf. http://stackoverflow.com/questions/155097/microsoft-excel-mangles-diacritics-in-csv-files
     // and http://www.unicode.org/faq/utf_bom.html#bom1
-    $BOM = "\xEF\xBB\xBF";
+    $BOM['UTF-8'] = "\xEF\xBB\xBF";
     $out = $BOM['UTF-8'];
     if ($print) {
       echo $out;

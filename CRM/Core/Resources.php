@@ -911,6 +911,49 @@ class CRM_Core_Resources {
       }
     }
 
+    if (in_array('CiviEvent', $config->enableComponents)) {
+      $filters['event'] = array(
+        array('key' => 'event_type_id', 'value' => ts('Event Type')),
+        array(
+          'key' => 'start_date',
+          'value' => ts('Start Date'),
+          'options' => array(
+            array('key' => '{">":"now"}', 'value' => ts('Upcoming')),
+            array(
+              'key' => '{"BETWEEN":["now - 3 month","now"]}',
+              'value' => ts('Past 3 Months'),
+            ),
+            array(
+              'key' => '{"BETWEEN":["now - 6 month","now"]}',
+              'value' => ts('Past 6 Months'),
+            ),
+            array(
+              'key' => '{"BETWEEN":["now - 1 year","now"]}',
+              'value' => ts('Past Year'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    $filters['activity'] = array(
+      array('key' => 'activity_type_id', 'value' => ts('Activity Type')),
+      array('key' => 'status_id', 'value' => ts('Activity Status')),
+    );
+
+    $filters['contact'] = array(
+      array('key' => 'contact_type', 'value' => ts('Contact Type')),
+      array('key' => 'group', 'value' => ts('Group'), 'entity' => 'group_contact'),
+      array('key' => 'tag', 'value' => ts('Tag'), 'entity' => 'entity_tag'),
+      array('key' => 'state_province', 'value' => ts('State/Province'), 'entity' => 'address'),
+      array('key' => 'country', 'value' => ts('Country'), 'entity' => 'address'),
+      array('key' => 'gender_id', 'value' => ts('Gender')),
+      array('key' => 'is_deceased', 'value' => ts('Deceased')),
+      array('key' => 'contact_id', 'value' => ts('Contact ID'), 'type' => 'text'),
+      array('key' => 'external_identifier', 'value' => ts('External ID'), 'type' => 'text'),
+      array('key' => 'source', 'value' => ts('Contact Source'), 'type' => 'text'),
+    );
+
     foreach (CRM_Core_DAO_AllCoreTables::daoToClass() as $entity => $daoName) {
       // Skip DAOs of disabled components
       foreach ($disabledComponents as $nameSpace) {

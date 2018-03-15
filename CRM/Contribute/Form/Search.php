@@ -296,7 +296,7 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
       );
 
       $changeNames = array(
-        'payment_instrument_id' => 'payment_instrument',
+        'payment_instrument_id' => 'contribution_payment_instrument_id',
       );
       CRM_Contact_BAO_Query::processSpecialFormValue($this->_formValues, $specialParams, $changeNames);
 

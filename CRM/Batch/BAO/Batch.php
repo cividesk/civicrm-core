@@ -761,7 +761,7 @@ LEFT JOIN civicrm_contribution_soft ON civicrm_contribution_soft.contribution_id
           'contribution_page_id',
           'contribution_product_id',
           'invoice_id',
-          'payment_instrument',
+          'contribution_payment_instrument_id',
           'contribution_batch_id',
         );
 
@@ -771,7 +771,7 @@ LEFT JOIN civicrm_contribution_soft ON civicrm_contribution_soft.contribution_id
           }
         }
 
-        $changeNames = array('payment_instrument_id' => 'payment_instrument');
+        $changeNames = array('payment_instrument_id' => 'contribution_payment_instrument_id');
         CRM_Contact_BAO_Query::processSpecialFormValue($values, $specialParams, $changeNames);
 
         $searchParams = CRM_Contact_BAO_Query::convertFormValues($values);

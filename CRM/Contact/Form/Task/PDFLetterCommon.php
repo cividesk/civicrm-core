@@ -105,9 +105,6 @@ class CRM_Contact_Form_Task_PDFLetterCommon {
       FALSE
     );
 
-    if (get_class($form) == 'CRM_Contribute_Form_Task_PDFLetter') {
-      $form->add('select', 'from_email_address', ts('From Email Address'), $form->_fromEmails, TRUE);
-    }
     $form->add('static', 'pdf_format_header', NULL, ts('Page Format: %1', array(1 => '<span class="pdf-format-header-label"></span>')));
     $form->addSelect('format_id', array(
       'label' => ts('Select Format'),
@@ -228,7 +225,6 @@ class CRM_Contact_Form_Task_PDFLetterCommon {
   public static function setDefaultValues() {
     $defaultFormat = CRM_Core_BAO_PdfFormat::getDefaultValues();
     $defaultFormat['format_id'] = $defaultFormat['id'];
-    $defaultFormat['from_email_address'] = key(CRM_Core_OptionGroup::values('from_email_address', TRUE, FALSE, FALSE, ' AND is_default = 1'));
     return $defaultFormat;
   }
 

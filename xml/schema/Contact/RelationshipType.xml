@@ -140,6 +140,15 @@
     <add>1.1</add>
   </field>
   <field>
+    <name>weight</name>
+    <type>int</type>
+    <title>Order</title>
+    <required>true</required>
+    <default>1</default>
+    <comment>Controls display order when multiple extended property groups are setup for the same class.</comment>
+    <add>4.7</add>
+  </field>
+  <field>
     <name>is_active</name>
     <title>Relationship Type is Active</title>
     <type>boolean</type>

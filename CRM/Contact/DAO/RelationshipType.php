@@ -108,6 +108,13 @@ class CRM_Contact_DAO_RelationshipType extends CRM_Core_DAO {
   public $is_reserved;
 
   /**
+   * Controls display order when multiple extended property groups are setup for the same class.
+   *
+   * @var int
+   */
+  public $weight;
+
+  /**
    * Is this relationship type currently active (i.e. can be used when creating or editing relationships)?
    *
    * @var bool
@@ -338,6 +345,18 @@ class CRM_Contact_DAO_RelationshipType extends CRM_Core_DAO {
             'type' => 'CheckBox',
           ],
           'add' => '1.1',
+        ],
+        'weight' => [
+          'name' => 'weight',
+          'type' => CRM_Utils_Type::T_INT,
+          'title' => ts('Order'),
+          'description' => 'Controls display order when multiple extended property groups are setup for the same class.',
+          'required' => TRUE,
+          'default' => '1',
+          'table_name' => 'civicrm_relationship_type',
+          'entity' => 'RelationshipType',
+          'bao' => 'CRM_Contact_BAO_RelationshipType',
+          'localizable' => 0,
         ],
         'is_active' => [
           'name' => 'is_active',

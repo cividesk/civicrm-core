@@ -31,7 +31,6 @@
     {strip}
   {* handle enable/disable actions*}
   {include file="CRM/common/enableDisableApi.tpl"}
-    {include file="CRM/common/jsortable.tpl"}
         <table id="options" class="display">
         <thead>
         <tr>
@@ -39,6 +38,7 @@
           <th>{ts}Relationship B to A{/ts}</th>
           <th>{ts}Contact Type A{/ts}</th>
           <th>{ts}Contact Type B{/ts}</th>
+          <th>{ts}Order{/ts}</th>
           <th>{ts}Enabled?{/ts}</th>
           <th></th>
         </tr>
@@ -53,6 +53,7 @@
             <td class="crm-relationship-contact_type_b_display">
                 {if $row.contact_type_b_display} {$row.contact_type_b_display}
                 {if $row.contact_sub_type_b} - {$row.contact_sub_type_b}{/if} {else} {ts}All Contacts{/ts} {/if} </td>
+            <td class="nowrap crmf-weight">{$row.weight}</td>
             <td class="crm-relationship-is_active" id="row_{$row.id}_status">{if $row.is_active eq 1} {ts}Yes{/ts} {else} {ts}No{/ts} {/if}</td>
             <td>{$row.action|replace:'xx':$row.id}</td>
         </tr>

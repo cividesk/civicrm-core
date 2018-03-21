@@ -10,3 +10,7 @@ UPDATE IGNORE civicrm_uf_group SET name = 'contribution_batch_entry' WHERE name 
 UPDATE IGNORE civicrm_uf_group SET name = 'membership_batch_entry' WHERE name = concat('membership_batch_entry_', id);
 UPDATE IGNORE civicrm_uf_group SET name = 'shared_address' WHERE name = concat('shared_address_', id);
 UPDATE IGNORE civicrm_uf_group SET name = 'event_registration' WHERE name = concat('event_registration_', id);
+
+-- CRM-21740
+ALTER TABLE  civicrm_relationship_type ADD weight INT NOT NULL;
+UPDATE civicrm_relationship_type SET weight = id;

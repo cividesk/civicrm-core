@@ -458,7 +458,7 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
 
       // from email address
       if (isset($params['from_email_address'])) {
-        $fromEmailAddress = CRM_Utils_Array::value($params['from_email_address'], $fromEmail);
+        $fromEmailAddress = $params['from_email_address'];
       }
       // condition to check for download PDF Invoice or email Invoice
       if ($invoiceElements['createPdf']) {

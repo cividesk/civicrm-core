@@ -161,6 +161,11 @@ class CRM_Core_BAO_UFJoin extends CRM_Core_DAO_UFJoin {
     if (isset($params['module'])) {
       $dao->module = CRM_Utils_Array::value('module', $params);
     }
+
+    if (isset($params['is_active'])) {
+      $dao->is_active = CRM_Utils_Array::value('is_active', $params);
+    }
+
     $dao->entity_table = CRM_Utils_Array::value('entity_table', $params);
     $dao->entity_id = CRM_Utils_Array::value('entity_id', $params);
     $dao->orderBy('weight asc');

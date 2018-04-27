@@ -240,7 +240,7 @@ abstract class CRM_Core_Page_Basic extends CRM_Core_Page {
     elseif ($key) {
       $object->orderBy($key . ' asc');
     }
-    else {
+    elseif (property_exists($object, 'weight')) {
       $object->orderBy('weight');
     }
 

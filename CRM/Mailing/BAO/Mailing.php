@@ -142,6 +142,7 @@ class CRM_Mailing_BAO_Mailing extends CRM_Mailing_DAO_Mailing {
       ->param('!groupTableName', CRM_Contact_BAO_Group::getTableName())
       ->param('#mailing_id', $mailingID)
       ->execute();
+
     while ($dao->fetch()) {
       if ($dao->entity_table == 'civicrm_mailing') {
         $priorMailingIDs[$dao->group_type] = explode(',', $dao->group_ids);

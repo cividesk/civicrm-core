@@ -334,7 +334,7 @@ class CRM_Report_Form_Contribute_TopDonor extends CRM_Report_Form {
     CRM_Core_DAO::singleValueQuery($setVariable);
     $sql = "
       SELECT * FROM ( {$this->_select} {$this->_from}  {$this->_where} {$this->_groupBy}
-        ORDER BY civicrm_contribution_total_amount_sum DESC
+        ORDER BY civicrm_contribution_total_amount DESC
       ) as abc {$this->_outerCluase} $this->_limit
     ";
     parent::buildRows($sql, $rows);

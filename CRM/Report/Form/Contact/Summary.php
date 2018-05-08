@@ -273,6 +273,13 @@ class CRM_Report_Form_Contact_Summary extends CRM_Report_Form {
         $entryFound = TRUE;
       }
 
+      if (array_key_exists('civicrm_address_county_id', $row)) {
+        if ($value = $row['civicrm_address_county_id']) {
+          $rows[$rowNum]['civicrm_address_county_id'] = CRM_Core_PseudoConstant::county($value, FALSE);
+        }
+        $entryFound = TRUE;
+      }
+
       // Handle ID to label conversion for contact fields
       $entryFound = $this->alterDisplayContactFields($row, $rows, $rowNum, 'contact/summary', 'View Contact Summary') ? TRUE : $entryFound;
 

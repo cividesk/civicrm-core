@@ -1532,9 +1532,11 @@ INNER JOIN  civicrm_membership membership2 ON membership1.membership_type_id = m
 
     $contactType = $migrationInfo['main_details']['contact_type'];
     $relTables = CRM_Dedupe_Merger::relTables();
+
     $submittedCustomFields = $moveTables = $tableOperations = $removeTables = [];
 
     self::swapOutFieldsAffectedByQFZeroBug($migrationInfo);
+
     foreach ($migrationInfo as $key => $value) {
 
       if (substr($key, 0, 12) == 'move_custom_' && $value != NULL) {
@@ -1573,6 +1575,7 @@ INNER JOIN  civicrm_membership membership2 ON membership1.membership_type_id = m
     if (!empty($removeTables)) {
       // **** CRM-20421
       CRM_Dedupe_Merger::removeContactBelongings($otherId, $removeTables);
+
       $removeTables = [];
     }
 

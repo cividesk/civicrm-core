@@ -1719,7 +1719,8 @@ INNER JOIN  civicrm_membership membership2 ON membership1.membership_type_id = m
       $dao = CRM_Core_DAO::executeQuery($sql);
       while ($dao->fetch()) {
         $fileIds[$dao->entity_id] = $dao->file_id;
-        if ($dao->entity_id == $mainId) {
+        // check file id present for main id before calling delete function
+        if ($dao->entity_id == $mainId && !empty($fileIds[$mainId])) {
           CRM_Core_BAO_File::deleteFileReferences($fileIds[$mainId], $mainId, $customId);
         }
       }

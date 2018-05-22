@@ -1368,8 +1368,8 @@ class CRM_Utils_Token {
       if (!empty($contactDetails)) {
         $tokenString = CRM_Utils_Token::replaceContactTokens($tokenString, $contactDetails, TRUE, $greetingTokens, TRUE, $escapeSmarty);
       }
-
-      self::removeNullContactTokens($tokenString, $contactDetails, $greetingTokens);
+      // TODO : Contact details are absent;
+      //self::removeNullContactTokens($tokenString, $contactDetails, $greetingTokens);
       // check if there are any unevaluated tokens
       $greetingTokens = self::getTokens($tokenString);
 

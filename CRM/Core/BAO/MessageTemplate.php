@@ -599,7 +599,7 @@ class CRM_Core_BAO_MessageTemplate extends CRM_Core_DAO_MessageTemplate {
       }
     }
 
-    return [$sent, $mailContent['subject'], $mailContent['text'], $mailContent['html']];
+    return [$sent, $mailContent['subject'], $mailContent['text'], $mailContent['html'], $params['PDFFilename']];
   }
 
 }

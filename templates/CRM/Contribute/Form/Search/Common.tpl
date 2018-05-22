@@ -81,7 +81,7 @@
       {$form.contribution_soft_credit_type_id.html|crmAddClass:twenty}
     </div>
   </td>
-  <td>
+  <td class="crm-contribution-invoice_number">
     {$form.invoice_number.label} <br />
     {$form.invoice_number.html}
   </td>

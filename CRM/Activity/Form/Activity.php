@@ -628,6 +628,8 @@ class CRM_Activity_Form_Activity extends CRM_Contact_Form_Task {
     if (empty($defaults['status_id'])) {
       $defaults['status_id'] = CRM_Core_OptionGroup::getDefaultValue('activity_status');
     }
+
+    $defaults['separation'] = 'combined';
     return $defaults;
   }
 

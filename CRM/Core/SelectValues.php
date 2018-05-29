@@ -221,6 +221,7 @@ class CRM_Core_SelectValues {
       'Relationship' => ts('Relationships'),
       'Contribution' => ts('Contributions'),
       'ContributionRecur' => ts('Recurring Contributions'),
+      'ContributionPage' => ts('Contribution Page'),
       'Group' => ts('Groups'),
       'Membership' => ts('Memberships'),
       'Event' => ts('Events'),

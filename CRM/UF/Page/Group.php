@@ -447,6 +447,11 @@ class CRM_UF_Page_Group extends CRM_Core_Page {
             $valueLabels = CRM_Contribute_PseudoConstant::financialType();
             break;
 
+          case 'ContributionPage':
+            $typeName = 'ContributionPage';
+            $valueLabels = CRM_Contribute_PseudoConstant::contributionPage();
+            break;
+
           case 'ParticipantRole':
             $typeName = 'Participant';
             $valueLabels = CRM_Event_PseudoConstant::participantRole();

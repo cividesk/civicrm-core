@@ -37,6 +37,18 @@ class CRM_Contribute_Form_ContributionPage_Settings extends CRM_Contribute_Form_
    */
   public function preProcess() {
     parent::preProcess();
+    // when custom data is included in this page
+    if (!empty($_POST['hidden_custom'])) {
+      $this->set('type', 'ContributionPage');
+      $this->set('subType', $this->_id);
+      $this->assign('customDataSubType', $this->_id);
+      $this->assign('customDataType', 'ContributionPage');
+      $this->set('entityId', $this->_id);
+
+      CRM_Custom_Form_CustomData::preProcess($this, NULL, $this->_id, 1, 'ContributionPage', $this->_id);
+      CRM_Custom_Form_CustomData::buildQuickForm($this);
+      CRM_Custom_Form_CustomData::setDefaultValues($this);
+    }
   }
 
   /**
@@ -119,7 +131,12 @@ class CRM_Contribute_Form_ContributionPage_Settings extends CRM_Contribute_Form_
    * Build the form object.
    */
   public function buildQuickForm() {
-
+    //need to assign custom data type and subtype to the template
+    $this->assign('customDataType', 'ContributionPage');
+    $this->assign('entityID', $this->_id);
+    if ($this->_id) {
+      $this->assign('customDataSubType', $this->_id);
+    }
     $this->_first = TRUE;
     $attributes = CRM_Core_DAO::getAttribute('CRM_Contribute_DAO_ContributionPage');
 
@@ -345,6 +362,11 @@ class CRM_Contribute_Form_ContributionPage_Settings extends CRM_Contribute_Form_
       $params['honor_block_title'] = NULL;
       $params['honor_block_text'] = NULL;
     }
+
+    $params['custom'] = CRM_Core_BAO_CustomField::postProcess($params,
+      $this->_id,
+    'ContributionPage'
+    );
 
     $dao = CRM_Contribute_BAO_ContributionPage::create($params);
 

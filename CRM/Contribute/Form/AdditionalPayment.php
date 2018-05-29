@@ -173,7 +173,7 @@ class CRM_Contribute_Form_AdditionalPayment extends CRM_Contribute_Form_Abstract
     }
 
     if ($this->_refund) {
-      $defaults['total_amount'] = CRM_Utils_Money::format(abs($this->_refund), NULL, NULL, TRUE);
+      $defaults['total_amount'] = CRM_Contribute_BAO_Contribution_Utils::formatAmount(CRM_Utils_Money::format(abs($this->_refund), NULL, NULL, TRUE));
     }
     elseif ($this->_owed) {
       $defaults['total_amount'] = CRM_Utils_Money::formatLocaleNumericRoundedForDefaultCurrency($this->_owed);

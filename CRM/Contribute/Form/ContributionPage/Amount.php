@@ -374,7 +374,7 @@ class CRM_Contribute_Form_ContributionPage_Amount extends CRM_Contribute_Form_Co
     }
     else {
        if (empty($fields['payment_processor'])) {
-         $errors['payment_processor'] = ts('You have listed amount or selected a price set, but no payment option has been selected. Please select at least one payment option or choose pay later option.');
+         $errors['payment_processor'] = ts('You have listed fixed contribution options or selected a price set, but no payment option has been selected. Please select at least one payment processor and/or enable the pay later option.');
         }
       }
 

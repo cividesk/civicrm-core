@@ -523,7 +523,7 @@ class CRM_Event_Form_ManageEvent_Fee extends CRM_Event_Form_ManageEvent {
         }
       } else {
        if (empty($values['payment_processor'])) {
-         $errors['payment_processor'] = ts('You have listed fees or selected a price set, but no payment option has been selected. Please select at least one payment option or remove fees from the event configuration for an unpaid event.');
+         $errors['payment_processor'] = ts('You have indicated that this is a paid event, but no payment option has been selected. If this is not a paid event, please select the "No" option at the top of the page. If this is a paid event, please select at least one payment processor and/or enable the pay later option.');
         }
       }
       else {

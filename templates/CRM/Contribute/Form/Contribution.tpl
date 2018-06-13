@@ -289,7 +289,7 @@
 
     <!-- start of PCP -->
     {if $siteHasPCPs && !$payNow}
-      <div class="crm-accordion-wrapper crm-accordion_title-accordion crm-accordion-processed {if $noPCP}collapsed{/if}" id="softCredit">
+      <div class="crm-accordion-wrapper crm-accordion_title-accordion crm-accordion-processed {if $noPCP}collapsed{/if}" id="pcp">
         <div class="crm-accordion-header">
           {ts}Personal Campaign Page{/ts}&nbsp;{help id="id-pcp"}
         </div>

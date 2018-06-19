@@ -180,7 +180,9 @@ class CRM_Admin_Form_RelationshipType extends CRM_Admin_Form {
       if ($this->_action & CRM_Core_Action::UPDATE) {
         $params['id'] = $this->_id;
       }
-
+      elseif ($this->_action & CRM_Core_Action::ADD) {
+        $params['weight'] = CRM_Utils_Weight::getDefaultWeight('CRM_Contact_DAO_RelationshipType');
+      }
       $cTypeA = CRM_Utils_System::explode('__',
         $params['contact_types_a'],
         2

@@ -5073,6 +5073,14 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
         'title' => $options['prefix_label'] . ts('Nick Name'),
         'is_fields' => TRUE,
       ),
+      $options['prefix'] . 'prefix_id' => array(
+        'name' => 'prefix_id',
+        'title' => $options['prefix_label'] . ts('Prefix'),
+        'options' => CRM_Contact_BAO_Contact::buildOptions('prefix_id'),
+        'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+        'is_fields' => TRUE,
+        'is_filters' => TRUE,
+      ),
       $options['prefix'] . 'gender_id' => array(
         'name' => 'gender_id',
         'title' => $options['prefix_label'] . ts('Gender'),

@@ -31,9 +31,6 @@
  * @copyright CiviCRM LLC (c) 2004-2017
  */
 class CRM_Report_Form_Contribute_Bookkeeping extends CRM_Report_Form {
-  protected $_addressField = FALSE;
-
-  protected $_emailField = FALSE;
 
   protected $_summary = NULL;
 
@@ -304,8 +301,9 @@ class CRM_Report_Form_Contribute_Bookkeeping extends CRM_Report_Form {
             'title' => ts('Contribution Status'),
             'default' => TRUE,
           ),
-          'source' => array(
+          'contribution_source' => array(
             'title' => ts('Source'),
+            'name' => 'source',
           ),
           'id' => array(
             'title' => ts('Contribution ID'),

@@ -55,7 +55,7 @@ class TokenCompatSubscriber implements EventSubscriberInterface {
         $params = array(
           array('contact_id', '=', $contactId, 0, 0),
         );
-        list($contact, $_) = \CRM_Contact_BAO_Query::apiQuery($params);
+        list($contact) = \CRM_Utils_Token::getTokenDetails(array($contactId));
         $contact = reset($contact); //CRM-4524
         if (!$contact || is_a($contact, 'CRM_Core_Error')) {
           // FIXME: Need to differentiate errors which kill the batch vs the individual row.

@@ -251,11 +251,12 @@ class CRM_Grant_BAO_Query extends CRM_Core_BAO_Query {
 
       case 'grant_type':
         $from .= " $side JOIN civicrm_option_group option_group_grant_type ON (option_group_grant_type.name = 'grant_type')";
+        $domain_id = CRM_Core_Config::domainID();
         if ($mode & CRM_Contact_BAO_Query::MODE_GRANT) {
-          $from .= " INNER JOIN civicrm_option_value grant_type ON (civicrm_grant.grant_type_id = grant_type.value AND option_group_grant_type.id = grant_type.option_group_id ) ";
+          $from .= " INNER JOIN civicrm_option_value grant_type ON (civicrm_grant.grant_type_id = grant_type.value AND option_group_grant_type.id = grant_type.option_group_id AND grant_type.domain_id = {$domain_id} ) ";
         }
         else {
-          $from .= " $side JOIN civicrm_option_value grant_type ON (civicrm_grant.grant_type_id = grant_type.value AND option_group_grant_type.id = grant_type.option_group_id ) ";
+          $from .= " $side JOIN civicrm_option_value grant_type ON (civicrm_grant.grant_type_id = grant_type.value AND option_group_grant_type.id = grant_type.option_group_id AND grant_type.domain_id = {$domain_id} ) ";
         }
         break;
 

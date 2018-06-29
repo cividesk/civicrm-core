@@ -61,6 +61,7 @@ class TokenCompatSubscriber implements EventSubscriberInterface {
         list($contact, $_) = \CRM_Contact_BAO_Query::apiQuery($params);
         //CRM-4524
         $contact = reset($contact);
+
         if (!$contact || is_a($contact, 'CRM_Core_Error')) {
           // FIXME: Need to differentiate errors which kill the batch vs the individual row.
           throw new TokenException("Failed to generate token data. Invalid contact ID: " . $row->context['contactId']);

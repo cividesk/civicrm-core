@@ -190,7 +190,7 @@ class CRM_Admin_Page_AJAX {
           break;
 
         case 'CRM_Member_BAO_MembershipType':
-          $ret['content'] = ts('Are you sure you want to disable this membership type?');
+          $ret['content'] = ts('Any Price field options that are linked to Membership Type will get ignored while generating the form.') . '<br/><br/> ' . ts('Are you sure you want to disable this membership type?');
           break;
 
         case 'CRM_Member_BAO_MembershipStatus':

@@ -29,7 +29,23 @@
   <div class="form-item" id="membership_type_form">
   {if $action eq 8}
     <div class="messages status no-popup">
-      {ts}WARNING: Deleting this option will result in the loss of all membership records of this type.{/ts} {ts}This may mean the loss of a substantial amount of data, and the action cannot be undone.{/ts} {ts}Do you want to continue?{/ts}
+      {ts}WARNING: Deleting this option will result in the loss of all membership records of this type.{/ts} {ts}This may mean the loss of a substantial amount of data, and the action cannot be undone.{/ts}
+      {if $usedBy}
+        <br />
+        {ts}If you delete this Membership Type, Membership Type ID used in Price Field will set to 'NULL' value and thereafter field will consider as general field in price field.{/ts}
+        <br /><br />
+        <table class="report">
+          <thead class="sticky">
+          <th scope="col">{ts}Price Field{/ts}</th>
+          </thead>
+            {foreach from=$usedBy item=path key=id}
+              <tr>
+                <td>{$path}</td>
+              </tr>
+            {/foreach}
+        </table>
+      {/if}
+      {ts}Do you want to continue?{/ts}
     </div>
     <div> {include file="CRM/common/formButtons.tpl"}</div>
   {else}

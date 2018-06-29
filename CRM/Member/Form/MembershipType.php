@@ -114,6 +114,8 @@ class CRM_Member_Form_MembershipType extends CRM_Member_Form_MembershipConfig {
     parent::buildQuickForm();
 
     if ($this->_action & CRM_Core_Action::DELETE) {
+      $usedBy = CRM_Member_BAO_MembershipType::getUsedBy($this->_id);
+      $this->assign('usedBy', $usedBy);
       return;
     }
 

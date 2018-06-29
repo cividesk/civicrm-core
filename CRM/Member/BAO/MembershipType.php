@@ -828,4 +828,35 @@ AND cps.is_quick_config = 1 AND cps.name != 'default_membership_type_amount'";
     CRM_Core_DAO::executeQuery($query, $queryParams);
   }
 
+  /**
+   * Return a list of all price-field id which use this membership type id.
+   *
+   * @param int $id
+   *   Id of Membership Type.
+   *
+   * @return array
+   */
+  public static function getUsedBy($id) {
+    $usedBy = array();
+    if (empty($id)) {
+      return $usedBy;
+    }
+    // Only get Price field details which are configured through Price set UI
+    // when membership type is created, price field value created for price set Membership Amount (name : default_membership_type_amount)
+    // default_membership_type_amount is for quick config and reserved price set.
+    $queryString = "
+      SELECT pfv.price_field_id, concat(ps.title, ' &#x21d2; ', pf.label, ' &#x21d2; ', pfv.label) as field_path
+      FROM civicrm_price_field_value pfv
+      INNER JOIN civicrm_price_field pf ON (pf.id = pfv.price_field_id)
+      INNER JOIN civicrm_price_set ps ON (ps.id = pf.price_set_id)
+      WHERE ps.is_quick_config = 0 AND ps.is_reserved= 0 AND pfv.membership_type_id = %1";
+    $params = array(1 => array($id, 'Integer'));
+    $crmFormDAO = CRM_Core_DAO::executeQuery($queryString, $params);
+
+    while ($crmFormDAO->fetch()) {
+      $usedBy[$crmFormDAO->price_field_id] = $crmFormDAO->field_path;
+    }
+    return $usedBy;
+  }
+
 }

@@ -193,8 +193,13 @@ class CRM_Price_BAO_PriceFieldValue extends CRM_Price_DAO_PriceFieldValue {
     if ($isActive) {
       $fieldValueDAO->is_active = 1;
     }
+    $membershipType = CRM_Member_PseudoConstant::membershipType();
     $fieldValueDAO->find();
     while ($fieldValueDAO->fetch()) {
+      // Do not Generate Price field option for disabled membership Type
+      if ($fieldValueDAO->membership_type_id && ! array_key_exists($fieldValueDAO->membership_type_id, $membershipType)) {
+        continue;
+      }
       CRM_Core_DAO::storeValues($fieldValueDAO, $values[$fieldValueDAO->id]);
     }
 

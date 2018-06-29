@@ -430,7 +430,7 @@ class CRM_Grant_DAO_Grant extends CRM_Core_DAO {
           'where' => 'civicrm_grant.status_id',
           'headerPattern' => '',
           'dataPattern' => '',
-          'export' => FALSE,
+          'export' => TRUE,
           'table_name' => 'civicrm_grant',
           'entity' => 'Grant',
           'bao' => 'CRM_Grant_BAO_Grant',

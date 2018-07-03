@@ -227,6 +227,7 @@ class CRM_Event_Form_ManageEvent_Location extends CRM_Event_Form_ManageEvent {
       );
     }
 
+    $this->_values['address'] = array();
     // if 'create new loc' optioin is selected OR selected new loc is different
     // from old one, go ahead and delete the old loc provided thats not being
     // used by any other event

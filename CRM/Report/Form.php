@@ -5379,6 +5379,14 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
         'is_fields' => TRUE,
         'is_filters' => TRUE,
       ),
+      $options['prefix'] . 'suffix_id' => array(
+        'name' => 'suffix_id',
+        'title' => $options['prefix_label'] . ts('Suffix'),
+        'options' => CRM_Contact_BAO_Contact::buildOptions('suffix_id'),
+        'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+        'is_fields' => TRUE,
+        'is_filters' => TRUE,
+      ),
       $options['prefix'] . 'gender_id' => array(
         'name' => 'gender_id',
         'title' => $options['prefix_label'] . ts('Gender'),

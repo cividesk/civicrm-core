@@ -465,7 +465,7 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
       }
       // condition to check for download PDF Invoice or email Invoice
       if ($invoiceElements['createPdf']) {
-        list($sent, $subject, $message, $html) = CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
+        list($sent, $subject, $message, $html, $pdfFileName) = CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
         if (isset($params['forPage'])) {
           return $html;
         }
@@ -492,7 +492,7 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
         $sendTemplateParams['cc'] = CRM_Utils_Array::value('cc_receipt', $values);
         $sendTemplateParams['bcc'] = CRM_Utils_Array::value('bcc_receipt', $values);
 
-        list($sent, $subject, $message, $html) = CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
+        list($sent, $subject, $message, $html, $pdfFileName) = CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
         // functions call for adding activity with attachment
         $pdfFileName = "{$invoiceNumber}.pdf";
         $fileName = self::putFile($html, $pdfFileName);
@@ -507,7 +507,7 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
         $sendTemplateParams['cc'] = CRM_Utils_Array::value('cc_confirm', $values);
         $sendTemplateParams['bcc'] = CRM_Utils_Array::value('bcc_confirm', $values);
 
-        list($sent, $subject, $message, $html) = CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
+        list($sent, $subject, $message, $html, $pdfFileName) = CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
         // functions call for adding activity with attachment
         $pdfFileName = "{$invoiceNumber}.pdf";
         $fileName = self::putFile($html, $pdfFileName);

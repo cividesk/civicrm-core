@@ -217,7 +217,7 @@
   {/if}
 
   {if $invoice_number}
-    <tr>
+    <tr id="crm-contribution-invoice_number">
       <td class="label">{ts}Invoice Number{/ts}</td>
       <td>{$invoice_number}&nbsp;</td>
     </tr>

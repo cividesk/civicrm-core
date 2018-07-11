@@ -2208,6 +2208,12 @@ ORDER BY   civicrm_email.is_bulkmail DESC
         case 'opened_unique':
           $url = "mailing/opened";
           $searchFilter .= "&mailing_open_status=Y";
+          $reportFilter .= "&distinct=0"; // do not use group by clause in report, because same report used for total and unique open
+          break;
+
+        case 'opened_unique':
+          $url = "mailing/opened";
+          $searchFilter .= "&mailing_open_status=Y";
           break;
 
         case 'clicks':

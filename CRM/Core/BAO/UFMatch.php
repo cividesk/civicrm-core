@@ -204,6 +204,12 @@ class CRM_Core_BAO_UFMatch extends CRM_Core_DAO_UFMatch {
       if (!empty($_POST) && !$isLogin) {
         $params = $_POST;
         $params['email'] = $uniqId;
+        // unset onbehalf array
+        // dedupe function flatten the array then rename onbehalf 'email-3', 'email-Primary' TO 'email' which overwrite Individual email
+        // because of this dedupe for individual not work properly and return empty array
+        if (array_key_exists('onbehalf', $params)) {
+          unset($params['onbehalf']);
+        }
 
         $ids = CRM_Contact_BAO_Contact::getDuplicateContacts($params, 'Individual', 'Unsupervised', array(), FALSE);
 

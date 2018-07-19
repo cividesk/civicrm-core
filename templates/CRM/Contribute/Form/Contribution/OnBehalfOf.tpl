@@ -43,7 +43,7 @@
   {crmRegion name="onbehalf-block"}
     {if $onBehalfOfFields|@count}
       <fieldset>
-      <legend>{$fieldSetTitle}</legend>
+      <legend>{$onBehalfOfFields.organization_name.groupDisplayTitle}</legend>
       {if $form.org_option}
         <div id='orgOptions' class="section crm-public-form-item crm-section">
           <div class="content">

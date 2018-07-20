@@ -112,7 +112,7 @@
   <script type="text/javascript" >
   CRM.$(function($) {
     var $form = $("form.{/literal}{$form.formClass}{literal}");
-    var action = "{/literal}{$action}{literal}";
+    action = {/literal}{$action|@json_encode}{literal},
 
     $('.crm-accordion-body').each( function() {
       //remove tab which doesn't have any element

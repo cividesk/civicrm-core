@@ -47,16 +47,16 @@
   </div>
 
   <div class="action-link">
-    {if $prev}<a href="{$prev}" class="crm-hover-button action-item"><i class="crm-i fa-chevron-left"></i> {ts}Previous{/ts}</a>{/if}
-    {if $next}<a href="{$next}" class="crm-hover-button action-item">{ts}Next{/ts} <i class="crm-i fa-chevron-right"></i></a>{/if}
-    <a href="{$flip}" class="action-item crm-hover-button">
+    {if $prev}<a href="{$prev|escape}" class="crm-hover-button action-item"><i class="crm-i fa-chevron-left"></i> {ts}Previous{/ts}</a>{/if}
+    {if $next}<a href="{$next|escape}" class="crm-hover-button action-item">{ts}Next{/ts} <i class="crm-i fa-chevron-right"></i></a>{/if}
+    <a href="{$flip|escape}" class="action-item crm-hover-button">
       <i class="crm-i fa-random"></i>
       {ts}Flip between original and duplicate contacts.{/ts}
     </a>
   </div>
 
   <div class="action-link">
-    <a href="#" class="action-item crm-hover-button crm-notDuplicate" title={ts}Mark this pair as not a duplicate.{/ts} onClick="processDupes( {$main_cid}, {$other_cid}, 'dupe-nondupe', 'merge-contact', '{$browseUrl}' );return false;">
+    <a href="#" class="action-item crm-hover-button crm-notDuplicate" title={ts}Mark this pair as not a duplicate.{/ts} onClick="processDupes( {$main_cid|escape}, {$other_cid|escape}, 'dupe-nondupe', 'merge-contact', '{$browseUrl}' );return false;">
       <i class="crm-i fa-times-circle"></i>
       {ts}Mark this pair as not a duplicate.{/ts}
     </a>
@@ -72,9 +72,9 @@
   <table class="row-highlight">
     <tr class="columnheader">
       <th>&nbsp;</th>
-      <th><a href="{crmURL p='civicrm/contact/view' q="reset=1&cid=$other_cid"}">{$other_name}</a> ({ts}duplicate{/ts})</th>
+      <th><a href="{crmURL p='civicrm/contact/view' q="reset=1&cid=$other_cid"}">{$other_name|escape}</a> ({ts}duplicate{/ts})</th>
       <th>{ts}Mark All{/ts}<br />=={$form.toggleSelect.html} ==&gt;</th>
-      <th><a href="{crmURL p='civicrm/contact/view' q="reset=1&cid=$main_cid"}">{$main_name}</a></th>
+      <th><a href="{crmURL p='civicrm/contact/view' q="reset=1&cid=$main_cid"}">{$main_name|escape}</a></th>
       <th width="300">Add/overwrite?</th>
     </tr>
 
@@ -95,7 +95,7 @@
       {if !isset($row.main) && !isset($row.other)}
         <tr style="background-color: #fff !important; border-bottom:1px solid #ccc !important;" class="no-data">
           <td>
-            <strong>{$row.title}</strong>
+            <strong>{$row.title|escape}</strong>
           </td>
       {else}
         {if $row.main eq $row.other}
@@ -104,7 +104,7 @@
            <tr class="crm-row-error {cycle values="odd-row,even-row"}">
         {/if}
           <td>
-            {$row.title}
+            {$row.title|escape}
           </td>
         {/if}
 
@@ -191,9 +191,9 @@
             <td>
               <span>
                 {if !is_array($row.main)}
-                  {$row.main}
+                  {$row.main|escape}
                 {elseif $row.main.fileName}
-                  {$row.main.fileName}
+                  {$row.main.fileName|escape}
                 {else}
                   {', '|implode:$row.main}
                 {/if}
@@ -298,7 +298,7 @@
     }
 
     // Update operation description
-    var operation_description = "{/literal}{ts}add{/ts}{literal}";
+    var operation_description = "{/literal}{ts escape='js'}add{/ts}{literal}";
     var add_new_check_length = this_controls.find(".location_operation_checkbox input:checked").length;
     if (mainBlock != false) {
       if (add_new_check_length > 0) {

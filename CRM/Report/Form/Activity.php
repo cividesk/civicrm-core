@@ -887,6 +887,7 @@ GROUP BY civicrm_activity_id $having {$this->_orderBy}";
     // Would we ever want to retrieve from the form controller??
     $form = $this->noController ? NULL : $this;
     $context = CRM_Utils_Request::retrieve('context', 'Alphanumeric', $form, FALSE, 'report');
+
     $actUrl = '';
 
     if (CRM_Core_Permission::check('access CiviCRM')) {

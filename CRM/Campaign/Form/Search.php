@@ -80,6 +80,13 @@ class CRM_Campaign_Form_Search extends CRM_Core_Form_Search {
 
     $this->loadStandardSearchOptionsFromUrl();
 
+    //we allow the controller to set force/reset externally,
+    //useful when we are being driven by the wizard framework
+    $this->_limit = CRM_Utils_Request::retrieve('limit', 'Positive', $this);
+    $this->_force = CRM_Utils_Request::retrieve('force', 'Boolean', $this, FALSE);
+    $this->_context = CRM_Utils_Request::retrieve('context', 'Alphanumeric', $this, FALSE, 'search');
+    $this->_reset = CRM_Utils_Request::retrieve('reset', 'Boolean');
+
     //operation for state machine.
     $this->_operation = CRM_Utils_Request::retrieve('op', 'String', $this, FALSE, 'reserve');
     //validate operation.

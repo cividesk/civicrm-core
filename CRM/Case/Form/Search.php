@@ -92,6 +92,33 @@ class CRM_Case_Form_Search extends CRM_Core_Form_Search {
     $this->loadStandardSearchOptionsFromUrl();
     $this->loadFormValues();
 
+    /*
+     * we allow the controller to set force/reset externally, useful when we are being
+     * driven by the wizard framework
+     */
+
+    $this->_reset = CRM_Utils_Request::retrieve('reset', 'Boolean');
+    $this->_force = CRM_Utils_Request::retrieve('force', 'Boolean', $this, FALSE);
+    $this->_limit = CRM_Utils_Request::retrieve('limit', 'Positive', $this);
+    $this->_context = CRM_Utils_Request::retrieve('context', 'Alphanumeric', $this, FALSE, 'search');
+
+    $this->assign('context', $this->_context);
+
+    // get user submitted values
+    // get it from controller only if form has been submitted, else preProcess has set this
+    if (!empty($_POST) && !$this->controller->isModal()) {
+      $this->_formValues = $this->controller->exportValues($this->_name);
+    }
+    else {
+      $this->_formValues = $this->get('formValues');
+    }
+
+    if (empty($this->_formValues)) {
+      if (isset($this->_ssID)) {
+        $this->_formValues = CRM_Contact_BAO_SavedSearch::getFormValues($this->_ssID);
+      }
+    }
+
     if ($this->_force) {
       $this->postProcess();
       $this->set('force', 0);

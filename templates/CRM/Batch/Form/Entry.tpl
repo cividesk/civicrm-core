@@ -337,7 +337,7 @@ function updateContactInfo(blockNo, prefix) {
   {/literal}
   {if $contactFields}
   {foreach from=$contactFields item=val key=fldName}
-  var fldName = "{$fldName}";
+  var fldName = {$fldName|@json_encode};
   {literal}
   if (returnProperties) {
     returnProperties = returnProperties + ',';

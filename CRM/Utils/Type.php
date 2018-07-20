@@ -389,6 +389,7 @@ class CRM_Utils_Type {
       'Alphanumeric',
       'Color',
     ];
+
     if (!in_array($type, $possibleTypes)) {
       throw new CRM_Core_Exception(ts('Invalid type, must be one of : ' . implode($possibleTypes)));
     }

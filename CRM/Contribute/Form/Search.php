@@ -85,7 +85,6 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
     $this->_done = FALSE;
 
     parent::preProcess();
-
     $sortID = NULL;
     if ($this->get(CRM_Utils_Sort::SORT_ID)) {
       $sortID = CRM_Utils_Sort::sortIDValue($this->get(CRM_Utils_Sort::SORT_ID),

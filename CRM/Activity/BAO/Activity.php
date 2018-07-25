@@ -1183,6 +1183,12 @@ class CRM_Activity_BAO_Activity extends CRM_Activity_DAO_Activity {
         unset($details["{$contactId}"]['email_id']);
         $values = array_merge($values, $details["{$contactId}"]);
       }
+      // CRM-21615
+      $domainTokens = array_merge($subjectToken, $messageToken);
+      $domain = CRM_Core_BAO_Domain::getDomain();
+      foreach (['subject', 'text', 'html'] as $bodyType) {
+        $$bodyType = CRM_Utils_Token::replaceDomainTokens($$bodyType, $domain, TRUE, $domainTokens, TRUE);
+      }
 
       $tokenSubject = CRM_Utils_Token::replaceContactTokens($subject, $values, FALSE, $subjectToken, FALSE, $escapeSmarty);
       $tokenSubject = CRM_Utils_Token::replaceHookTokens($tokenSubject, $values, $categories, FALSE, $escapeSmarty);

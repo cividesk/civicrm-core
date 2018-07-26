@@ -257,6 +257,11 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
         $billingAddress = array_shift($addressDetails);
       }
 
+      $countryAbbreviation = '';
+      if (!empty($billingAddress[$contribution->contact_id]['country_id'])) {
+        $countryAbbreviation = CRM_Core_PseudoConstant::country($billingAddress[$contribution->contact_id]['country_id']);
+      }
+
       if ($contribution->contribution_status_id == $refundedStatusId || $contribution->contribution_status_id == $cancelledStatusId) {
         $creditNoteId = $contribution->creditnote_id;
       }
@@ -351,6 +356,13 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
       }
 
       $invoiceNotes = Civi::settings()->get('invoice_notes') ?? NULL;
+      // get billing name in case of contribution is owned by organization (on behalf on organization)
+      $displayName = '';
+      $contactType = CRM_Contact_BAO_Contact::getContactType($contribution->contact_id);
+      if ($contactType == 'Organization' && $contribution->address_id) {
+        $billingName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Address', $contribution->address_id, 'name');
+        $displayName = str_replace(CRM_Core_DAO::VALUE_SEPARATOR, ' ', $billingName);
+      }
 
       // parameters to be assign for template
       $tplParams = [
@@ -368,7 +380,7 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
         'invoice_date' => $invoiceDate,
         'dueDate' => $dueDate,
         'notes' => $invoiceNotes,
-        'display_name' => $contribution->_relatedObjects['contact']->display_name,
+        'display_name' => $displayName? $displayName: $contribution->_relatedObjects['contact']->display_name,
         'lineItem' => $lineItem,
         'dataArray' => $dataArray,
         'refundedStatusId' => $refundedStatusId,
@@ -388,6 +400,7 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
         // Kept for backwards compatibility
         'stateProvinceAbbreviation' => $billingAddress['state_province_abbreviation'] ?? NULL,
         'country' => $billingAddress['country'] ?? NULL,
+        'countryAbbreviation' => $countryAbbreviation,
         'is_pay_later' => $contribution->is_pay_later,
         'organization_name' => $contribution->_relatedObjects['contact']->organization_name,
         'domain_organization' => $domain->name,

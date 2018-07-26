@@ -280,6 +280,11 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
         $stateProvinceAbbreviation = '';
       }
 
+      $countryAbbreviation = '';
+      if (!empty($billingAddress[$contribution->contact_id]['country_id'])) {
+        $countryAbbreviation = CRM_Core_PseudoConstant::country($billingAddress[$contribution->contact_id]['country_id']);
+      }
+
       if ($contribution->contribution_status_id == $refundedStatusId || $contribution->contribution_status_id == $cancelledStatusId) {
         if (is_null($contribution->creditnote_id)) {
           $creditNoteId = CRM_Contribute_BAO_Contribution::createCreditNoteId();
@@ -398,6 +403,14 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
         $countryDomain = '';
       }
 
+      // get billing name in case of contribution is owned by organization (on behalf on organization)
+      $displayName = '';
+      $contactType = CRM_Contact_BAO_Contact::getContactType($contribution->contact_id);
+      if ($contactType == 'Organization' && $contribution->address_id) {
+        $billingName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Address', $contribution->address_id, 'name');
+        $displayName = str_replace(CRM_Core_DAO::VALUE_SEPARATOR, ' ', $billingName);
+      }
+
       // parameters to be assign for template
       $tplParams = array(
         'title' => $title,
@@ -414,7 +427,7 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
         'invoice_date' => $invoiceDate,
         'dueDate' => $dueDate,
         'notes' => CRM_Utils_Array::value('notes', $prefixValue),
-        'display_name' => $contribution->_relatedObjects['contact']->display_name,
+        'display_name' => $displayName? $displayName: $contribution->_relatedObjects['contact']->display_name,
         'lineItem' => $lineItem,
         'dataArray' => $dataArray,
         'refundedStatusId' => $refundedStatusId,
@@ -428,6 +441,7 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
         'supplemental_address_3' => CRM_Utils_Array::value('supplemental_address_3', CRM_Utils_Array::value($contribution->contact_id, $billingAddress)),
         'city' => CRM_Utils_Array::value('city', CRM_Utils_Array::value($contribution->contact_id, $billingAddress)),
         'stateProvinceAbbreviation' => $stateProvinceAbbreviation,
+        'countryAbbreviation' => $countryAbbreviation,
         'postal_code' => CRM_Utils_Array::value('postal_code', CRM_Utils_Array::value($contribution->contact_id, $billingAddress)),
         'is_pay_later' => $contribution->is_pay_later,
         'organization_name' => $contribution->_relatedObjects['contact']->organization_name,

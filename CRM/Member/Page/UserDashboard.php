@@ -80,6 +80,17 @@ class CRM_Member_Page_UserDashboard extends CRM_Contact_Page_View_UserDashBoard 
           }
         }
       }
+      if ($membership[$dao->id]['renewPageId']) {
+        if ($membership[$dao->id]['owner_membership_id']) {
+         $rel = CRM_Core_DAO::getFieldValue('CRM_Member_DAO_MembershipType',
+            $membership[$dao->id]['membership_type_id'], 'relationship_type_id', 'id'
+          );
+         $allowed = CRM_Contact_BAO_Relationship::getPermissionedContacts($membership[$dao->id]['contact_id'], $rel);
+         if (empty($allowed)) {
+           unset($membership[$dao->id]['renewPageId']);
+         }
+        }
+      }
     }
 
     $activeMembers = CRM_Member_BAO_Membership::activeMembers($membership);

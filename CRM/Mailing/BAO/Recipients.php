@@ -73,10 +73,20 @@ WHERE  mailing_id = %1
       $limitString = "LIMIT $offset, $limit";
     }
 
+    $isSMSmode = CRM_Core_DAO::getFieldValue('CRM_Mailing_BAO_Mailing', $mailingID, 'sms_provider_id', 'id');
+    $additionalJoin = '';
+    if (!$isSMSmode) {
+      // mailing_recipients added when mailing is submitted in UI.
+      // if any email is marked on_hold =1 after mailing submitted then it should be get skipped while building event_queue
+      // event_queue get generated while running mailing job.
+      $additionalJoin = " INNER JOIN civicrm_email e ON (r.email_id = e.id AND e.on_hold = 0) ";
+    }
+
     $sql = "
-SELECT contact_id, email_id, phone_id
-FROM   civicrm_mailing_recipients
-WHERE  mailing_id = %1
+SELECT r.contact_id, r.email_id, r.phone_id
+FROM   civicrm_mailing_recipients r
+{$additionalJoin}
+WHERE  r.mailing_id = %1
        $limitString
 ";
     $params = array(1 => array($mailingID, 'Integer'));

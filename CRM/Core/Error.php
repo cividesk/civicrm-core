@@ -695,7 +695,7 @@ class CRM_Core_Error extends PEAR_ErrorStack {
       $prefixString = $prefix ? ($prefix . '.') : '';
 
       $hash = self::generateLogFileHash($config);
-      $fileName = $config->configAndLogDir . 'CiviCRM.' . $prefixString . $hash . '.log';
+      $fileName = $config->configAndLogDir . 'CiviCRM.' . CIVICRM_DOMAIN_ID . '_' . $prefixString . $hash . '.log';
 
       // Roll log file monthly or if greater than 256M.
       // Size-based rotation introduced in response to filesize limits on

@@ -921,6 +921,7 @@ class CRM_Contribute_Form_Contribution_Confirm extends CRM_Contribute_Form_Contr
     $contactID = $contributionParams['contact_id'];
 
     $isEmailReceipt = !empty($form->_values['is_email_receipt']);
+    $premiumParams = $params;
     $isSeparateMembershipPayment = empty($params['separate_membership_payment']) ? FALSE : TRUE;
     $pledgeID = !empty($params['pledge_id']) ? $params['pledge_id'] : CRM_Utils_Array::value('pledge_id', $form->_values);
     if (!$isSeparateMembershipPayment && !empty($form->_values['pledge_block_id']) &&
@@ -998,6 +999,8 @@ class CRM_Contribute_Form_Contribution_Confirm extends CRM_Contribute_Form_Contr
       // lets store it in the form variable so postProcess hook can get to this and use it
       $form->_contributionID = $contribution->id;
     }
+    // add premium to contribution record
+    $form->postProcessPremium($premiumParams, $contribution);
 
     // process soft credit / pcp params first
     CRM_Contribute_BAO_ContributionSoft::formatSoftCreditParams($params, $form);
@@ -1484,7 +1487,6 @@ class CRM_Contribute_Form_Contribution_Confirm extends CRM_Contribute_Form_Contr
       );
       if (!empty($paymentResult['contribution'])) {
         $paymentResults[] = array('contribution_id' => $paymentResult['contribution']->id, 'result' => $paymentResult);
-        $this->postProcessPremium($premiumParams, $paymentResult['contribution']);
         //note that this will be over-written if we are using a separate membership transaction. Otherwise there is only one
         $membershipContribution = $paymentResult['contribution'];
         // Save the contribution ID so that I can be used in email receipts
@@ -2337,10 +2339,6 @@ class CRM_Contribute_Form_Contribution_Confirm extends CRM_Contribute_Form_Contr
         CRM_Utils_Array::value('is_recur', $paymentParams)
       );
 
-      if (empty($result['is_payment_failure'])) {
-        // @todo move premium processing to complete transaction if it truly is an 'after' action.
-        $this->postProcessPremium($premiumParams, $result['contribution']);
-      }
       if (!empty($result['contribution'])) {
         // Not quite sure why it would be empty at this stage but tests show it can be ... at least in tests.
         $this->completeTransaction($result, $result['contribution']->id);

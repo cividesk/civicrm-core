@@ -179,6 +179,11 @@ class CRM_Contact_Page_View_Relationship extends CRM_Core_Page {
   public function preProcess() {
     $this->_id = CRM_Utils_Request::retrieve('id', 'Positive', $this);
     $this->_contactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this, TRUE);
+
+    if (isset($_REQUEST['tid']) && $_REQUEST['tid'] != '') {
+      $relationship_type_id = isset($_REQUEST['tid']) ? $_REQUEST['tid'] : '';
+    }
+    $this->assign('relTypeId', $relationship_type_id);
     $this->assign('contactId', $this->_contactId);
 
     // check logged in url permission

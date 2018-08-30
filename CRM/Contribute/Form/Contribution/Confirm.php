@@ -1000,7 +1000,9 @@ class CRM_Contribute_Form_Contribution_Confirm extends CRM_Contribute_Form_Contr
       $form->_contributionID = $contribution->id;
     }
     // add premium to contribution record
-    $form->postProcessPremium($premiumParams, $contribution);
+    if (method_exists($form, 'postProcessPremium')) {
+      $form->postProcessPremium($premiumParams, $contribution);
+    }
 
     // process soft credit / pcp params first
     CRM_Contribute_BAO_ContributionSoft::formatSoftCreditParams($params, $form);

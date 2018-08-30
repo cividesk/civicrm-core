@@ -26,10 +26,10 @@
 {* relationship selector *}
 {crmRegion name="crm-contact-relationshipselector-pre"}
 {/crmRegion}
-<div class="crm-contact-relationship-{$context}">
+<div class="crm-contact-relationship-{$context}{'_'}{$relTypeId}">
   <table
-    class="crm-contact-relationship-selector-{$context} crm-ajax-table"
-    data-ajax="{crmURL p="civicrm/ajax/contactrelationships" q="context=$context&cid=$contactId"}">
+    class="crm-contact-relationship-selector-{$context}{'_'}{$relTypeId} crm-ajax-table"
+    data-ajax="{crmURL p="civicrm/ajax/contactrelationships" q="context=$context&cid=$contactId&relationship_type_id=$relTypeId"}">
     <thead>
     <tr>
       <th data-data="relation" class='crm-contact-relationship-type'>{ts}Relationship{/ts}</th>

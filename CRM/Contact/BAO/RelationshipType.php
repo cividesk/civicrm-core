@@ -105,6 +105,15 @@ class CRM_Contact_BAO_RelationshipType extends CRM_Contact_DAO_RelationshipType 
         $params['name_b_a'] = $params['label_b_a'];
       }
     }
+    // adjust weight
+    if (isset($params['id'])) {
+      $oldWeight = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_RelationshipType', $params['id'], 'weight', 'id');
+    }
+    else {
+      $oldWeight = 0;
+    }
+    $params['weight'] = CRM_Utils_Weight::updateOtherWeights('CRM_Contact_DAO_RelationshipType', $oldWeight, CRM_Utils_Array::value('weight', $params, FALSE));
+
 
     // action is taken depending upon the mode
     $relationshipType = new CRM_Contact_DAO_RelationshipType();

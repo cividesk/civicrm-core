@@ -404,15 +404,32 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
       }
 
       // get billing name in case of contribution is owned by organization (on behalf on organization)
-      $displayName = '';
+      $primaryContact = '';
       $contactType = CRM_Contact_BAO_Contact::getContactType($contribution->contact_id);
       if ($contactType == 'Organization' && $contribution->address_id) {
         $billingName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Address', $contribution->address_id, 'name');
-        $displayName = str_replace(CRM_Core_DAO::VALUE_SEPARATOR, ' ', $billingName);
+        $primaryContact = str_replace(CRM_Core_DAO::VALUE_SEPARATOR, ' ', $billingName);
+      }
+      else if ($contactType == 'Organization' && $contribution->contact_id) {
+        // If no billing name then get primary contact through relationship (is_permission_a_b = 1)
+        $result = civicrm_api3('Relationship', 'get', array(
+          'sequential' => 1,
+          'relationship_type_id' => 5,
+          'is_permission_a_b' => 1,
+          'contact_id_b' => $contribution->contact_id,
+          'options' => array('limit' => 1),
+        ));
+        if (!empty($result['values'])) {
+          $valuesRelationship = reset($result['values']);
+          $primaryContactID = $valuesRelationship['contact_id_a'];
+          $primaryContact = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $primaryContactID, 'display_name');
+        }
       }
 
       // parameters to be assign for template
       $tplParams = array(
+        'contact_type' => $contactType,
+        'primaryContact' => $primaryContact,
         'title' => $title,
         'component' => $input['component'],
         'id' => $contribution->id,
@@ -427,7 +444,7 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
         'invoice_date' => $invoiceDate,
         'dueDate' => $dueDate,
         'notes' => CRM_Utils_Array::value('notes', $prefixValue),
-        'display_name' => $displayName? $displayName: $contribution->_relatedObjects['contact']->display_name,
+        'display_name' => $contribution->_relatedObjects['contact']->display_name,
         'lineItem' => $lineItem,
         'dataArray' => $dataArray,
         'refundedStatusId' => $refundedStatusId,

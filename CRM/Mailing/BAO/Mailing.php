@@ -1197,10 +1197,7 @@ ORDER BY   civicrm_email.is_bulkmail DESC
 
     if (empty($mailParams['text']) && empty($mailParams['html'])) {
       // CRM-9833
-      // something went wrong, lets log it and return null (by reference)
-      $msg = ts('CiviMail will not send an empty mail body, Skipping: %1',
-        array(1 => $email)
-      );
+      $msg = ts('It appears that the body of your email contains only images, no text - please add text to the body of the email in order to send - this requirement is in place to minimize the chance of your domain being marked as spam by an internet service provider.');
       CRM_Core_Error::debug_log_message($msg);
       throw new API_Exception($msg);
 

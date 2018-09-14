@@ -1722,10 +1722,12 @@ LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
             if ('Pending' === CRM_Core_PseudoConstant::getName('CRM_Member_BAO_Membership', 'status_id', $membershipValues['status_id'])) {
               $membershipValues['skipStatusCal'] = TRUE;
             }
+
             // As long as the membership itself was not created by inheritance from the same contact
             // that stands to inherit the membership we add an inherited membership.
             if ($membershipInherittedFromContactID !== (int) $membershipValues['contact_id']) {
               $membershipValues = self::addInheritedMembership($membershipValues);
+
             }
           }
         }
@@ -2444,6 +2446,9 @@ SELECT count(*)
     AND is_current_member = 1";
     $result = CRM_Core_DAO::singleValueQuery($query);
     if ($result < CRM_Utils_Array::value('max_related', $membershipValues, PHP_INT_MAX)) {
+      if (Civi::settings()->get('membership_reassignment')) {
+        $membershipValues['join_date'] = $membershipValues['start_date'] = date('Y-m-d');
+      }
       civicrm_api3('Membership', 'create', $membershipValues);
     }
     return $membershipValues;

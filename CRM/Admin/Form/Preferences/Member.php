@@ -46,6 +46,13 @@ class CRM_Admin_Form_Preferences_Member extends CRM_Admin_Form_Preferences {
           'weight' => 1,
           'description' => ts('If you select a default online contribution page for self-service membership renewals, a "renew" link pointing to that page will be displayed on the Contact Dashboard for memberships which were entered offline. You will need to ensure that the membership block for the selected online contribution page includes any currently available memberships.'),
         ),
+        'membership_reassignment' => array(
+          'html_type' => 'YesNo',
+          'title' => ts('Re-assignment of related membership'),
+          'weight' => 2,
+          'description' => ts("If enabled, Cancel Related Membership link will be available (Membership status set to Cancelled with Today date as end date) and while creating new related membership Join and Start date set as Today's date, delete link will not be available."),
+
+        ),
       ),
     );
 

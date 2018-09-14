@@ -97,6 +97,18 @@ class CRM_Member_Form_MembershipView extends CRM_Core_Form {
           'title' => ts('Create Related Membership'),
         ),
       );
+      // check Re-assignment of related membership settings
+      if (Civi::settings()->get('membership_reassignment')) {
+        // Add Cancel Link
+        self::$_links[CRM_Core_Action::DETACH] = array(
+          'name' => ts('Cancel'),
+          'url' => 'civicrm/contact/view/membership',
+          'qs' => 'action=view&id=%%id%%&cid=%%cid%%&relAction=detach&mid=%%mid%%&reset=1' . $this->addContext(),
+          'title' => ts('Cancel Related Membership'),
+        );
+        // unset delete link
+        unset(self::$_links[CRM_Core_Action::DELETE]);
+      }
     }
     return self::$_links;
   }
@@ -120,8 +132,26 @@ class CRM_Member_Form_MembershipView extends CRM_Core_Form {
           ts('Membership Deleted'), 'success');
         break;
 
+      case 'detach':
+        $id = CRM_Utils_Request::retrieve('mid', 'Positive', $this);
+        $relatedContactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this);
+        $relatedDisplayName = CRM_Contact_BAO_Contact::displayName($relatedContactId);
+        $cancelledStatus = array_search('Cancelled', CRM_Member_PseudoConstant::membershipStatus(NULL, " name = 'Cancelled' ", 'name', FALSE, TRUE));
+        if ($cancelledStatus) {
+          // Set today date as cancelled date
+          $params = array('id' => $id, 'contact_id' => $relatedContactId, 'status_id' => $cancelledStatus, 'end_date' => date('Y-m-d'));
+          CRM_Member_BAO_Membership::add($params);
+          CRM_Core_Session::setStatus(ts('Related membership for %1 has been cancelled.', array(1 => $relatedDisplayName)),
+            ts('Membership Deleted'), 'success');
+        }
+        break;
+
       case 'create':
         $ids = array();
+        // check Re-assignment of related membership settings
+        if (Civi::settings()->get('membership_reassignment')) {
+          $owner['join_date'] = $owner['start_date'] = date('Y-m-d');
+        }
         $params = array(
           'contact_id' => CRM_Utils_Request::retrieve('rid', 'Positive', $this),
           'membership_type_id' => $owner['membership_type_id'],

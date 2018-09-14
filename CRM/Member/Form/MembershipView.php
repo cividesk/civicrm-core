@@ -324,7 +324,9 @@ SELECT r.id, c.id as cid, c.display_name as name, c.job_title as comment,
           }
           if ($row['mid'] && ($row['is_current_member'] == 1)) {
             $relatedRemaining--;
-            $row['action'] = CRM_Core_Action::formLink(self::links(), CRM_Core_Action::DELETE,
+            // build right link based on Membership Re-assignment setting.
+            $row['action'] = CRM_Core_Action::formLink(self::links(),
+              Civi::settings()->get('membership_reassignment') ? CRM_Core_Action::DETACH : CRM_Core_Action::DELETE,
               array(
                 'id' => CRM_Utils_Request::retrieve('id', 'Positive', $this),
                 'cid' => $row['cid'],

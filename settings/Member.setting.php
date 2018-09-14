@@ -54,4 +54,18 @@ return array(
     'description' => 'If you select a default online contribution page for self-service membership renewals, a "renew" link pointing to that page will be displayed on the Contact Dashboard for memberships which were entered offline. You will need to ensure that the membership block for the selected online contribution page includes any currently available memberships.',
     'help_text' => NULL,
   ),
+  'membership_reassignment' => array(
+    'group_name' => 'Member Preferences',
+    'group' => 'member',
+    'name' => 'membership_reassignment',
+    'type' => 'Boolean',
+    'quick_form_type' => 'YesNo',
+    'default' => FALSE,
+    'add' => '4.7',
+    'title' => 'Re-assignment of related membership',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => "If enabled, Cancel Related Membership link will be available (Membership status set to Cancelled with Today date as end date) and while creating new related membership Join and Start date set as Today's date, delete link will not be available.",
+    'help_text' => NULL,
+  ),
 );

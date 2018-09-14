@@ -1768,6 +1768,9 @@ SELECT count(*)
     AND is_current_member = 1";
             $result = CRM_Core_DAO::singleValueQuery($query);
             if ($result < CRM_Utils_Array::value('max_related', $membershipValues, PHP_INT_MAX)) {
+              if (Civi::settings()->get('membership_reassignment')) {
+                $membershipValues['join_date'] = $membershipValues['start_date'] = date('Y-m-d');
+              }
               CRM_Member_BAO_Membership::create($membershipValues, CRM_Core_DAO::$_nullArray);
             }
           }

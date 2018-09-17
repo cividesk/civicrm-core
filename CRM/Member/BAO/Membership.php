@@ -705,7 +705,15 @@ INNER JOIN  civicrm_membership_type type ON ( type.id = membership.membership_ty
     while ($membership->fetch()) {
       //delete related first and then delete parent.
       self::deleteRelatedMemberships($membership->id);
-      self::deleteMembership($membership->id);
+      // set membership status to Cancelled (when relationship is In-Active or deleted)
+      if (Civi::settings()->get('membership_reassignment')) {
+        $cancelledStatus = array_search('Cancelled', CRM_Member_PseudoConstant::membershipStatus(NULL, " name = 'Cancelled' ", 'name', FALSE, TRUE));
+        $membership->status_id = $cancelledStatus;
+        $membership->end_date = date('Y-m-d'); // set end date to today
+        $membership->save();
+      } else {
+        self::deleteMembership($membership->id);
+      }
     }
     $membership->free();
   }

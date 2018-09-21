@@ -573,10 +573,64 @@ class CRM_Contribute_Form_ContributionBase extends CRM_Core_Form {
       $locTypeId = array_keys($this->_params['onbehalf_location']['email']);
       $this->assign('onBehalfEmail', $this->_params['onbehalf_location']['email'][$locTypeId[0]]['email']);
     }
+
     $this->assignPaymentFields();
 
+    //fix for CRM-3767
+    $isMonetary = FALSE;
+    if ($this->_amount > 0.0) {
+      $isMonetary = TRUE;
+    }
+    elseif (!empty($this->_params['selectMembership'])) {
+      $memFee = CRM_Core_DAO::getFieldValue('CRM_Member_DAO_MembershipType', $this->_params['selectMembership'], 'minimum_fee');
+      if ($memFee > 0.0) {
+        $isMonetary = TRUE;
+      }
+    }
+
+    // The concept of contributeMode is deprecated.
+    // The payment processor object can provide info about the fields it shows.
+    if ($isMonetary && is_a($this->_paymentProcessor['object'], 'CRM_Core_Payment')) {
+      /** @var  $paymentProcessorObject \CRM_Core_Payment */
+      $paymentProcessorObject = $this->_paymentProcessor['object'];
+
+      $paymentFields = $paymentProcessorObject->getPaymentFormFields();
+      foreach ($paymentFields as $index => $paymentField) {
+        if (!isset($this->_params[$paymentField])) {
+          unset($paymentFields[$index]);
+          continue;
+        }
+        if ($paymentField === 'credit_card_exp_date') {
+          $date = CRM_Utils_Date::format(CRM_Utils_Array::value('credit_card_exp_date', $this->_params));
+          $date = CRM_Utils_Date::mysqlToIso($date);
+          $this->assign('credit_card_exp_date', $date);
+        }
+        elseif ($paymentField === 'credit_card_number') {
+          $this->assign('credit_card_number',
+            CRM_Utils_System::mungeCreditCard(CRM_Utils_Array::value('credit_card_number', $this->_params))
+          );
+        }
+        else {
+          $this->assign($paymentField, $this->_params[$paymentField]);
+        }
+      }
+      $paymentFieldsetLabel = ts('%1 Information', array($paymentProcessorObject->getPaymentTypeLabel()));
+      if (empty($paymentFields)) {
+        $paymentFieldsetLabel = '';
+      }
+      $this->assign('paymentFieldsetLabel', $paymentFieldsetLabel);
+      $this->assign('paymentFields', $paymentFields);
+
+    }
+    // default Email address field
+    $emailFieldName = "email-{$this->_bltID}";
+    // If email field is present in profile then use email from profile itself.
+    if ($emailExistsFieldName = $this->get('emailExistsFieldName')) {
+      $emailFieldName = $emailExistsFieldName;
+    }
+
     $this->assign('email',
-      $this->controller->exportValue('Main', "email-{$this->_bltID}")
+      $this->controller->exportValue('Main', $emailFieldName)
     );
 
     // also assign the receipt_text
@@ -630,7 +684,38 @@ class CRM_Contribute_Form_ContributionBase extends CRM_Core_Form {
           ) {
             $this->_emailExists = TRUE;
             $this->set('emailExists', TRUE);
+
+        // Prepare list of email only field in profile
+        $emailFields = array_filter($fields,
+          function($field) {
+            if (substr($field['name'], 0, 6) == 'email-') {
+              return TRUE;
+            }
+            return '';
           }
+        );
+        if (!empty($emailFields) &&
+          !in_array($profileContactType, array('honor', 'onbehalf'))
+        ) {
+          $this->_emailExists = TRUE;
+          $this->set('emailExists', TRUE);
+
+          // get a list of sort columns and their data to pass to array_multisort
+          $sort = array();
+          foreach ($emailFields as $k => $v) {
+            $sort['name'][$k] = $v['name'];
+            $sort['is_required'][$k] = $v['is_required'];
+          }
+
+          // IF profile have more than one email field then preference goes to
+          // Required field first then email-Primary and then other email fields
+
+          // sort by is_required desc and then name DESC
+          array_multisort($sort['is_required'], SORT_DESC, $sort['name'], SORT_DESC, $emailFields);
+          // get first element which has higher preference
+          $emailField = reset($emailFields);
+          // set profile field name.
+          $this->set('emailExistsFieldName', $emailField['name']);
         }
 
         if (array_intersect_key($fields, $fieldsToIgnore)) {

@@ -623,9 +623,14 @@ class CRM_Contribute_Form_ContributionBase extends CRM_Core_Form {
       $this->assign('paymentFields', $paymentFields);
 
     }
-
+    // default Email address field
+    $emailFieldName = "email-{$this->_bltID}";
+    // If email field is present in profile then use email from profile itself.
+    if ($emailExistsFieldName = $this->get('emailExistsFieldName')) {
+      $emailFieldName = $emailExistsFieldName;
+    }
     $this->assign('email',
-      $this->controller->exportValue('Main', "email-{$this->_bltID}")
+      $this->controller->exportValue('Main', $emailFieldName)
     );
 
     // also assign the receipt_text
@@ -673,13 +678,38 @@ class CRM_Contribute_Form_ContributionBase extends CRM_Core_Form {
 
       if ($fields) {
         // determine if email exists in profile so we know if we need to manually insert CRM-2888, CRM-15067
-        foreach ($fields as $key => $field) {
-          if (substr($key, 0, 6) == 'email-' &&
-              !in_array($profileContactType, array('honor', 'onbehalf'))
-          ) {
-            $this->_emailExists = TRUE;
-            $this->set('emailExists', TRUE);
+
+        // Prepare list of email only field in profile
+        $emailFields = array_filter($fields,
+          function($field) {
+            if (substr($field['name'], 0, 6) == 'email-') {
+              return TRUE;
+            }
+            return '';
           }
+        );
+        if (!empty($emailFields) &&
+          !in_array($profileContactType, array('honor', 'onbehalf'))
+        ) {
+          $this->_emailExists = TRUE;
+          $this->set('emailExists', TRUE);
+
+          // get a list of sort columns and their data to pass to array_multisort
+          $sort = array();
+          foreach ($emailFields as $k => $v) {
+            $sort['name'][$k] = $v['name'];
+            $sort['is_required'][$k] = $v['is_required'];
+          }
+
+          // IF profile have more than one email field then preference goes to
+          // Required field first then email-Primary and then other email fields
+
+          // sort by is_required desc and then name DESC
+          array_multisort($sort['is_required'], SORT_DESC, $sort['name'], SORT_DESC, $emailFields);
+          // get first element which has higher preference
+          $emailField = reset($emailFields);
+          // set profile field name.
+          $this->set('emailExistsFieldName', $emailField['name']);
         }
 
         if (array_intersect_key($fields, $fieldsToIgnore)) {

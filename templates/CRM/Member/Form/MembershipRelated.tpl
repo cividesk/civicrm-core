@@ -45,7 +45,7 @@
                         {foreach from=$related item=rel}
                         <tr id="rel_{$rel.id}" class="{cycle values="odd-row,even-row"} row-relationship {if $rel.membership_id}row-highlight{/if}">
                             <td>
-                                <a href="{crmURL p='civicrm/contact/view/rel' q="action=view&reset=1&selectedChild=rel&cid=`$rel.cid`&id=`$rel.id`"}">{$rel.relation}</a>{if $rel.mid}&nbsp;<span class="crm-marker">*</span>{/if}
+                                <a href="{crmURL p='civicrm/contact/view/rel' q="action=view&reset=1&selectedChild=rel&cid=`$rel.cid`&id=`$rel.id`"}">{$rel.relation}</a>{if $rel.is_permission_a_b}&nbsp;<span class="crm-marker" title="permissioned relationship">*</span>{/if}
                             </td>
                             <td data-order="{$rel.start_date}">{$rel.start_date|crmDate}</td>
                             <td data-order="{$rel.end_date}">{$rel.end_date|crmDate}</td>

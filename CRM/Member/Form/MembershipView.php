@@ -282,7 +282,7 @@ END AS 'relType'
         // _x and _y are replaced with _a and _b first, then vice-versa
         // comment is a qualifier for the relationship - now just job_title
         $select = "
-SELECT r.id, c.id as cid, c.display_name as name, c.job_title as comment,
+SELECT r.id, r.is_permission_a_b, r.is_permission_b_a, c.id as cid, c.display_name as name, c.job_title as comment,
        rt.name_x_y as relation, r.start_date, r.end_date,
        m.id as mid, ms.is_current_member, ms.label as status
   FROM civicrm_relationship r
@@ -315,6 +315,8 @@ SELECT r.id, c.id as cid, c.display_name as name, c.job_title as comment,
           'end_date',
           'is_current_member',
           'status',
+          'is_permission_a_b',
+          'is_permission_b_a',
         );
 
         while ($dao->fetch()) {

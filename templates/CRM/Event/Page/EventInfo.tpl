@@ -117,17 +117,17 @@
   <div class="crm-section event_date_time-section">
       <div class="label">{ts}When{/ts}</div>
       <div class="content">
-            <abbr class="dtstart" title="{$event.event_start_date|crmDate}">
+            <abbr class="dtstart" title="{$event.event_start_date}">
             {$event.event_start_date|crmDate}</abbr>
             {if $event.event_end_date}
                 &nbsp; {ts}through{/ts} &nbsp;
                 {* Only show end time if end date = start date *}
                 {if $event.event_end_date|date_format:"%Y%m%d" == $event.event_start_date|date_format:"%Y%m%d"}
-                    <abbr class="dtend" title="{$event.event_end_date|crmDate:0:1}">
+                    <abbr class="dtend" title="{$event.event_end_date}">
                     {$event.event_end_date|crmDate:0:1}
                     </abbr>
                 {else}
-                    <abbr class="dtend" title="{$event.event_end_date|crmDate}">
+                    <abbr class="dtend" title="{$event.event_end_date}">
                     {$event.event_end_date|crmDate}
                     </abbr>
                 {/if}

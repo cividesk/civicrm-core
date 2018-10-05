@@ -1463,6 +1463,9 @@ WHERE  civicrm_membership.contact_id = civicrm_contact.id
         if ($relMembership->find(TRUE)) {
           $params['id'] = $relMemIds['membership'] = $relMembership->id;
         }
+        else {
+          unset($params['id'], $params['membership_id']);
+        }
         $params['contact_id'] = $contactId;
         $params['owner_membership_id'] = $membership->id;
 
@@ -1499,6 +1502,8 @@ WHERE  civicrm_membership.contact_id = civicrm_contact.id
           $params['start_date'] = $membership->start_date;
           $params['end_date'] = $membership->end_date;
         }
+
+        $relMembership->free();
         // we should not created contribution record for related contacts, CRM-3371
         unset($params['contribution_status_id']);
 

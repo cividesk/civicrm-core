@@ -4481,6 +4481,9 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
       'is_opt_out' => array(),
       'is_deceased' => array(),
       'preferred_language' => array(),
+      'employer_id' => array(
+        'title' => ts('Current Employer'),
+      ),
     );
   }
 

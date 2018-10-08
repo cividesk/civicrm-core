@@ -200,13 +200,21 @@ class CRM_Contact_Form_Merge extends CRM_Core_Form {
           // @todo consider enabling if it is an add & defaulting to true.
           $element[4] = array_merge((array) CRM_Utils_Array::value(4, $element, array()), array('disabled' => TRUE));
         }
-        $this->addElement($element[0],
+        else if ($element[1] == 'operation[move_rel_table_memberships][add]') {
+          // Make Add New Membership field readonly
+          $element[4] = array('readonly' => TRUE, 'disabled' => TRUE);
+        }
+        $ele = $this->addElement($element[0],
           $element[1],
           array_key_exists('2', $element) ? $element[2] : NULL,
           array_key_exists('3', $element) ? $element[3] : NULL,
           array_key_exists('4', $element) ? $element[4] : NULL,
           array_key_exists('5', $element) ? $element[5] : NULL
         );
+        if ($element[1] == 'operation[move_rel_table_memberships][add]') {
+          // Set Add New Membership default to true
+          $ele->setChecked(TRUE);
+        }
       }
 
       // add related table elements

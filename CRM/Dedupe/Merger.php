@@ -567,7 +567,9 @@ INNER JOIN  civicrm_membership membership2 ON membership1.membership_type_id = m
     foreach ($sqls as $sql) {
       CRM_Core_DAO::executeQuery($sql, array(), TRUE, NULL, TRUE);
     }
-    CRM_Dedupe_Merger::addMembershipToRealtedContacts($mainId);
+    // Primary Membership is already assigned to Main contact
+    // No need to re-calculate Related Members
+    //CRM_Dedupe_Merger::addMembershipToRealtedContacts($mainId);
     $transaction->commit();
   }
 

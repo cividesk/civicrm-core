@@ -88,7 +88,7 @@
   <div class="clear"></div>
 </div>
 {/if}
-<div class="fn crm-event-id-{$event.id} crm-block crm-event-info-form-block">
+<div class="vevent crm-event-id-{$event.id} crm-block crm-event-info-form-block">
   <div class="event-info">
   {* Display top buttons only if the page is long enough to merit duplicate buttons *}
   {if $event.summary or $event.description}

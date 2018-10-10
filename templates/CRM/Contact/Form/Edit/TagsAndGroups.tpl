@@ -42,6 +42,9 @@
           </td>
         {/if}
         {if !$type || $type eq 'group'}
+          {if $groupElementType eq 'checkbox'}
+              {include file="CRM/Contact/Form/Edit/Groups.tpl"}
+          {else}
           <td>
             {if $groupElementType eq 'select'}
               <div class="crm-section group-section">
@@ -59,6 +62,7 @@
               {/foreach}
             {/if}
           </td>
+          {/if}
         {/if}
       </tr>
     </table>
@@ -66,3 +70,4 @@
   </div>
 </div><!-- /.crm-accordion-wrapper -->
 {/if}
+

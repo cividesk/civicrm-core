@@ -999,7 +999,7 @@ class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
         $values[$object->id]['count'] = ts('unknown');
       }
       else {
-        $values[$object->id]['count'] = civicrm_api3('Contact', 'getcount', array('group' => $object->id));
+        $values[$object->id]['count'] = civicrm_api3('Contact', 'getcount', array('group' => $object->id,  "status" => 'Added'));
       }
     }
 

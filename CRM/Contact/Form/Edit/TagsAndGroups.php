@@ -180,7 +180,9 @@ class CRM_Contact_Form_Edit_TagsAndGroups {
         $fName = $fieldName;
       }
 
-      $contactGroup = CRM_Contact_BAO_GroupContact::getContactGroup($id, 'Added', NULL, FALSE, TRUE);
+      // Show smart group contact those are added explicitly.
+      $contactGroup = CRM_Contact_BAO_GroupContact::getContactGroup($id, 'Added', NULL, FALSE, TRUE,
+        FALSE, TRUE, NULL, TRUE);
       if ($contactGroup) {
         foreach ($contactGroup as $group) {
           if ($groupElementType == 'select') {

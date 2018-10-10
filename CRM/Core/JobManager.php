@@ -246,8 +246,8 @@ class CRM_Core_JobManager {
       else {
         $data .= "\n\nParameters parsed (and passed to API method): \n" . serialize($this->currentJob->apiParams);
       }
-
-      $data .= "\n\nFull message: \n" . $message;
+      // Avoid issue : Data too long for column 'data'
+      $data .= "\n\nFull message: \n" . CRM_Utils_String::ellipsify($message, 64000);
 
       $dao->data = $data;
     }

@@ -669,11 +669,12 @@ AND  civicrm_group_contact.group_id = $groupID ";
    * @param int $contactID
    * @param bool $showHidden
    *   Hidden groups are shown only if this flag is set.
+   * @param bool $loadAll
    *
    * @return array
    *   an array of groups that this contact belongs to
    */
-  public static function contactGroup($contactID, $showHidden = FALSE) {
+  public static function contactGroup($contactID, $showHidden = FALSE, $loadAll = TRUE) {
     if (empty($contactID)) {
       return NULL;
     }
@@ -684,8 +685,9 @@ AND  civicrm_group_contact.group_id = $groupID ";
     else {
       $contactIDs = array($contactID);
     }
-
-    self::loadAll();
+    if ($loadAll) {
+      self::loadAll();
+    }
 
     $hiddenClause = '';
     if (!$showHidden) {
@@ -721,6 +723,7 @@ ORDER BY   gc.contact_id, g.children
       $contactGroup[$dao->contact_id]['group'][]
         = array(
           'id' => $dao->group_id,
+          'group_id' => $dao->group_id,
           'title' => $dao->title,
           'description' => $dao->description,
           'children' => $dao->children,

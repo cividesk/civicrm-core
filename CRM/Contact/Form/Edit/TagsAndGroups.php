@@ -180,9 +180,18 @@ class CRM_Contact_Form_Edit_TagsAndGroups {
         $fName = $fieldName;
       }
 
-      // Show smart group contact those are added explicitly.
+      // Include smart group contact those are added explicitly.
       $contactGroup = CRM_Contact_BAO_GroupContact::getContactGroup($id, 'Added', NULL, FALSE, TRUE,
         FALSE, TRUE, NULL, TRUE);
+
+      // Show smart group contact those are added implicitly.
+      if ($groupElementType == 'checkbox') {
+        $contactSmartyGroup = CRM_Contact_BAO_GroupContactCache::contactGroup($id, FALSE, FALSE);
+        if (!empty($contactSmartyGroup)) {
+          $contactGroup = array_merge($contactGroup, $contactSmartyGroup['group']);
+        }
+      }
+
       if ($contactGroup) {
         foreach ($contactGroup as $group) {
           if ($groupElementType == 'select') {

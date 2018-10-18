@@ -766,4 +766,13 @@ ORDER BY   gc.contact_id, g.children
     return date('YmdHis', strtotime("+ " . self::smartGroupCacheTimeout() . " Minutes"));
   }
 
+  public static function getPublicSmartGroup() {
+    $query = "SELECT id FROM `civicrm_group` where saved_search_id is not null and visibility = 'Public Pages' and is_active = 1";
+    $dao = CRM_Core_DAO::executeQuery($query);
+    $smartGroup = array();
+    while ($dao->fetch()) {
+      $smartGroup[] = $dao->id;
+    }
+    return $smartGroup;
+  }
 }

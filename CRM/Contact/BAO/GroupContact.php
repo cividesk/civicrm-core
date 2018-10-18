@@ -506,9 +506,12 @@ SELECT    *
     $contactGroup = [];
 
     if ($contactId) {
-      $contactGroupList = CRM_Contact_BAO_GroupContact::getContactGroup($contactId, 'Added',
-        NULL, FALSE, $ignorePermission
-      );
+      $contactGroupList = CRM_Contact_BAO_GroupContact::getContactGroup($contactId, 'Added', NULL, FALSE, $ignorePermission,
+        FALSE, TRUE, NULL, TRUE);
+      $contactSmartyGroup = CRM_Contact_BAO_GroupContactCache::contactGroup($contactId, FALSE, FALSE);
+      if (!empty($contactSmartyGroup)) {
+        $contactGroupList = array_merge($contactGroupList, $contactSmartyGroup['group']);
+      }
       if (is_array($contactGroupList)) {
         foreach ($contactGroupList as $key) {
           $groupId = $key['group_id'];

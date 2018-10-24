@@ -98,7 +98,7 @@ class CRM_Badge_BAO_Badge {
         if ($element) {
           $value = $row[$element];
           // hack to fix date field display format
-          if (strpos($element, '_date')) {
+          if (strpos($element, '_date') && (strpos($element, 'crm_date') !=  '0' )) {
             $value = CRM_Utils_Date::customFormat($value, "%B %E%f");
           }
         }
@@ -435,13 +435,15 @@ class CRM_Badge_BAO_Badge {
 
     // split/get actual field names from token and individual contact image URLs
     $returnProperties = array();
+    $badgeTokens = CRM_Utils_Token::getTokens(implode(', ', $layoutInfo['data']['token']));
     if (!empty($layoutInfo['data']['token'])) {
       foreach ($layoutInfo['data']['token'] as $index => $value) {
-        $element = '';
+        $element = $isReturnProperties = '';
         if ($value) {
           $token = CRM_Utils_Token::getTokens($value);
           if (key($token) == 'contact') {
             $element = $token['contact'][0];
+            $isReturnProperties = TRUE;
           }
           elseif (key($token) == 'event') {
             $element = $token['event'][0];
@@ -449,13 +451,21 @@ class CRM_Badge_BAO_Badge {
             if (substr($element, 0, 6) != 'event_') {
               $element = 'event_' . $element;
             }
+            $isReturnProperties = TRUE;
           }
           elseif (key($token) == 'participant') {
             $element = $token['participant'][0];
+            $isReturnProperties = TRUE;
+          }
+          else {
+            $element = key($token) . '.' . reset($token[key($token)]);
+            $isReturnProperties = FALSE;
           }
 
           // build returnproperties for query
-          $returnProperties[$element] = 1;
+          if ($isReturnProperties) {
+            $returnProperties[$element] = 1;
+          }
         }
 
         // add actual field name to row element
@@ -495,22 +505,35 @@ class CRM_Badge_BAO_Badge {
         $sortOrder = " ORDER BY $sortOrder";
       }
     }
-    $queryString = "$select $from $where $having $sortOrder";
+    $groupBy = " group by civicrm_participant.id ";
+
+    $queryString = "$select $from $where $groupBy $having $sortOrder";
 
     $dao = CRM_Core_DAO::executeQuery($queryString);
     $rows = array();
     while ($dao->fetch()) {
-      $query->convertToPseudoNames($dao);
-      $rows[$dao->participant_id] = array();
+      $val = $query->store($dao);
+      $convertedVals = $query->convertToPseudoNames($dao, TRUE, TRUE);
+      if (!empty($convertedVals)) {
+        $val = array_replace_recursive($val, $convertedVals);
+      }
       foreach ($returnProperties as $key => $dontCare) {
-        $value = isset($dao->$key) ? $dao->$key : NULL;
+        $value = isset($val[$key]) ? $val[$key] : NULL;
         // Format custom fields
         if (strstr($key, 'custom_') && isset($value)) {
-          $value = CRM_Core_BAO_CustomField::displayValue($value, substr($key, 7), $dao->contact_id);
+          $value = CRM_Core_BAO_CustomField::displayValue($value, substr($key, 7), $val['contact_id']);
+          $val[$key] = $value;
         }
-        $rows[$dao->participant_id][$key] = $value;
       }
+      $rows[$val['contact_id']] = $val;
     }
+
+    $contactIDs = array_keys($rows);
+    CRM_Utils_Hook::tokenValues($rows,
+      $contactIDs,
+      '',
+      $badgeTokens
+    );
 
     $eventBadgeClass = new CRM_Badge_BAO_Badge();
     $eventBadgeClass->createLabels($rows, $layoutInfo);

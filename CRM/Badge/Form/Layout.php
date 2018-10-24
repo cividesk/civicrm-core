@@ -114,6 +114,11 @@ class CRM_Badge_Form_Layout extends CRM_Admin_Form {
     $this->add('text', 'width_image_2', ts('Width (mm)'), array('size' => 6));
     $this->add('text', 'height_image_2', ts('Height (mm)'), array('size' => 6));
 
+    $this->add('text', 'image_3', ts('Image (top center)'),
+      $attributes + CRM_Core_DAO::getAttribute('CRM_Core_DAO_PrintLabel', 'title'));
+    $this->add('text', 'width_image_3', ts('Width (mm)'), array('size' => 6));
+    $this->add('text', 'height_image_3', ts('Height (mm)'), array('size' => 6));
+
     $this->add('checkbox', 'show_participant_image', ts('Use Participant Image?'));
     $this->add('text', 'width_participant_image', ts('Width (mm)'), array('size' => 6));
     $this->add('text', 'height_participant_image', ts('Height (mm)'), array('size' => 6));

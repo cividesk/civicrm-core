@@ -133,6 +133,17 @@ class CRM_Badge_BAO_Badge {
     if (!empty($layout['data']['height_image_2'])) {
       $formattedRow['height_image_2'] = $layout['data']['height_image_2'];
     }
+
+    if (!empty($layout['data']['image_3'])) {
+      $formattedRow['image_3'] = $layout['data']['image_3'];
+    }
+    if (!empty($layout['data']['width_image_3'])) {
+      $formattedRow['width_image_3'] = $layout['data']['width_image_3'];
+    }
+    if (!empty($layout['data']['height_image_3'])) {
+      $formattedRow['height_image_3'] = $layout['data']['height_image_3'];
+    }
+
     if (!empty($row['image_URL']) && !empty($layout['data']['show_participant_image'])) {
       $formattedRow['participant_image'] = $row['image_URL'];
     }
@@ -201,6 +212,11 @@ class CRM_Badge_BAO_Badge {
         CRM_Utils_Array::value('height_image_2', $formattedRow));
     }
 
+    if (!empty($formattedRow['image_3'])) {
+      $this->printImage($formattedRow['image_3'], $x + 34, NULL, CRM_Utils_Array::value('width_image_3', $formattedRow),
+        CRM_Utils_Array::value('height_image_3', $formattedRow));
+    }
+
     if ((CRM_Utils_Array::value('height_image_1', $formattedRow) >
         CRM_Utils_Array::value('height_image_2', $formattedRow)) && !empty($formattedRow['height_image_1'])
     ) {
@@ -208,6 +224,9 @@ class CRM_Badge_BAO_Badge {
     }
     elseif (!empty($formattedRow['height_image_2'])) {
       $startOffset = CRM_Utils_Array::value('height_image_2', $formattedRow);
+    }
+    elseif (!empty($formattedRow['height_image_3'])) {
+      $startOffset = CRM_Utils_Array::value('height_image_3', $formattedRow);
     }
 
     if (!empty($formattedRow['participant_image'])) {

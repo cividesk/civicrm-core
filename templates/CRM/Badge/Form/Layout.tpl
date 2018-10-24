@@ -86,6 +86,26 @@
          </table>
         </td>
       </tr>
+      <tr class="crm-badge-layout-form-block-image_3">
+        <td class="label">{$form.image_3.label}</td>
+        <td>
+         <table>
+          <tr>
+           <td>{$form.image_3.html}
+              <a href="#" class="crm-hover-button clear-image" title="{ts}Clear{/ts}"><i class="crm-i fa-times"></i></a>
+            <br/>
+            <span class="description">{ts}Click above and select a file by double clicking on it.{/ts}</span>
+           </td>
+           <td>
+            {$form.width_image_3.html}<br/>{$form.width_image_3.label}
+           </td>
+           <td>
+            {$form.height_image_3.html}<br/>{$form.height_image_3.label}
+           </td>
+          </tr>
+         </table>
+        </td>
+      </tr>
       <tr class="crm-badge-layout-form-block-participant_image">
         <td class="label">{$form.show_participant_image.label}</td>
         <td>

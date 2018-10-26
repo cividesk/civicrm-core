@@ -31,7 +31,6 @@
  * @copyright CiviCRM LLC (c) 2004-2017
  */
 class CRM_Report_Form_Contribute_Summary extends CRM_Report_Form {
-  protected $_addressField = FALSE;
 
   protected $_charts = array(
     '' => 'Tabular',
@@ -344,9 +343,6 @@ class CRM_Report_Form_Contribute_Summary extends CRM_Report_Form {
     foreach ($this->_columns as $tableName => $table) {
       if (array_key_exists('group_bys', $table)) {
         foreach ($table['group_bys'] as $fieldName => $field) {
-          if ($tableName == 'civicrm_address') {
-            $this->_addressField = TRUE;
-          }
           if (!empty($this->_params['group_bys'][$fieldName])) {
             switch (CRM_Utils_Array::value($fieldName, $this->_params['group_bys_freq'])) {
               case 'YEARWEEK':
@@ -411,9 +407,6 @@ class CRM_Report_Form_Contribute_Summary extends CRM_Report_Form {
 
       if (array_key_exists('fields', $table)) {
         foreach ($table['fields'] as $fieldName => $field) {
-          if ($tableName == 'civicrm_address') {
-            $this->_addressField = TRUE;
-          }
           if (!empty($field['required']) ||
             !empty($this->_params['fields'][$fieldName])
           ) {
@@ -515,15 +508,20 @@ class CRM_Report_Form_Contribute_Summary extends CRM_Report_Form {
              {$softCreditJoin}
              LEFT  JOIN civicrm_financial_type  {$this->_aliases['civicrm_financial_type']}
                      ON {$this->_aliases['civicrm_contribution']}.financial_type_id ={$this->_aliases['civicrm_financial_type']}.id
-             LEFT  JOIN civicrm_email {$this->_aliases['civicrm_email']}
-                     ON ({$this->_aliases['civicrm_contact']}.id = {$this->_aliases['civicrm_email']}.contact_id AND
-                        {$this->_aliases['civicrm_email']}.is_primary = 1)
-
-             LEFT  JOIN civicrm_phone {$this->_aliases['civicrm_phone']}
-                     ON ({$this->_aliases['civicrm_contact']}.id = {$this->_aliases['civicrm_phone']}.contact_id AND
-                        {$this->_aliases['civicrm_phone']}.is_primary = 1)";
+             ";
 
     $this->addAddressFromClause();
+    $this->addPhoneFromClause();
+
+    // include email field if email column is to be included
+    if ($this->isTableSelected('civicrm_email')) {
+      $this->_from .= "
+      LEFT JOIN civicrm_email {$this->_aliases['civicrm_email']}
+      ON ({$this->_aliases['civicrm_contact']}.id =
+      {$this->_aliases['civicrm_email']}.contact_id) AND
+      {$this->_aliases['civicrm_email']}.is_primary = 1\n";
+    }
+
     //for contribution batches
     if ($this->isTableSelected('civicrm_batch')) {
       $this->_from .= "
@@ -658,6 +656,7 @@ ROUND(AVG({$this->_aliases['civicrm_contribution']}.total_amount), 2) as civicrm
 
     if ($softCredit) {
       $this->from();
+      $this->customDataFrom();
       $select = "
 COUNT({$this->_aliases['civicrm_contribution_soft']}.amount )        as civicrm_contribution_soft_soft_amount_count,
 SUM({$this->_aliases['civicrm_contribution_soft']}.amount )          as civicrm_contribution_soft_soft_amount_sum,
@@ -779,6 +778,7 @@ ROUND(AVG({$this->_aliases['civicrm_contribution_soft']}.amount), 2) as civicrm_
     $softCredit = (!empty($this->_params['fields']['soft_amount']) && !empty($this->_params['fields']['total_amount'])) ? TRUE : FALSE;
     if ($softCredit) {
       $this->from('contribution');
+      $this->customDataFrom();
       $contriSQL = "{$this->_select} {$this->_from} {$this->_where} {$this->_groupBy} {$this->_having} {$this->_orderBy} {$this->_limit}";
       $contriDAO = CRM_Core_DAO::executeQuery($contriSQL);
       $contriFields = array(
@@ -866,7 +866,7 @@ ROUND(AVG({$this->_aliases['civicrm_contribution_soft']}.amount), 2) as civicrm_
         // build the chart.
         $config = CRM_Core_Config::Singleton();
         $graphRows['xname'] = $this->_interval;
-        $graphRows['yname'] = "Amount ({$config->defaultCurrency})";
+        $graphRows['yname'] = ts('Amount (%1)', array(1 => $config->defaultCurrency));
         CRM_Utils_OpenFlashChart::chart($graphRows, $this->_params['charts'], $this->_interval);
         $this->assign('chartType', $this->_params['charts']);
       }

@@ -86,4 +86,10 @@
     <page_callback>CRM_Member_Form_MembershipType</page_callback>
     <access_arguments>access CiviMember,administer CiviCRM</access_arguments>
   </item>
+  <item>
+     <path>civicrm/member/blockedit</path>
+     <title>CiviMember Dashboard</title>
+     <page_callback>CRM_Member_Form_BlockEdit</page_callback>
+     <access_arguments>access CiviMember</access_arguments>
+  </item>
 </menu>

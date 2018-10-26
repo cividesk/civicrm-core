@@ -62,7 +62,15 @@
         {/if}
         <tr><td class="label">{ts}Status{/ts}</td><td>{$status}</td></tr>
         <tr><td class="label">{ts}Source{/ts}</td><td>{$source}</td></tr>
-  {if $campaign}<tr><td class="label">{ts}Campaign{/ts}</td><td>{$campaign}</td></tr>{/if}
+        {if $campaign}<tr><td class="label">{ts}Campaign{/ts}</td><td>{$campaign}</td></tr>{/if}
+        {if $membership_reassignment && $owner_display_name}
+          <tr>
+            <td class="label"></td>
+            <td>
+              <a class="action-item crm-hover-button" href='{crmURL p="civicrm/member/blockedit" q="reset=1&id=$id&cid=$contact_id&snippet=json"}' id="crm-membership-edit-button-bottom"><span><i class="crm-i fa-pencil"></i> {ts}Edit Date{/ts}</span></a>
+            </td>
+          </tr>
+        {/if}
         <tr><td class="label">{ts}Member Since{/ts}</td><td>{$join_date|crmDate}</td></tr>
         <tr><td class="label">{ts}Start date{/ts}</td><td>{$start_date|crmDate}</td></tr>
         <tr><td class="label">{ts}End date{/ts}</td><td>{$end_date|crmDate}</td></tr>

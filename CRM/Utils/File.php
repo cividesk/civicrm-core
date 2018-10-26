@@ -950,7 +950,8 @@ HTACCESS;
    *   which the resized image will not extend.
    *   When FALSE, the image will be resized exactly to $width and $height, even
    *   if it means stretching it.
-   *
+   * @param string $subDir = null
+   *   create sub dir and copy resize Image to it.
    * @return string
    *   Path to image
    * @throws \CRM_Core_Exception
@@ -958,7 +959,7 @@ HTACCESS;
    *   - When GD is not available.
    *   - When the source file is not an image.
    */
-  public static function resizeImage($sourceFile, $targetWidth, $targetHeight, $suffix = "", $preserveAspect = TRUE) {
+  public static function resizeImage($sourceFile, $targetWidth, $targetHeight, $suffix = "", $preserveAspect = TRUE, $subDir = null) {
 
     // Check if GD is installed
     $gdSupport = CRM_Utils_System::getModuleSetting('gd', 'GD Support');
@@ -999,7 +1000,12 @@ HTACCESS;
 
     // figure out the new filename
     $pathParts = pathinfo($sourceFile);
-    $targetFile = $pathParts['dirname'] . DIRECTORY_SEPARATOR
+    $targetDirectory = $pathParts['dirname'] . DIRECTORY_SEPARATOR;
+    if (!empty($subDir)) {
+      $targetDirectory = $targetDirectory . $subDir . DIRECTORY_SEPARATOR;
+      CRM_Utils_File::createDir($targetDirectory);
+    }
+    $targetFile = $targetDirectory
       . $pathParts['filename'] . $suffix . "." . $pathParts['extension'];
 
     $targetData = imagecreatetruecolor($targetWidth, $targetHeight);

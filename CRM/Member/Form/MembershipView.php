@@ -199,6 +199,8 @@ class CRM_Member_Form_MembershipView extends CRM_Core_Form {
       else {
         $this->assign('noACL', TRUE);
       }
+      $this->assign('membership_reassignment', Civi::settings()->get('membership_reassignment'));
+
       $membershipType = CRM_Member_BAO_MembershipType::getMembershipTypeDetails($values['membership_type_id']);
 
       // Do the action on related Membership if needed

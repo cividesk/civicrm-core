@@ -1009,16 +1009,59 @@ HTACCESS;
       . $pathParts['filename'] . $suffix . "." . $pathParts['extension'];
 
     $targetData = imagecreatetruecolor($targetWidth, $targetHeight);
+    /* Check if this image is PNG or GIF, then set if Transparent*/
+    if ($sourceMime == 'image/gif') {
+      $transparent = imagecolortransparent($sourceData);
+      if ($transparent >= 0) {
+        // Find out the number of colors in the image palette. It will be 0 for truecolor images.
+        $palette_size = imagecolorstotal($sourceData);
+        if ($palette_size == 0 || $transparent < $palette_size) {
+          // Set the transparent color in the new resource, either if it is a
+          // truecolor image or if the transparent color is part of the palette.
+          // Since the index of the transparency color is a property of the
+          // image rather than of the palette, it is possible that an image
+          // could be created with this index set outside the palette size (see
+          // http://stackoverflow.com/a/3898007).
+          $transparent_color = imagecolorsforindex($sourceData, $transparent);
+          $transparent = imagecolorallocate($targetData, $transparent_color['red'], $transparent_color['green'], $transparent_color['blue']);
+
+          // Flood with our new transparent color.
+          imagefill($targetData, 0, 0, $transparent);
+          imagecolortransparent($targetData, $transparent);
+        }
+        else {
+          imagefill($targetData, 0, 0, imagecolorallocate($targetData, 255, 255, 255));
+        }
+      }
+    }
+    elseif ($sourceMime == 'image/png') {
+      // Set alphablending to off
+      imagealphablending($targetData, FALSE);
+      // alpha values
+      $transparency = imagecolorallocatealpha($targetData, 0, 0, 0, 127);
+      imagefill($targetData, 0, 0, $transparency);
+      // Set alphablending to on
+      imagealphablending($targetData, TRUE);
+      imagesavealpha($targetData, TRUE);
+    }
+    elseif ($sourceMime == 'image/jpeg') {
+      imagefill($targetData, 0, 0, imagecolorallocate($targetData, 255, 255, 255));
+    }
 
     // resize
-    imagecopyresized($targetData, $sourceData,
+    imagecopyresampled($targetData, $sourceData,
       0, 0, 0, 0,
       $targetWidth, $targetHeight, $sourceWidth, $sourceHeight);
 
     // save the resized image
     $fp = fopen($targetFile, 'w+');
     ob_start();
-    imagejpeg($targetData);
+    switch ($sourceInfo[2]) {
+      case 1: imagegif($targetData); break;
+      case 2: imagejpeg($targetData); break;
+      case 3: imagepng($targetData); break;
+      default: imagejpeg($targetData); break;
+    }
     $image_buffer = ob_get_contents();
     ob_end_clean();
     imagedestroy($targetData);

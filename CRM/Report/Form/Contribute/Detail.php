@@ -31,10 +31,6 @@
  * @copyright CiviCRM LLC (c) 2004-2017
  */
 class CRM_Report_Form_Contribute_Detail extends CRM_Report_Form {
-  protected $_addressField = FALSE;
-
-  protected $_emailField = FALSE;
-
   protected $_summary = NULL;
 
   protected $_softFrom = NULL;
@@ -946,7 +942,7 @@ WHERE  civicrm_contribution_contribution_id={$row['civicrm_contribution_contribu
 
     $this->addAddressFromClause();
 
-    if ($this->_emailField) {
+    if ($this->isTableSelected('civicrm_email')) {
       $this->_from .= "
             LEFT JOIN civicrm_email {$this->_aliases['civicrm_email']}
                    ON {$this->_aliases['civicrm_contact']}.id = {$this->_aliases['civicrm_email']}.contact_id AND

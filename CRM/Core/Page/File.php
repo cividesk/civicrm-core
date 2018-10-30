@@ -61,12 +61,13 @@ class CRM_Core_Page_File extends CRM_Core_Page {
       if ($width && $height) {
         $suffix = '_w'.$width .'_h' . $height;
         $fileName = pathinfo($path, PATHINFO_FILENAME);
-        $fileExtension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $fileExtension = pathinfo($path, PATHINFO_EXTENSION);
         $newFileName = $config->customFileUploadDir . 'cache'. DIRECTORY_SEPARATOR . $fileName . $suffix. '.' .$fileExtension;
         $photo = $fileName .'.' .$fileExtension;
         if (file_exists($newFileName)) {
           $path = $newFileName;
-        } else if ( file_exists($config->customFileUploadDir . $photo)) {
+        }
+        else if ( file_exists($config->customFileUploadDir . $photo)) {
           try {
             CRM_Utils_File::resizeImage($config->customFileUploadDir . $photo, $width, $height, $suffix, TRUE, 'cache');
             $path = $newFileName;

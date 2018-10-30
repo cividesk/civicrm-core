@@ -62,7 +62,7 @@ class CRM_Contact_Page_ImageFile extends CRM_Core_Page {
     if ($cid) {
       $config = CRM_Core_Config::singleton();
       $fileName = pathinfo($photo, PATHINFO_FILENAME);
-      $fileExtension = strtolower(pathinfo($photo, PATHINFO_EXTENSION));
+      $fileExtension = pathinfo($photo, PATHINFO_EXTENSION);
       // Functionality to resize image by passing width and height in url along with photo name,
       // this will create imange with width and height as suffix to image name
       // e.g img_112112133313.png will be img_112112133313_150_150.png
@@ -74,7 +74,8 @@ class CRM_Contact_Page_ImageFile extends CRM_Core_Page {
         $newFileName = $config->customFileUploadDir . 'cache'. DIRECTORY_SEPARATOR . $fileName . $suffix. '.' .$fileExtension;
         if (file_exists($newFileName)) {
           $thisFileName = $newFileName;
-        } else if ( file_exists($config->customFileUploadDir . $photo)) {
+        }
+        else if ( file_exists($config->customFileUploadDir . $photo)) {
           try {
             CRM_Utils_File::resizeImage($config->customFileUploadDir . $photo, $width, $height, $suffix, TRUE, 'cache');
             $thisFileName = $newFileName;
@@ -85,7 +86,7 @@ class CRM_Contact_Page_ImageFile extends CRM_Core_Page {
       }
       $this->download(
         $thisFileName,
-        'image/' . ($fileExtension == 'jpg' ? 'jpeg' : $fileExtension),
+        'image/' . (strtolower($fileExtension) == 'jpg' ? 'jpeg' : $fileExtension),
         $this->ttl
       );
       CRM_Utils_System::civiExit();

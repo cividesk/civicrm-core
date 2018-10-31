@@ -25,7 +25,7 @@
 *}
 
 {crmRegion name="membership-edit-block"}
-    <div id="membership-edit-section" class="crm-section">
+    <div id="membership-edit-section" class="crm-section" style="padding-top:12px;">
         {foreach from=$membershipFields key=fieldName item=membershipField}
             {assign var='name' value=$fieldName}
             <div class="crm-container {$name}-section">

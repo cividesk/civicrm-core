@@ -78,7 +78,7 @@ class CRM_Member_Form_BlockEdit extends CRM_Core_Form {
    * Build quickForm.
    */
   public function buildQuickForm() {
-    CRM_Utils_System::setTitle(ts('Update Membership details'));
+    CRM_Utils_System::setTitle(ts('Update Membership Dates'));
 
     $membershipFields = $this->getMembershipFields();
     $this->assign('membershipFields', $membershipFields);
@@ -87,7 +87,8 @@ class CRM_Member_Form_BlockEdit extends CRM_Core_Form {
         $name,
         $membershipField['title'],
         $membershipField['attributes'],
-        $membershipField['is_required']
+        $membershipField['is_required'],
+        $membershipField['attributes']
       );
     }
 
@@ -140,10 +141,10 @@ class CRM_Member_Form_BlockEdit extends CRM_Core_Form {
       'join_date' => array(
         'htmlType' => 'datepicker',
         'name' => 'join_date',
-        'title' => ts('Join Date'),
+        'title' => ts('Member Since Date'),
         'is_required' => TRUE,
         'attributes' => array(
-          'date' => 'yyyy-mm-dd',
+          'time' => false
         ),
       ),
       'start_date' => array(
@@ -152,7 +153,7 @@ class CRM_Member_Form_BlockEdit extends CRM_Core_Form {
         'title' => ts('Start Date'),
         'is_required' => TRUE,
         'attributes' => array(
-          'date' => 'yyyy-mm-dd',
+          'time' => false
         ),
       ),
     );

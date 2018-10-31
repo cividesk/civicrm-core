@@ -67,7 +67,7 @@
           <tr>
             <td class="label"></td>
             <td>
-              <a class="action-item crm-hover-button" href='{crmURL p="civicrm/member/blockedit" q="reset=1&id=$id&cid=$contact_id&snippet=json"}' id="crm-membership-edit-button-bottom"><span><i class="crm-i fa-pencil"></i> {ts}Edit Date{/ts}</span></a>
+              <a class="action-item crm-hover-button" href='{crmURL p="civicrm/member/blockedit" q="reset=1&id=$id&cid=$contact_id&snippet=json"}' id="crm-membership-edit-button-bottom"><span><i class="crm-i fa-pencil"></i> {ts}Edit Membership Dates{/ts}</span></a>
             </td>
           </tr>
         {/if}

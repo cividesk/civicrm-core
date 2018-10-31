@@ -894,8 +894,8 @@ HTACCESS;
       case 'image/jpg':
         list($imageWidth, $imageHeight) = getimagesize($path);
         list($imageThumbWidth, $imageThumbHeight) = CRM_Contact_BAO_Contact::getThumbSize($imageWidth, $imageHeight);
-        $url = "<a href=\"$url\" class='crm-image-popup'>
-          <img src=\"$url\" width=$imageThumbWidth height=$imageThumbHeight/>
+        $url = "<a href='$url' class='crm-image-popup'>
+          <img src='{$url}&width={$imageThumbWidth}&height={$imageThumbHeight}' width=$imageThumbWidth height=$imageThumbHeight/>
           </a>";
         break;
 

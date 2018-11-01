@@ -25,14 +25,14 @@
 *}
 
 {crmRegion name="membership-edit-block"}
-    <div id="membership-edit-section" class="crm-section" style="padding-top:12px;">
+    <div id="membership-edit-section" class="crm-block crm-form-block crm-membership-form-block crm-section" style="padding-top:12px;">
+    <table class="form-layout-compressed">
         {foreach from=$membershipFields key=fieldName item=membershipField}
             {assign var='name' value=$fieldName}
-            <div class="crm-container {$name}-section">
-                <div class="label">{$form.$name.label}</div>
-                <div class="content">{$form.$name.html}</div>
-                <div class="clear"></div>
-            </div>
+            <tr class="crm-container {$name}-section">
+                <td class="label">{$form.$name.label}</td>
+                <td class="content">{$form.$name.html}</td>
+            </tr>
         {/foreach}
     </div>
 {/crmRegion}

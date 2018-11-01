@@ -63,6 +63,7 @@ class CRM_Member_Form_BlockEdit extends CRM_Core_Form {
     $this->_memberID = CRM_Utils_Request::retrieve('membership_id', 'Positive', $this);
 
     $this->_values = civicrm_api3('Membership', 'getsingle', array('id' => $this->_id));
+    $this->_values['display_name'] = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $this->_values['contact_id'], 'display_name');
   }
 
   /**
@@ -81,7 +82,13 @@ class CRM_Member_Form_BlockEdit extends CRM_Core_Form {
     CRM_Utils_System::setTitle(ts('Update Membership Dates'));
 
     $membershipFields = $this->getMembershipFields();
-    $this->assign('membershipFields', $membershipFields);
+    $contact =  array( 'display_name' => array(
+        'add_field' => FALSE,
+          'readonly' => 'readonly'
+        ),
+      );
+    $this->assign('membershipFields', $contact + $membershipFields);
+    $this->addElement('text', 'display_name', ts('Member Name'), array('readonly' => TRUE));
     foreach ($membershipFields as $name => $membershipField) {
       $this->add($membershipField['htmlType'],
         $name,

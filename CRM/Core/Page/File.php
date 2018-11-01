@@ -57,23 +57,12 @@ class CRM_Core_Page_File extends CRM_Core_Page {
     if ($mimeType && strpos($mimeType, 'image') == '0') {
       $width  = CRM_Utils_Request::retrieve('width', 'Positive', CRM_Core_DAO::$_nullObject);
       $height = CRM_Utils_Request::retrieve('height', 'Positive', CRM_Core_DAO::$_nullObject);
-      $config = CRM_Core_Config::singleton();
       if ($width && $height) {
-        $suffix = '_w'.$width .'_h' . $height;
-        $fileName = pathinfo($path, PATHINFO_FILENAME);
-        $fileExtension = pathinfo($path, PATHINFO_EXTENSION);
-        $newFileName = $config->customFileUploadDir . 'cache'. DIRECTORY_SEPARATOR . $fileName . $suffix. '.' .$fileExtension;
-        $photo = $fileName .'.' .$fileExtension;
-        if (file_exists($newFileName)) {
-          $path = $newFileName;
-        }
-        else if ( file_exists($config->customFileUploadDir . $photo)) {
-          try {
-            CRM_Utils_File::resizeImage($config->customFileUploadDir . $photo, $width, $height, $suffix, TRUE, 'cache');
-            $path = $newFileName;
-          } catch (CRM_Core_Exception $e) {
-            // processing error
-          }
+        $suffix = '_w' . $width . '_h' . $height;
+        try {
+          $path = CRM_Utils_File::resizeImage($path, $width, $height, $suffix, TRUE, 'cache', TRUE);
+        } catch (CRM_Core_Exception $e) {
+          // processing error
         }
       }
     }

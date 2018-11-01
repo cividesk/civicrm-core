@@ -946,6 +946,8 @@ HTACCESS;
    *   if it means stretching it.
    * @param string $subDir = null
    *   create sub dir and copy resize Image to it.
+   * @param bool $returnPath = FALSE
+   *   When TRUE return new file name path otherwise return url
    * @return string
    *   Path to image
    * @throws \CRM_Core_Exception
@@ -953,8 +955,25 @@ HTACCESS;
    *   - When GD is not available.
    *   - When the source file is not an image.
    */
-  public static function resizeImage($sourceFile, $targetWidth, $targetHeight, $suffix = "", $preserveAspect = TRUE, $subDir = null) {
+  public static function resizeImage($sourceFile, $targetWidth, $targetHeight, $suffix = "", $preserveAspect = TRUE, $subDir = null, $returnPath = FALSE) {
 
+    if ( !file_exists($sourceFile) && $returnPath) {
+      return $sourceFile;
+    }
+    // figure out the new filename
+    $pathParts = pathinfo($sourceFile);
+    $targetDirectory = $pathParts['dirname'] . DIRECTORY_SEPARATOR;
+    if (!empty($subDir)) {
+      $targetDirectory = $targetDirectory . $subDir . DIRECTORY_SEPARATOR;
+      CRM_Utils_File::createDir($targetDirectory);
+    }
+    $targetFile = $targetDirectory
+      . $pathParts['filename'] . $suffix . "." . $pathParts['extension'];
+
+    // return file path if resize file already exist
+    if (!empty($subDir) && file_exists($targetFile) && $returnPath) {
+      return $targetFile;
+    }
     // Check if GD is installed
     $gdSupport = CRM_Utils_System::getModuleSetting('gd', 'GD Support');
     if (!$gdSupport) {
@@ -992,15 +1011,6 @@ HTACCESS;
       }
     }
 
-    // figure out the new filename
-    $pathParts = pathinfo($sourceFile);
-    $targetDirectory = $pathParts['dirname'] . DIRECTORY_SEPARATOR;
-    if (!empty($subDir)) {
-      $targetDirectory = $targetDirectory . $subDir . DIRECTORY_SEPARATOR;
-      CRM_Utils_File::createDir($targetDirectory);
-    }
-    $targetFile = $targetDirectory
-      . $pathParts['filename'] . $suffix . "." . $pathParts['extension'];
 
     $targetData = imagecreatetruecolor($targetWidth, $targetHeight);
     /* Check if this image is PNG or GIF, then set if Transparent*/
@@ -1063,6 +1073,9 @@ HTACCESS;
     rewind($fp);
     fclose($fp);
 
+    if ($returnPath) {
+      return $targetFile;
+    }
     // return the URL to link to
     $config = CRM_Core_Config::singleton();
     return $config->imageUploadURL . basename($targetFile);

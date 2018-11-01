@@ -70,20 +70,14 @@ class CRM_Contact_Page_ImageFile extends CRM_Core_Page {
       $height = CRM_Utils_Request::retrieve('height', 'Positive', CRM_Core_DAO::$_nullObject);
       $thisFileName = $config->customFileUploadDir . $photo;
       if ($width && $height) {
-        $suffix = '_w'.$width .'_h' . $height;
-        $newFileName = $config->customFileUploadDir . 'cache'. DIRECTORY_SEPARATOR . $fileName . $suffix. '.' .$fileExtension;
-        if (file_exists($newFileName)) {
-          $thisFileName = $newFileName;
-        }
-        else if ( file_exists($config->customFileUploadDir . $photo)) {
-          try {
-            CRM_Utils_File::resizeImage($config->customFileUploadDir . $photo, $width, $height, $suffix, TRUE, 'cache');
-            $thisFileName = $newFileName;
-          } catch (CRM_Core_Exception $e) {
-            // processing error
-          }
+        $suffix = '_w' . $width . '_h' . $height;
+        try {
+          $thisFileName = CRM_Utils_File::resizeImage($thisFileName, $width, $height, $suffix, TRUE, 'cache', TRUE);
+        } catch (CRM_Core_Exception $e) {
+          // processing error
         }
       }
+
       $this->download(
         $thisFileName,
         'image/' . (strtolower($fileExtension) == 'jpg' ? 'jpeg' : $fileExtension),

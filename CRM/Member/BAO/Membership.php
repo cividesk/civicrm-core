@@ -1494,8 +1494,8 @@ WHERE  civicrm_membership.contact_id = civicrm_contact.id
 
         //CRM-20707 - include start/end date
         if (Civi::settings()->get('membership_reassignment') && $relMembership->id) {
-          $params['start_date'] = $relMembership->start_date;
-          $params['join_date'] = $relMembership->join_date;
+          $params['start_date'] = !empty($relMembership->start_date) ? $relMembership->start_date : $membership->start_date;
+          $params['join_date'] = !empty($relMembership->join_date) ? $relMembership->join_date : $membership->join_date;
           $params['end_date'] = $membership->end_date;
         }
         else {

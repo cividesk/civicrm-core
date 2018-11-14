@@ -72,14 +72,14 @@
         <table id="active_membership" class="display">
             <thead>
             <tr>
-                <th>{ts}Membership{/ts}</th>
-                <th>{ts}Member Since{/ts}</th>
-                <th>{ts}Start Date{/ts}</th>
-                <th>{ts}End Date{/ts}</th>
-                <th>{ts}Status{/ts}</th>
-                <th>{ts}Source{/ts}</th>
-                <th>{ts}Auto-renew{/ts}</th>
-                <th>{ts}Related{/ts}</th>
+                <th class="crm-membership">{ts}Membership{/ts}</th>
+                <th class="crm-membership-join_date">{ts}Member Since{/ts}</th>
+                <th class="crm-membership-start_date">{ts}Start Date{/ts}</th>
+                <th class="crm-membership-end_date">{ts}End Date{/ts}</th>
+                <th class="crm-membership-status">{ts}Status{/ts}</th>
+                <th class="crm-membership-source">{ts}Source{/ts}</th>
+                <th class="crm-membership-auto_renew">{ts}Auto-renew{/ts}</th>
+                <th class="crm-membership-related_count">{ts}Related{/ts}</th>
                 <th></th>
             </tr>
             </thead>
@@ -123,13 +123,13 @@
         <table id="pending_membership" class="display">
             <thead>
             <tr>
-                <th>{ts}Membership{/ts}</th>
-                <th>{ts}Member Since{/ts}</th>
-                <th>{ts}Start Date{/ts}</th>
-                <th>{ts}End Date{/ts}</th>
-                <th>{ts}Status{/ts}</th>
-                <th>{ts}Source{/ts}</th>
-                <th>{ts}Auto-renew{/ts}</th>
+                <th class="crm-membership">{ts}Membership{/ts}</th>
+                <th class="crm-membership-join_date">{ts}Member Since{/ts}</th>
+                <th class="crm-membership-start_date">{ts}Start Date{/ts}</th>
+                <th class="crm-membership-end_date">{ts}End Date{/ts}</th>
+                <th class="crm-membership-status">{ts}Status{/ts}</th>
+                <th class="crm-membership-source">{ts}Source{/ts}</th>
+                <th class="crm-membership-auto_renew">{ts}Auto-renew{/ts}</th>
     <th></th>
             </tr>
             </thead>

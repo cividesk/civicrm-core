@@ -4329,7 +4329,7 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
    * Add Phone into From Table if required.
    */
   public function addPhoneFromClause() {
-    // include address field if address column is to be included
+    // include phone field if phone column is to be included
     if ($this->isTableSelected('civicrm_phone')) {
       $this->_from .= "
       LEFT JOIN civicrm_phone {$this->_aliases['civicrm_phone']}

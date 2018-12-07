@@ -534,7 +534,7 @@ class CRM_Activity_Form_Activity extends CRM_Contact_Form_Task {
       CRM_Core_Form_RecurringEntity::preProcess('civicrm_activity');
     }
 
-    if ($this->_action & CRM_Core_Action::VIEW) {
+    if ($this->_action & CRM_Core_Action::VIEW & !empty($this->_values['subject'])) {
       $url = CRM_Utils_System::url(implode("/", $this->urlPath), "reset=1&id={$this->_activityId}&action=view&cid={$this->_values['source_contact_id']}");
       CRM_Utils_Recent::add($this->_values['subject'],
         $url,

@@ -352,11 +352,6 @@ class CRM_Contact_Form_Edit_Address {
       }
       // end of parse address functionality
     }
-    else {
-      $config = CRM_Core_Config::singleton();
-      $defaults['address'][$blockId]['state_province_id'] = $config->defaultContactStateProvince;
-      $defaults['address'][$blockId]['country_id'] = $config->defaultContactCountry;
-    }
   }
 
   /**

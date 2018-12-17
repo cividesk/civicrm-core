@@ -2363,6 +2363,7 @@ LEFT JOIN civicrm_mailing_group g ON g.mailing_id   = m.id
       $mailingIDs = array();
       while ($dao->fetch()) {
         $mailingIDs[] = $dao->id;
+        self::getMailingRecurList($dao->id, $mailingIDs);
       }
       //CRM-18181 Get all mailings that use the mailings found earlier as receipients
       if (!empty($mailingIDs)) {
@@ -2380,6 +2381,23 @@ LEFT JOIN civicrm_mailing_group g ON g.mailing_id   = m.id
     }
 
     return $mailingIDs;
+  }
+
+  /**
+   * Get the Mailing list recursively from main mailing ID.
+   *
+   * @param int $id mailing ID
+   * @param array $mailingIDs List of Mailing ID
+   */
+  static function getMailingRecurList($id, &$mailingIDs) {
+    if ($id) {
+      $query = "SELECT mailing_id FROM civicrm_mailing_group WHERE entity_table LIKE 'civicrm_mailing%' and entity_id = $id " ;
+      $dao = CRM_Core_DAO::executeQuery($query);
+      while ($dao->fetch()) {
+        $mailingIDs[] = $dao->mailing_id;
+        self::getMailingRecurList($dao->mailing_id, $mailingIDs);
+      }
+    }
   }
 
   /**

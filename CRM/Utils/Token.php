@@ -1782,7 +1782,12 @@ class CRM_Utils_Token {
         }
         else {
           // ie unchanged
-          $value = "{$entity}.{$token}";
+          // keep curly bracket to handle token using replaceHookTokens if present
+          // Membership related custom token (not the custom field) present in contact array rather than membership array
+          // e.g. membership.last_paid_date, membership.duration (membership type Unit + Interval => 1 Year or 6 Month Or Lifetime)
+          // these type of token get handled in extension where token is defined.
+          // if token is not present at then it replace with empty value.
+          $value = '{'."{$entity}.{$token}". '}';
         }
         break;
     }

@@ -869,6 +869,7 @@
     <comment>When was the contact was created.</comment>
     <required>false</required>
     <export>true</export>
+    <import>true</import>
     <default>NULL</default>
     <add>4.3</add>
   </field>
@@ -878,6 +879,7 @@
     <comment>When was the contact (or closely related entity) was created or modified or deleted.</comment>
     <required>false</required>
     <export>true</export>
+    <import>true</import>
     <default>CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</default>
     <add>4.3</add>
   </field>

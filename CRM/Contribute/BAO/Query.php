@@ -103,6 +103,11 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
       $query->_element['contribution_campaign_title'] = $query->_tables['civicrm_campaign'] = 1;
     }
 
+    if (!empty($query->_returnProperties['contribution_payment_instrument_id'])) {
+      $query->_select['contribution_payment_instrument_id'] = "civicrm_contribution.payment_instrument_id as contribution_payment_instrument_id";
+      $query->_element['contribution_payment_instrument_id'] = $query->_tables['civicrm_contribution'] = 1;
+    }
+
     self::addSoftCreditFields($query);
   }
 
@@ -751,6 +756,8 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
       'contact_sub_type' => 1,
       'sort_name' => 1,
       'financial_type' => 1,
+      'payment_instrument_id' => 1,
+      'contribution_payment_instrument_id' => 1,
       'contribution_source' => 1,
       'is_test' => 1,
       'receive_date' => 1,
@@ -823,6 +830,7 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
         'payment_instrument' => 1,
         // kittens
         'payment_instrument_id' => 1,
+        'contribution_payment_instrument_id' => 1,
         // argh
         'contribution_check_number' => 1,
         // no

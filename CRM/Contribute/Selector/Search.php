@@ -72,6 +72,8 @@ class CRM_Contribute_Selector_Search extends CRM_Core_Selector_Base implements C
     'contribution_recur_id',
     'receipt_date',
     'membership_id',
+    'payment_instrument_id',
+    'contribution_payment_instrument_id',
     'currency',
     'contribution_campaign_id',
     'contribution_soft_credit_name',
@@ -357,7 +359,7 @@ class CRM_Contribute_Selector_Search extends CRM_Core_Selector_Base implements C
     $contributionStatuses = CRM_Core_OptionGroup::values('contribution_status',
       FALSE, FALSE, FALSE, NULL, 'name', FALSE
     );
-
+    $paymentInstrument = CRM_Core_OptionGroup::values('payment_instrument');
     //get all campaigns.
     $allCampaigns = CRM_Campaign_BAO_Campaign::getCampaigns(NULL, NULL, FALSE, FALSE, FALSE, TRUE);
 
@@ -412,7 +414,10 @@ class CRM_Contribute_Selector_Search extends CRM_Core_Selector_Base implements C
       $row['contribution_status_name'] = CRM_Utils_Array::value($row['contribution_status_id'],
         $contributionStatuses
       );
-
+      // add payment instrument name
+      $row['payment_instrument_name'] = CRM_Utils_Array::value($row['payment_instrument_id'],
+        $paymentInstrument
+      );
       $isPayLater = FALSE;
       if ($result->is_pay_later && CRM_Utils_Array::value('contribution_status_name', $row) == 'Pending') {
         $isPayLater = TRUE;

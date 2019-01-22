@@ -312,9 +312,16 @@ class CRM_Mailing_Event_BAO_TrackableURLOpen extends CRM_Mailing_Event_DAO_Track
             INNER JOIN  $queue
                     ON  $queue.contact_id = $contact.id
             INNER JOIN  $email
-                    ON  $queue.email_id = $email.id
-            INNER JOIN  $click
-                    ON  $click.event_queue_id = $queue.id
+                    ON  $queue.email_id = $email.id ";
+    if ($is_distinct && $url_id) {
+      $query .= " INNER JOIN  (
+        SELECT * FROM {$click} WHERE trackable_url_id = {$url_id} GROUP BY event_queue_id
+      ) AS {$click} ";
+    }
+    else {
+      $query .= "INNER JOIN  $click";
+    }
+    $query .= " ON  $click.event_queue_id = $queue.id
             INNER JOIN  $url
                     ON  $click.trackable_url_id = $url.id
             INNER JOIN  $job

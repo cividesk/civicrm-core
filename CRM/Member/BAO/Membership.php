@@ -710,7 +710,11 @@ INNER JOIN  civicrm_membership_type type ON ( type.id = membership.membership_ty
       if (Civi::settings()->get('membership_reassignment')) {
         $cancelledStatus = array_search('Cancelled', CRM_Member_PseudoConstant::membershipStatus(NULL, " name = 'Cancelled' ", 'name', FALSE, TRUE));
         $membership->status_id = $cancelledStatus;
-        $membership->end_date = date('Y-m-d'); // set end date to today
+        $endDate = date('Y-m-d');
+        // set today's date as end date if end is in future or no end date present (in case of life time membership)
+        if (($membership->end_date && $membership->end_date > $endDate) || empty($membership->end_date)) {
+          $membership->end_date = $endDate; // set end date to today
+        }
         $membership->save();
       } else {
         self::deleteMembership($membership->id);

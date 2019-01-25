@@ -88,9 +88,9 @@
       </td>
     </tr>
   {else}
-    <tr>
+    <tr class="crm-contribution-form-block-total_amount">
       <td class="label">{ts}Total Amount{/ts}</td>
-      <td><strong>{$total_amount|crmMoney:$currency}</strong>
+      <td><span class="total_amount-section" id='totalAmount'><strong>{$total_amount|crmMoney:$currency}</strong></span>
         {if $contribution_recur_id}
           <a class="crm-hover-button" href='{crmURL p="civicrm/contact/view/contributionrecur" q="reset=1&id=`$contribution_recur_id`&cid=`$contact_id`&context=contribution"}'>
             <strong>{ts}Recurring Contribution{/ts}</strong>

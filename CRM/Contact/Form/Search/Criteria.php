@@ -166,6 +166,10 @@ class CRM_Contact_Form_Search_Criteria {
       unset($componentModes['8']);
     }
 
+    if (!array_key_exists('CiviCase', $enabledComponents)) {
+      unset($componentModes['6']);
+    }
+
     // unset contributions or participants if user does not have
     // permission on them
     if (!CRM_Core_Permission::access('CiviContribute')) {

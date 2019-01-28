@@ -158,7 +158,38 @@ class CRM_Contact_Form_Search_Criteria {
     );
 
     $componentModes = CRM_Contact_Form_Search::getModeSelect();
+
     $form->assign('component_mappings', json_encode(CRM_Contact_Form_Search::getModeToComponentMapping()));
+    $enabledComponents = CRM_Core_Component::getEnabledComponents();
+
+    // unset disabled components that must should have been enabled
+    // to the option be viable
+    if (!array_key_exists('CiviMail', $enabledComponents)) {
+      unset($componentModes['8']);
+    }
+
+    if (!array_key_exists('CiviCase', $enabledComponents)) {
+      unset($componentModes['6']);
+    }
+
+    // unset contributions or participants if user does not have
+    // permission on them
+    if (!CRM_Core_Permission::access('CiviContribute')) {
+      unset($componentModes['2']);
+    }
+
+    if (!CRM_Core_Permission::access('CiviEvent')) {
+      unset($componentModes['3']);
+    }
+
+    if (!CRM_Core_Permission::access('CiviMember')) {
+      unset($componentModes['5']);
+    }
+
+    if (!CRM_Core_Permission::check('view all activities')) {
+      unset($componentModes['4']);
+    }
+
     if (count($componentModes) > 1) {
       $form->add('select',
         'component_mode',

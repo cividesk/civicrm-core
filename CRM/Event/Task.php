@@ -43,7 +43,8 @@ class CRM_Event_Task extends CRM_Core_Task {
    */
   const
     CANCEL_REGISTRATION = 301,
-    PARTICIPANT_STATUS = 302;
+    PARTICIPANT_STATUS = 302,
+    RECORD_CONTACTS = 303;
 
   /**
    * @var string
@@ -133,6 +134,10 @@ class CRM_Event_Task extends CRM_Core_Task {
           'class' => 'CRM_Event_Form_Task_AddToGroup',
           'result' => FALSE,
         ],
+        self::RECORD_CONTACTS => array(
+          'title' => ts('Add activity'),
+          'class' => 'CRM_Event_Form_Task_Activity',
+        ),
       ];
 
       //CRM-4418, check for delete

@@ -41,7 +41,8 @@ class CRM_Event_Task extends CRM_Core_Task {
   const
     // Event tasks
     CANCEL_REGISTRATION = 301,
-    PARTICIPANT_STATUS = 302;
+    PARTICIPANT_STATUS = 302,
+    RECORD_CONTACTS = 303;
 
   static $objectType = 'event';
 
@@ -126,6 +127,10 @@ class CRM_Event_Task extends CRM_Core_Task {
           'title' => ts('Group - add contacts'),
           'class' => 'CRM_Event_Form_Task_AddToGroup',
           'result' => FALSE,
+        ),
+        self::RECORD_CONTACTS => array(
+          'title' => ts('Add activity'),
+          'class' => 'CRM_Event_Form_Task_Activity',
         ),
       );
 

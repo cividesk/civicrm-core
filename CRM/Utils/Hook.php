@@ -1890,14 +1890,26 @@ abstract class CRM_Utils_Hook {
   }
 
   /**
-   * This hook is called while preparing a read-only profile screen
-   *
-   * @param string $profileName
-   * @return mixed
-   */
+ * This hook is called while preparing a read-only profile screen
+ *
+ * @param string $profileName
+ * @return mixed
+ */
   public static function viewProfile($profileName) {
     return self::singleton()->invoke(array('profileName'), $profileName, self::$_nullObject, self::$_nullObject, self::$_nullObject,
       self::$_nullObject, self::$_nullObject, 'civicrm_viewProfile');
+  }
+
+  /**
+   * This hook is called while preparing a read-only profile screen
+   *
+   * @param int $profileID
+   * @param string $contactType
+   * @return mixed
+   */
+  public static function summaryOverlayProfile(&$profileID, $contactType) {
+    return self::singleton()->invoke(array('profileID', 'contactType'), $profileID, $contactType, self::$_nullObject, self::$_nullObject,
+      self::$_nullObject, self::$_nullObject, 'civicrm_summaryOverlayProfile');
   }
 
   /**

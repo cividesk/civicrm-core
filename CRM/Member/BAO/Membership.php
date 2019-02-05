@@ -1384,6 +1384,8 @@ WHERE  civicrm_membership.contact_id = civicrm_contact.id
       return;
     }
     $deceasedStatusId = array_search('Deceased', CRM_Member_PseudoConstant::membershipStatus());
+    $cancelledStatusId = array_search('Cancelled', CRM_Member_PseudoConstant::membershipStatus());
+
     // FIXME : While updating/ renewing the
     // membership, if the relationship is PAST then
     // the membership of the related contact must be
@@ -1464,8 +1466,15 @@ WHERE  civicrm_membership.contact_id = civicrm_contact.id
         $relMembership = new CRM_Member_DAO_Membership();
         $relMembership->contact_id = $contactId;
         $relMembership->owner_membership_id = $membership->id;
+        $relMemIds = array();
         if ($relMembership->find(TRUE)) {
           $params['id'] = $relMembership->id;
+
+          // if existing membership cancelled, skip from renewal (relationship may be active)
+          if ($cancelledStatusId == $relMembership->status_id) {
+            continue;
+          }
+          $params['id'] = $relMemIds['membership'] = $relMembership->id;
         }
         else {
           unset($params['id'], $params['membership_id']);

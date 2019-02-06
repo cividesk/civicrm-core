@@ -74,6 +74,7 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
     'grant_application_received_date',
     'grant_report_received',
     'grant_money_transfer_date',
+    'decision_date',
   );
 
   /**

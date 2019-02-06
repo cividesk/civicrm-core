@@ -90,6 +90,7 @@ class CRM_Grant_BAO_Query extends CRM_Core_BAO_Query {
       $query->_select['grant_amount_total'] = 'civicrm_grant.amount_total as grant_amount_total';
       $query->_select['grant_application_received_date'] = 'civicrm_grant.application_received_date as grant_application_received_date ';
       $query->_select['grant_report_received'] = 'civicrm_grant.grant_report_received as grant_report_received';
+      $query->_select['decision_date'] = 'civicrm_grant.decision_date';
       $query->_select['grant_money_transfer_date'] = 'civicrm_grant.money_transfer_date as grant_money_transfer_date';
       $query->_element['grant_type_id'] = 1;
       $query->_element['grant_status_id'] = 1;

@@ -81,7 +81,7 @@
                             <a class="button" href="{$payNowLink}"><span class='nowrap'>{ts}Pay Now{/ts}</span></a>
                           </td>
                         {/if}
-                        {if $row.contribution_status_name == 'Completed' }
+                        {if $row.contribution_status_name == 'Completed' AND (call_user_func(array('CRM_Core_Permission','check'), 'view my invoices') OR call_user_func(array('CRM_Core_Permission','check'), 'access CiviContribute'))}
                           <td>
                             {assign var='id' value=$row.contribution_id}
                             {assign var='cid' value=$row.contact_id}

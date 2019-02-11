@@ -81,16 +81,18 @@
                             <a class="button" href="{$payNowLink}"><span class='nowrap'>{ts}Pay Now{/ts}</span></a>
                           </td>
                         {/if}
-                        {if $row.contribution_status_name == 'Completed' AND (call_user_func(array('CRM_Core_Permission','check'), 'view my invoices') OR call_user_func(array('CRM_Core_Permission','check'), 'access CiviContribute'))}
-                          <td>
-                            {assign var='id' value=$row.contribution_id}
-                            {assign var='cid' value=$row.contact_id}
-                            {capture assign=printReceipt}{crmURL p='civicrm/contribute/receipt' q="reset=1&id=`$id`&cid=`$cid`"}{/capture}
-                            <a class="button no-popup nowrap" href="{$printReceipt}">
-                              <i class="crm-i fa-print"></i>
-                              <span class='nowrap'>{ts}Print Receipt{/ts}</span>
-                            </a>
-                          </td>
+                        {if $row.contribution_status_name == 'Completed'}
+                           {if call_user_func(array('CRM_Core_Permission','check'), 'view my receipts') OR call_user_func(array('CRM_Core_Permission','check'), 'access CiviContribute')}
+                              <td>
+                                {assign var='id' value=$row.contribution_id}
+                                {assign var='cid' value=$row.contact_id}
+                                {capture assign=printReceipt}{crmURL p='civicrm/contribute/receipt' q="reset=1&id=`$id`&cid=`$cid`"}{/capture}
+                                <a class="button no-popup nowrap" href="{$printReceipt}">
+                                  <i class="crm-i fa-print"></i>
+                                  <span class='nowrap'>{ts}Print Receipt{/ts}</span>
+                                </a>
+                              </td>
+                           {/if}
                         {/if}
                     </tr>
                 {/foreach}

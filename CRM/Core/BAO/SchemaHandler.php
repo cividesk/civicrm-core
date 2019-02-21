@@ -303,8 +303,14 @@ ALTER TABLE {$tableName}
 
     $sql = self::buildFieldChangeSql($params, $indexExist);
 
-    // CRM-7007: do not i18n-rewrite this query
-    CRM_Core_DAO::executeQuery($sql, [], TRUE, NULL, FALSE, FALSE);
+    try {
+      // CRM-7007: do not i18n-rewrite this query
+      $dao = CRM_Core_DAO::executeQuery($sql, [], TRUE, NULL, FALSE, FALSE);
+      $dao->free();
+    }
+    catch (Exception $e) {
+      $e->getMessage();
+    }
 
     $config = CRM_Core_Config::singleton();
     if ($config->logging) {

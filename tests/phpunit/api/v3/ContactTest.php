@@ -4375,6 +4375,8 @@ class api_v3_ContactTest extends CiviUnitTestCase {
   }
 
   /**
+=======
+>>>>>>> Fix SQL injection in group/tag search
    * Verify that passing tag IDs to Contact.get works
    *
    * Tests the following formats

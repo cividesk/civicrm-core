@@ -102,6 +102,15 @@ class CRM_Utils_Money {
       throw new CRM_Core_Exception("Invalid currency \"{$currency}\"");
     }
 
+    // money_format() exists only in certain PHP install (CRM-650)
+    // setlocale() affects native gettext (CRM-11054, CRM-9976)
+    if (is_numeric($amount) && function_exists('money_format')) {
+      $lc = setlocale(LC_MONETARY, 0);
+      setlocale(LC_MONETARY, 'en_US.utf8', 'en_US', 'en_US.utf8', 'en_US', 'C');
+      $amount = money_format($valueFormat, $amount);
+      setlocale(LC_MONETARY, $lc);
+    }
+
     $amount = self::formatNumericByFormat($amount, $valueFormat);
     // If it contains tags, means that HTML was passed and the
     // amount is already converted properly,

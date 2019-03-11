@@ -489,7 +489,7 @@ class CRM_Mailing_BAO_Mailing extends CRM_Mailing_DAO_Mailing {
 
     $patterns = [];
 
-    $protos = '(https?|ftp|mailto)';
+    $protos = '(https?|ftp)';
     $letters = '\w';
     $gunk = '\{\}/#~:.?+=&;%@!\,\-\|\(\)\*';
     $punc = '.:?\-';

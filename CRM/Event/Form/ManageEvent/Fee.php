@@ -526,11 +526,6 @@ class CRM_Event_Form_ManageEvent_Fee extends CRM_Event_Form_ManageEvent {
          $errors['payment_processor'] = ts('You have indicated that this is a paid event, but no payment option has been selected. If this is not a paid event, please select the "No" option at the top of the page. If this is a paid event, please select at least one payment processor and/or enable the pay later option.');
         }
       }
-      else {
-        if (empty($values['payment_processor'])) {
-          $errors['payment_processor'] = ts('You have indicated that this is a paid event, but no payment option has been selected. If this is not a paid event, please select the "No" option at the top of the page. If this is a paid event, please select at least one payment processor and/or enable the pay later option.');
-        }
-      }
     }
     return empty($errors) ? TRUE : $errors;
   }

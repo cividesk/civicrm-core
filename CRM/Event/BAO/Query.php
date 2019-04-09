@@ -442,6 +442,9 @@ class CRM_Event_BAO_Query extends CRM_Core_BAO_Query {
       case 'event_id':
       case 'participant_event_id':
         $name = str_replace('participant_', '', $name);
+        if (CRM_Utils_Type::validate($value, 'CommaSeparatedIntegers')) {
+	  $op = 'IN';
+	}
       case 'event_is_public':
       case 'event_type_id':
       case 'event_title':

@@ -166,6 +166,15 @@ class CRM_Report_Form_Event_ParticipantListCount extends CRM_Report_Form_Event {
           ),
         ),
       ),
+      'civicrm_note' => array(
+        'dao' => 'CRM_Core_DAO_Note',
+        'fields' => array(
+          'participant_note' => array(
+            'name' => 'note',
+            'title' => ts('Participant Note'),
+          ),
+        ),
+      ),
       'civicrm_email' => array(
         'dao' => 'CRM_Core_DAO_Email',
         'fields' => array(
@@ -473,6 +482,14 @@ class CRM_Report_Form_Event_ParticipantListCount extends CRM_Report_Form_Event {
                 {$this->_aliases['civicrm_phone']}.is_primary = 1
          LEFT JOIN civicrm_line_item {$this->_aliases['civicrm_line_item']}
               ON {$this->_aliases['civicrm_line_item']}.entity_table = 'civicrm_participant' AND {$this->_aliases['civicrm_participant']}.id ={$this->_aliases['civicrm_line_item']}.entity_id";
+
+    // Include participant note.
+    if ($this->isTableSelected('civicrm_note')) {
+      $this->_from .= "
+            LEFT JOIN civicrm_note {$this->_aliases['civicrm_note']}
+                   ON ( {$this->_aliases['civicrm_note']}.entity_table = 'civicrm_participant' AND
+                   {$this->_aliases['civicrm_participant']}.id = {$this->_aliases['civicrm_note']}.entity_id )";
+    }
   }
 
   public function storeWhereHavingClauseArray() {

@@ -68,4 +68,15 @@ return array(
     'description' => "If enabled, Cancel Related Membership link will be available (Membership status set to Cancelled with Today date as end date) and while creating new related membership Join and Start date set as Today's date, delete link will not be available.",
     'help_text' => NULL,
   ),
+  'online_renewal_contribution_page' => array(
+    'group_name' => 'Member Preferences',
+    'group' => 'member',
+    'name' => 'online_renewal_contribution_page',
+    'type' => 'Integer',
+    'html_type' => 'Select',
+    'default' => NULL,
+    'pseudoconstant' => array(
+      'name' => 'contributionPage',
+    ),
+  ),
 );

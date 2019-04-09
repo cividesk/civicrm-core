@@ -164,6 +164,10 @@ class CRM_Report_Form_Event_ParticipantListing extends CRM_Report_Form_Event {
           'registered_by_id' => array(
             'title' => ts('Registered by Participant ID'),
           ),
+          'registered_by_name' => array(
+            'title' => ts('Registered by Participant Name'),
+            'name' => 'registered_by_id',
+          ),
           'source' => array(
             'title' => ts('Source'),
           ),
@@ -291,6 +295,15 @@ class CRM_Report_Form_Event_ParticipantListing extends CRM_Report_Form_Event {
           ),
           'event_start_date' => array(
             'title' => ts('Event Start Date'),
+          ),
+        ),
+      ),
+      'civicrm_note' => array(
+        'dao' => 'CRM_Core_DAO_Note',
+        'fields' => array(
+          'participant_note' => array(
+            'name' => 'note',
+            'title' => ts('Participant Note'),
           ),
         ),
       ),
@@ -523,6 +536,15 @@ ORDER BY  cv.label
                      ON {$this->_aliases['civicrm_contact']}.id = {$this->_aliases['civicrm_phone']}.contact_id AND
                          {$this->_aliases['civicrm_phone']}.is_primary = 1
       ";
+
+    // Include participant note.
+    if ($this->isTableSelected('civicrm_note')) {
+      $this->_from .= "
+            LEFT JOIN civicrm_note {$this->_aliases['civicrm_note']}
+                   ON ( {$this->_aliases['civicrm_note']}.entity_table = 'civicrm_participant' AND
+                   {$this->_aliases['civicrm_participant']}.id = {$this->_aliases['civicrm_note']}.entity_id )";
+    }
+
     if ($this->_contribField) {
       $this->_from .= "
              LEFT JOIN civicrm_participant_payment pp
@@ -746,7 +768,6 @@ ORDER BY  cv.label
   public function alterDisplay(&$rows) {
     $entryFound = FALSE;
     $eventType = CRM_Core_OptionGroup::values('event_type');
-
     $financialTypes = CRM_Contribute_PseudoConstant::financialType();
     $contributionStatus = CRM_Contribute_PseudoConstant::contributionStatus();
     $paymentInstruments = CRM_Contribute_PseudoConstant::paymentInstrument();
@@ -795,7 +816,18 @@ ORDER BY  cv.label
         $entryFound = TRUE;
       }
 
-      // Handel value seperator in Fee Level
+      // Handle registered by name
+      if (array_key_exists('civicrm_participant_registered_by_name', $row)) {
+        $registeredById = $row['civicrm_participant_registered_by_name'];
+        if ($registeredById) {
+          $registeredByContactId = CRM_Core_DAO::getFieldValue("CRM_Event_DAO_Participant", $registeredById, 'contact_id', 'id');
+          $rows[$rowNum]['civicrm_participant_registered_by_name'] = CRM_Contact_BAO_Contact::displayName($registeredByContactId);
+          $rows[$rowNum]['civicrm_participant_registered_by_name_link'] = CRM_Utils_System::url('civicrm/contact/view', 'reset=1&cid=' . $registeredByContactId, $this->_absoluteUrl);
+          $rows[$rowNum]['civicrm_participant_registered_by_name_hover'] = ts('View Contact Summary for Contact that registered the participant.');
+        }
+      }
+
+      // Handle value seperator in Fee Level
       if (array_key_exists('civicrm_participant_participant_fee_level', $row)) {
         $feeLevel = $row['civicrm_participant_participant_fee_level'];
         if ($feeLevel) {

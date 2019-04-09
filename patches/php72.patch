@@ -1,0 +1,49 @@
+From 2bd5e33de886f65eb3e34fd8f379c941346d7c16 Mon Sep 17 00:00:00 2001
+From: Seamus Lee <seamuslee001@gmail.com>
+Date: Sun, 6 May 2018 08:38:37 +1000
+Subject: [PATCH] Update DB package to support PHP7.2
+
+switch count to strlen when parsing the DSN
+
+---
+ packages/DB.php        | 2 +-
+ packages/DB/common.php | 6 ++++--
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/packages/DB.php b/packages/DB.php
+index 2a06764f9..30dd48b38 100644
+--- a/packages/DB.php
++++ b/packages/DB.php
+@@ -790,7 +790,7 @@ static function parseDSN($dsn)
+             $parsed['dbsyntax'] = $str;
+         }
+ 
+-        if (!count($dsn)) {
++        if (empty($dsn)) {
+             return $parsed;
+         }
+ 
+diff --git a/packages/DB/common.php b/packages/DB/common.php
+index afa8359ba..ee50c0880 100644
+--- a/packages/DB/common.php
++++ b/packages/DB/common.php
+@@ -1342,7 +1342,8 @@ function &getRow($query, $params = array(),
+             }
+         }
+         // modifyLimitQuery() would be nice here, but it causes BC issues
+-        if (sizeof($params) > 0) {
++        $params = (array) $params;
++        if (count($params) > 0) {
+             $sth = $this->prepare($query);
+             if (DB::isError($sth)) {
+                 return $sth;
+@@ -1650,7 +1651,8 @@ function &getAll($query, $params = array(),
+             }
+         }
+ 
+-        if (sizeof($params) > 0) {
++        $params = (array) $params;
++        if (count($params) > 0) {
+             $sth = $this->prepare($query);
+ 
+             if (DB::isError($sth)) {

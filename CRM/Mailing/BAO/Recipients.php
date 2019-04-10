@@ -95,6 +95,7 @@ FROM   civicrm_mailing_recipients r
 WHERE  r.mailing_id = %1
        $limitString
 ";
+
     $params = [1 => [$mailingID, 'Integer']];
 
     return CRM_Core_DAO::executeQuery($sql, $params);

@@ -355,7 +355,7 @@ class CRM_Event_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
       $row['campaign_id'] = $result->participant_campaign_id;
       $row['current_employer'] = $result->current_employer;
       $row['current_employer_id'] = $result->current_employer_id;
-
+      $row['participant_listing_id'] = CRM_Core_DAO::getFieldValue('CRM_Event_DAO_Event', $row['event_id'], 'participant_listing_id');
       // gross hack to show extra information for pending status
       $statusClass = NULL;
       if ((isset($row['participant_status_id'])) &&

@@ -5759,6 +5759,11 @@ civicrm_relationship.start_date > {$today}
       $cache = $_rTempCache[$arg_sig];
     }
     else {
+      $cache = array(
+        "from" => "",
+        "where" => "",
+      );
+
       // create temp table with contact ids
 
       $tableName = CRM_Utils_SQL_TempTable::build()->createWithColumns('contact_id int primary key')->setMemory(TRUE)->getName();
@@ -5788,11 +5793,13 @@ SELECT contact_a.id
       $rTypes = CRM_Core_PseudoConstant::relationshipType();
       if (is_numeric($this->_displayRelationshipType)) {
         $relationshipTypeLabel = $rTypes[$this->_displayRelationshipType]['label_a_b'];
+
         $qcache['from'] = "
 INNER JOIN civicrm_relationship displayRelType ON ( displayRelType.contact_id_a = contact_a.id OR displayRelType.contact_id_b = contact_a.id )
 INNER JOIN $tableName transform_temp ON ( transform_temp.contact_id = displayRelType.contact_id_a OR transform_temp.contact_id = displayRelType.contact_id_b )
 ";
         $qcache['where'] = "
+
 WHERE displayRelType.relationship_type_id = {$this->_displayRelationshipType}
 AND   displayRelType.is_active = 1
 ";
@@ -5801,6 +5808,7 @@ AND   displayRelType.is_active = 1
         list($relType, $dirOne, $dirTwo) = explode('_', $this->_displayRelationshipType);
         if ($dirOne == 'a') {
           $relationshipTypeLabel = $rTypes[$relType]['label_a_b'];
+
           $qcache['from'] .= "
 INNER JOIN civicrm_relationship displayRelType ON ( displayRelType.contact_id_a = contact_a.id )
 INNER JOIN $tableName transform_temp ON ( transform_temp.contact_id = displayRelType.contact_id_b )
@@ -5813,11 +5821,13 @@ INNER JOIN civicrm_relationship displayRelType ON ( displayRelType.contact_id_b 
 INNER JOIN $tableName transform_temp ON ( transform_temp.contact_id = displayRelType.contact_id_a )
 ";
         }
+
         $qcache['where'] = "
 WHERE displayRelType.relationship_type_id = $relType
 AND   displayRelType.is_active = 1
 ";
       }
+
       $qcache['relTypeLabel'] = $relationshipTypeLabel;
       $_rTempCache[$arg_sig]['queries'][$this->_displayRelationshipType] = $qcache;
     }
@@ -5832,6 +5842,7 @@ AND   displayRelType.is_active = 1
       $from = str_replace("INNER JOIN", "LEFT JOIN", $from);
       $from .= $qcache['from'];
       $where = $qcache['where'];
+
       if (!empty($this->_permissionWhereClause)) {
         $where .= "AND $this->_permissionWhereClause";
       }

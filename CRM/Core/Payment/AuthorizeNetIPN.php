@@ -295,6 +295,7 @@ INNER JOIN civicrm_contribution co ON co.contribution_recur_id = cr.id
     $contRecur = CRM_Core_DAO::executeQuery($sql);
     $contRecur->fetch();
     $ids['contributionRecur'] = $contRecur->id;
+    $ids['paymentProcessor'] = $contRecur->payment_processor_id;
     if ($ids['contact'] != $contRecur->contact_id) {
       $message = ts("Recurring contribution appears to have been re-assigned from id %1 to %2, continuing with %2.", [1 => $ids['contact'], 2 => $contRecur->contact_id]);
       CRM_Core_Error::debug_log_message($message);

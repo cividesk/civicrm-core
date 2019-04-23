@@ -516,7 +516,7 @@ class CRM_Contact_Form_Task extends CRM_Core_Form {
       $ssId = $this->get('ssID');
       $hiddenSmartParams = array(
         'group_type' => array('2' => 1),
-        'form_values' => $this->get('formValues'),
+        'form_values' => $this->get('queryParams'),
         'saved_search_id' => $ssId,
         'search_custom_id' => $this->get('customSearchID'),
         'search_context' => $this->get('context'),

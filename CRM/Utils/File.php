@@ -1100,4 +1100,13 @@ HTACCESS;
     return $iconClasses['*'];
   }
 
+  /**
+   * Get the Mime-Type of a file based on the url path
+   * @param string $path full filename path
+   * @return string|bool
+   */
+  public function getMimeType($path = NULL) {
+    return mime_content_type($path);
+  }
+
 }

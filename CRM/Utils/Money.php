@@ -112,6 +112,7 @@ class CRM_Utils_Money {
     }
 
     $amount = self::formatNumericByFormat($amount, $valueFormat);
+
     // If it contains tags, means that HTML was passed and the
     // amount is already converted properly,
     // so don't mess with it again.

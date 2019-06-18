@@ -101,6 +101,7 @@ class CRM_Utils_API_HTMLInputCoder extends CRM_Utils_API_AbstractFieldCoder {
         'label',
         // This is needed for navigation items urls
         'url',
+        'receipt_text',
         'details',
         // message templates’ text versions
         'msg_text',

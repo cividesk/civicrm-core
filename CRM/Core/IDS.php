@@ -174,6 +174,7 @@ class CRM_Core_IDS {
       'suggested_message',
       'page_text',
       'details',
+      'receipt_text',
     ];
 
     $result = self::createBaseConfig();

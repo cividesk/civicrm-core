@@ -326,6 +326,30 @@ FROM civicrm_navigation WHERE domain_id = $domainID";
   }
 
   /**
+   * buildNavigationTree retreives items in order. We call this function to
+   * ensure that any items added by the hook are also in the correct order.
+   */
+  public static function orderByWeight(&$navigations) {
+    // sort each item in navigations by weight
+    usort($navigations, function($a, $b) {
+      // If no weight have been defined for an item put it at the end of the list
+      if (!isset($a['attributes']['weight'])) {
+        $a['attributes']['weight'] = 1000;
+      }
+      if (!isset($b['attributes']['weight'])) {
+        $b['attributes']['weight'] = 1000;
+      }
+      return $a['attributes']['weight'] - $b['attributes']['weight'];
+    });
+    // If any of the $navigations have children, recurse
+    foreach ($navigations as $navigation) {
+      if (isset($navigation['child'])) {
+        self::orderByWeight($navigation['child']);
+      }
+    }
+  }
+
+  /**
    * Recursively check child menus.
    *
    * @param array $value
@@ -385,6 +409,77 @@ FROM civicrm_navigation WHERE domain_id = $domainID";
       }
     });
     self::_fixNavigationMenu($nodes, $maxNavID, NULL);
+  }
+
+  /**
+   * Check if a menu item should be visible based on permissions and component.
+   *
+   * @param $item
+   * @return bool
+   */
+  public static function checkPermission($item) {
+    if (!empty($item['permission'])) {
+      $permissions = explode(',', $item['permission']);
+      $operator = CRM_Utils_Array::value('operator', $item);
+      $hasPermission = FALSE;
+      foreach ($permissions as $key) {
+        $key = trim($key);
+        $showItem = TRUE;
+        //get the component name from permission.
+        $componentName = CRM_Core_Permission::getComponentName($key);
+        if ($componentName) {
+          if (!in_array($componentName, CRM_Core_Config::singleton()->enableComponents) ||
+            !CRM_Core_Permission::check($key)
+          ) {
+            $showItem = FALSE;
+            if ($operator == 'AND') {
+              return FALSE;
+            }
+          }
+          else {
+            $hasPermission = TRUE;
+          }
+        }
+        elseif (!CRM_Core_Permission::check($key)) {
+          $showItem = FALSE;
+          if ($operator == 'AND') {
+            return FALSE;
+          }
+        }
+        else {
+          $hasPermission = TRUE;
+        }
+      }
+      if (empty($showItem) && !$hasPermission) {
+        return FALSE;
+      }
+    }
+    return TRUE;
+  }
+
+  /**
+   * Turns relative URLs (like civicrm/foo/bar) into fully-formed
+   * ones (i.e. example.com/wp-admin?q=civicrm/dashboard).
+   *
+   * If the URL is already fully-formed, nothing will be done.
+   *
+   * @param string $url
+   *
+   * @return string
+   */
+  public static function makeFullyFormedUrl($url) {
+    if (self::isNotFullyFormedUrl($url)) {
+      //CRM-7656 --make sure to separate out url path from url params,
+      //as we'r going to validate url path across cross-site scripting.
+      $path = parse_url($url, PHP_URL_PATH);
+      $q = parse_url($url, PHP_URL_QUERY);
+      $fragment = parse_url($url, PHP_URL_FRAGMENT);
+      return CRM_Utils_System::url($path, $q, FALSE, $fragment);
+    }
+    if (strpos($url, '&amp;') === FALSE) {
+      return htmlspecialchars($url);
+    }
+    return $url;
   }
 
   /**
@@ -540,6 +635,17 @@ FROM civicrm_navigation WHERE domain_id = $domainID";
     }
 
     return $url;
+  }
+  
+  /**
+   * Checks if the given URL is not fully-formed
+   *
+   * @param string $url
+   *
+   * @return bool
+   */
+  private static function isNotFullyFormedUrl($url) {
+    return substr($url, 0, 4) !== 'http' && $url[0] !== '/' && $url[0] !== '#';
   }
 
   /**

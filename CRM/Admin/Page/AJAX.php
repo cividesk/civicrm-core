@@ -54,6 +54,21 @@ class CRM_Admin_Page_AJAX {
     CRM_Utils_System::civiExit();
   }
 
+  public static function getSearchOptions() {
+  $searchOptions = Civi::settings()->get('quicksearch_options');
+    $labels = CRM_Core_SelectValues::quicksearchOptions();
+    $result = [];
+    foreach ($searchOptions as $key) {
+      $label = $labels[$key];
+      if (strpos($key, 'custom_') === 0) {
+        $key = 'custom_' . CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', substr($key, 7), 'id', 'name');
+        $label = array_slice(explode(': ', $label, 2), -1);
+      }
+      $result[$key] = $label;
+    }
+    return $result;
+  }
+
   /**
    * Process drag/move action for menu tree.
    */

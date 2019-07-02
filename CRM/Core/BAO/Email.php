@@ -315,13 +315,13 @@ AND    reset_date IS NULL
         if (!$email || $emailVal['on_hold']) {
           continue;
         }
-        $fromEmail = "$fromDisplayName <$email>";
+        $fromEmail = "\"$fromDisplayName\" <$email>";
         $fromEmailHtml = htmlspecialchars($fromEmail) . ' ' . $emailVal['locationType'];
 
         if (!empty($emailVal['is_primary'])) {
           $fromEmailHtml .= ' ' . ts('(preferred)');
         }
-        $fromEmailValues[$emailId] = $fromEmailHtml;
+        $fromEmailValues[$fromEmail] = $fromEmailHtml;
       }
     }
     return $fromEmailValues;

@@ -1499,6 +1499,7 @@ class CRM_Core_Permission {
 
     $permissions['report_template']['update'] = 'save Report Criteria';
     $permissions['report_template']['create'] = 'save Report Criteria';
+
     return $permissions;
   }
 

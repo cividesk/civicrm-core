@@ -242,7 +242,7 @@ class CRM_Grant_Form_Grant extends CRM_Core_Form {
       )
     );
 
-    if ($this->_context == 'standalone') {
+    if ($this->_context == 'standalone' || $this->_context == 'search') {
       $this->addEntityRef('contact_id', ts('Applicant'), array('create' => TRUE), TRUE);
     }
   }

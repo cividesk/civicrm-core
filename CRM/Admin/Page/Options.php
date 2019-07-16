@@ -250,6 +250,16 @@ class CRM_Admin_Page_Options extends CRM_Core_Page_Basic {
         $optionValue[$key]['financial_account'] = CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($key, NULL, 'civicrm_option_value', 'financial_account_id.name');
       }
     }
+
+    $showVisibility = 0;
+    foreach ($optionValue as $key => $option) {
+      if ($optionValue[$key]['visibility_id']) {
+        $showVisibility = $optionValue[$key]['visibility_id'];
+	break;
+      }
+    }
+    $this->assign('showVisibility', $showVisibility);
+
     $this->assign('rows', $optionValue);
   }
 

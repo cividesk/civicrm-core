@@ -105,8 +105,6 @@ class CRM_Core_Config_MagicMerge {
       'userFrameworkURLVar' => array('runtime'),
       'userHookClass' => array('runtime'),
       'cleanURL' => array('runtime'),
-      'configAndLogDir' => array('runtime'),
-      'templateCompileDir' => array('runtime'),
       'templateDir' => array('runtime'),
 
       // "boot-svc" properties are critical services needed during init.
@@ -184,6 +182,12 @@ class CRM_Core_Config_MagicMerge {
       'wpBasePage' => array('setting'),
       'wpLoadPhp' => array('setting'),
 
+      // "path" properties are managed via Civi::paths and $civicrm_paths
+      // Option: `mkdir` - auto-create dir
+      // Option: `restrict` - auto-restrict remote access
+      'configAndLogDir' => array('path', 'civicrm.log', array('mkdir', 'restrict')),
+      'templateCompileDir' => array('path', 'civicrm.compile', array('mkdir', 'restrict')),
+
       // "setting-path" properties are settings with special filtering
       // to return normalized file paths.
       // Option: `mkdir` - auto-create dir
@@ -235,10 +239,14 @@ class CRM_Core_Config_MagicMerge {
       case 'setting':
         return $this->getSettings()->get($name);
 
+      // The interpretation of 'path' and 'setting-path' is similar, except
+      // that the latter originates in a stored setting.
+      case 'path':
       case 'setting-path':
         // Array(0 => $type, 1 => $setting, 2 => $actions).
-        $value = $this->getSettings()->get($name);
-        $value = Civi::paths()->getPath($value);
+        $value = ($type === 'path')
+          ? Civi::paths()->getVariable($name, 'path')
+          : Civi::paths()->getPath($this->getSettings()->get($name));
         if ($value) {
           $value = CRM_Utils_File::addTrailingSlash($value);
           if (isset($this->map[$k][2]) && in_array('mkdir', $this->map[$k][2])) {
@@ -320,6 +328,7 @@ class CRM_Core_Config_MagicMerge {
       case 'setting':
       case 'setting-path':
       case 'setting-url':
+      case 'path':
       case 'user-system':
       case 'runtime':
       case 'callback':

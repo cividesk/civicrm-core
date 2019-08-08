@@ -159,7 +159,7 @@ class CRM_Core_BAO_Dashboard extends CRM_Core_DAO_Dashboard {
       $data[$item['column_no']][] = array(
         'id' => (int) $item['dashboard_id'],
         'name' => $item['name'],
-        'title' => $item['label'],
+        'title' => CRM_Utils_String::purifyHtml($item['label']),
         'url' => self::parseUrl($item['url']),
         'cacheMinutes' => $item['cache_minutes'],
         'fullscreenUrl' => self::parseUrl($item['fullscreen_url']),

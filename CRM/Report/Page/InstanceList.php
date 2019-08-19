@@ -284,8 +284,8 @@ class CRM_Report_Page_InstanceList extends CRM_Core_Page {
     }
     //Call link hook.
     CRM_Utils_Hook::links('view.report.links',
-      NULL,
-      CRM_Core_DAO::$_nullObject,
+      $className,
+      $instanceID,
       $actions
     );
     return $actions;

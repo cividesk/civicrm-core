@@ -558,11 +558,14 @@ INNER JOIN civicrm_contribution       con ON ( con.id = mp.contribution_id )
       // copy custom data
       $extends = ['Contribution'];
       $groupTree = CRM_Core_BAO_CustomGroup::getGroupDetail(NULL, NULL, $extends);
+
       if ($groupTree) {
         foreach ($groupTree as $groupID => $group) {
-          $table[$groupTree[$groupID]['table_name']] = ['entity_id'];
-          foreach ($group['fields'] as $fieldID => $field) {
-            $table[$groupTree[$groupID]['table_name']][] = $groupTree[$groupID]['fields'][$fieldID]['column_name'];
+	  $table[$groupTree[$groupID]['table_name']] = ['entity_id'];
+          if ($group['name'] != 'Invoice_Details') {
+            foreach ($group['fields'] as $fieldID => $field) {
+              $table[$groupTree[$groupID]['table_name']][] = $groupTree[$groupID]['fields'][$fieldID]['column_name'];
+            }
           }
         }
 

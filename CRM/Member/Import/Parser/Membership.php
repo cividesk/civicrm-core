@@ -666,6 +666,19 @@ class CRM_Member_Import_Parser_Membership extends CRM_Member_Import_Parser {
             }
           }
         }
+        elseif ($type == 'Select' || $type == 'Radio' || ($type == 'Autocomplete-Select' &&
+          $customFields[$customFieldID]['data_type'] == 'String')) {
+          $customOption = CRM_Core_BAO_CustomOption::getCustomOption($customFieldID, TRUE);
+          foreach ($customOption as $customFldID => $customValue) {
+            $val = CRM_Utils_Array::value('value', $customValue);
+            $label = CRM_Utils_Array::value('label', $customValue);
+            $label = strtolower($label);
+            $value = strtolower(trim($value));
+            if (($value == $label) || ($value == strtolower($val))) {
+              $values[$key] = $val;
+            }
+          }
+        }
       }
 
       switch ($key) {

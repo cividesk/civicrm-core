@@ -56,7 +56,8 @@ class CRM_Admin_Form_Setting_Smtp extends CRM_Admin_Form_Setting {
     //Load input as readonly whose values are overridden in civicrm.settings.php.
     foreach ($settings as $setting => $value) {
       if (isset($value)) {
-	$props[$setting]['readonly'] = TRUE;
+        $props[$setting]['readonly'] = TRUE;
+        $setStatus = TRUE;
       }
     }
 
@@ -77,6 +78,10 @@ class CRM_Admin_Form_Setting_Smtp extends CRM_Admin_Form_Setting {
     $buttons = $this->getElement('buttons')->getElements();
     $buttons[] = $this->createElement('submit', $this->_testButtonName, ts('Save & Send Test Email'), ['crm-icon' => 'fa-envelope-o']);
     $this->getElement('buttons')->setElements($buttons);
+
+    if (!empty($setStatus)) {
+      CRM_Core_Session::setStatus("Some fields are loaded as 'readonly' as they have been set (overridden) in civicrm.settings.php.", '', 'info', array('expires' => 0));    
+    }
   }
 
   /**

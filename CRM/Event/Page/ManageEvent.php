@@ -273,7 +273,11 @@ class CRM_Event_Page_ManageEvent extends CRM_Core_Page {
     $this->_searchResult = CRM_Utils_Request::retrieve('searchResult', 'Boolean', $this);
 
     $whereClause = $this->whereClause($params, FALSE, $this->_force);
-    $this->pagerAToZ($whereClause, $params);
+
+    $config = CRM_Core_Config::singleton();
+    if ($config->includeAlphabeticalPager) {
+      $this->pagerAToZ($whereClause, $params);
+    }
 
     $params = array();
     $whereClause = $this->whereClause($params, TRUE, $this->_force);
@@ -461,7 +465,8 @@ ORDER BY start_date desc
       if (is_array($value)) {
         $type = implode(',', $value);
       }
-      $clauses[] = "event_type_id IN ({$type})";
+      $clauses[] = "event_type_id IN (%2)";
+      $params[2] = [$type, 'String'];
     }
 
     $eventsByDates = $this->get('eventsByDates');

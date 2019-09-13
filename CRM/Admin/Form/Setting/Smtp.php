@@ -78,6 +78,10 @@ class CRM_Admin_Form_Setting_Smtp extends CRM_Admin_Form_Setting {
     $buttons = $this->getElement('buttons')->getElements();
     $buttons[] = $this->createElement('submit', $this->_testButtonName, ts('Save & Send Test Email'), array('crm-icon' => 'fa-envelope-o'));
     $this->getElement('buttons')->setElements($buttons);
+
+    if (!empty($setStatus)) {
+      CRM_Core_Session::setStatus("Some fields are loaded as 'readonly' as they have been set (overridden) in civicrm.settings.php.", '', 'info', array('expires' => 0));    
+    }
   }
 
   /**

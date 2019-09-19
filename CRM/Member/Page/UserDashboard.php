@@ -83,6 +83,7 @@ class CRM_Member_Page_UserDashboard extends CRM_Contact_Page_View_UserDashBoard 
         // Membership payment was not done via online contribution page or free membership. Check for default membership renewal page from CiviMember Settings
         $defaultRenewPageId = Civi::settings()->get('default_renewal_contribution_page');
         if ($defaultRenewPageId) {
+          $membership[$dao->id]['renewPageId'] = $defaultRenewPageId;
           //CRM-14831 - check if membership type is present in contrib page
           $memBlock = CRM_Member_BAO_Membership::getMembershipBlock($defaultRenewPageId);
           if (!empty($memBlock['membership_types'])) {

@@ -3022,10 +3022,13 @@ class CRM_Contact_BAO_Query {
         $op = strpos($op, 'IN') ? $op : ($op == '!=') ? 'NOT IN' : 'IN';
       }
 
-      $groupIds = CRM_Utils_Type::validate(
-        implode(',', (array) $regularGroupIDs),
-        'CommaSeparatedIntegers'
-      );
+      $groupIds = '';
+      if (!empty($regularGroupIDs)) {
+        $groupIds = CRM_Utils_Type::validate(
+          implode(',', (array) $regularGroupIDs),
+          'CommaSeparatedIntegers'
+        );
+      }
       $gcTable = "`civicrm_group_contact-{$groupIds}`";
       $joinClause = array("contact_a.id = {$gcTable}.contact_id");
 

@@ -146,6 +146,7 @@ class CRM_Queue_Queue_Sql extends CRM_Queue_Queue {
       #        $dao->save();
       $dao->data = unserialize($dao->data);
       $result = $dao;
+
     }
 
     $dao = CRM_Core_DAO::executeQuery('UNLOCK TABLES;');
@@ -180,7 +181,7 @@ class CRM_Queue_Queue_Sql extends CRM_Queue_Queue {
         '1' => [date('YmdHis', $nowEpoch + $lease_time), 'String'],
         '2' => [$dao->id, 'Integer'],
       ]);
-      $dao->data = unserialize($dao->data);
+      $dao->data = CRM_Utils_String::unserialize($dao->data);
       return $dao;
     }
   }

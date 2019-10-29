@@ -1008,5 +1008,4 @@ class CRM_Utils_String {
     $smarty->assign('smartySingleUseString', NULL);
     return $templateString;
   }
-
 }

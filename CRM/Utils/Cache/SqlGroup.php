@@ -180,7 +180,7 @@ class CRM_Utils_Cache_SqlGroup implements CRM_Utils_Cache_Interface {
    * @return object
    */
   private function reobjectify($value) {
-    return is_object($value) ? unserialize(serialize($value)) : $value;
+    return is_object($value) ? CRM_Utils_String::unserialize(serialize($value)) : $value;
   }
 
   /**

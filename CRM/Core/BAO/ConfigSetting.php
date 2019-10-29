@@ -50,7 +50,7 @@ class CRM_Core_BAO_ConfigSetting {
     $domain->id = CRM_Core_Config::domainID();
     $domain->find(TRUE);
     if ($domain->config_backend) {
-      $params = array_merge(CRM_Utils_String::unserialize($domain->config_backend), $params);
+      $params = array_merge(unserialize($domain->config_backend), $params);
     }
 
     $params = CRM_Core_BAO_ConfigSetting::filterSkipVars($params);

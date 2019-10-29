@@ -181,7 +181,7 @@ class CRM_Queue_Queue_Sql extends CRM_Queue_Queue {
         '1' => [date('YmdHis', $nowEpoch + $lease_time), 'String'],
         '2' => [$dao->id, 'Integer'],
       ]);
-      $dao->data = CRM_Utils_String::unserialize($dao->data);
+      $dao->data = unserialize($dao->data);
       return $dao;
     }
   }

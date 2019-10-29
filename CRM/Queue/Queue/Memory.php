@@ -121,7 +121,7 @@ class CRM_Queue_Queue_Memory extends CRM_Queue_Queue {
 
         $item = new stdClass();
         $item->id = $id;
-        $item->data = CRM_Utils_String::unserialize($data);
+        $item->data = unserialize($data);
         return $item;
       }
       else {
@@ -150,7 +150,7 @@ class CRM_Queue_Queue_Memory extends CRM_Queue_Queue {
 
       $item = new stdClass();
       $item->id = $id;
-      $item->data = CRM_Utils_String::unserialize($data);
+      $item->data = unserialize($data);
       return $item;
     }
     // nothing in queue

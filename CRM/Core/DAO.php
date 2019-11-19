@@ -355,6 +355,9 @@ class CRM_Core_DAO extends DB_DataObject {
     if ($dbLocale) {
       $tables = CRM_Core_I18n_Schema::schemaStructureTables();
       if (in_array($tableName, $tables)) {
+        // Kairos edge case: create a mailing, fatal the first time cron is run, works after
+        // is due to local being set to __fr_CA instead of _fr_CA for some reason.
+        if (substr($dbLocale, 0, 2) == '__') $dbLocale = substr($dbLocale, 1);
         return $tableName . $dbLocale;
       }
     }

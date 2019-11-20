@@ -72,6 +72,23 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
 
     parent::preProcess();
 
+    //membership ID
+    $memberShipId = CRM_Utils_Request::retrieve('memberId', 'Positive', $this);
+    if (isset($memberShipId)) {
+      $this->_formValues['contribution_membership_id'] = $memberShipId;
+    }
+    $participantId = CRM_Utils_Request::retrieve('participantId', 'Positive', $this);
+    if (isset($participantId)) {
+      $this->_formValues['contribution_participant_id'] = $participantId;
+    }
+
+    $sortID = NULL;
+    if ($this->get(CRM_Utils_Sort::SORT_ID)) {
+      $sortID = CRM_Utils_Sort::sortIDValue($this->get(CRM_Utils_Sort::SORT_ID),
+        $this->get(CRM_Utils_Sort::SORT_DIRECTION)
+      );
+    }
+
     $this->_queryParams = CRM_Contact_BAO_Query::convertFormValues($this->_formValues);
     $selector = new CRM_Contribute_Selector_Search($this->_queryParams,
       $this->_action,
@@ -302,6 +319,7 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
       }
 
       if ($group && is_array($group)) {
+        // @todo - stop changing formValues - respect submitted form values, change a working array.
         unset($this->_formValues['group']);
         foreach ($group as $groupID) {
           // @todo - stop changing formValues - respect submitted form values, change a working array.
@@ -311,6 +329,10 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
     }
 
     // @todo - stop changing formValues - respect submitted form values, change a working array.
+    CRM_Core_BAO_CustomValue::fixCustomFieldValue($this->_formValues);
+
+    // @todo - stop changing formValues - respect submitted form values, change a working array.
+
     $this->_queryParams = CRM_Contact_BAO_Query::convertFormValues($this->_formValues);
 
     $this->set('queryParams', $this->_queryParams);
@@ -326,6 +348,14 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
       return;
     }
 
+    $sortID = NULL;
+    if ($this->get(CRM_Utils_Sort::SORT_ID)) {
+      $sortID = CRM_Utils_Sort::sortIDValue($this->get(CRM_Utils_Sort::SORT_ID),
+        $this->get(CRM_Utils_Sort::SORT_DIRECTION)
+      );
+    }
+
+    // @todo - stop changing formValues - respect submitted form values, change a working array.
     $this->_queryParams = CRM_Contact_BAO_Query::convertFormValues($this->_formValues);
     $selector = new CRM_Contribute_Selector_Search($this->_queryParams,
       $this->_action,
@@ -470,5 +500,4 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
       $this->_formValues['contribution_page_id'] = $contribPageId;
     }
   }
-
 }

@@ -113,6 +113,7 @@ class CRM_Contact_BAO_SavedSearchTest extends CiviUnitTestCase {
     $returnedFormValues = CRM_Contact_BAO_SavedSearch::getFormValues(CRM_Core_DAO::singleValueQuery('SELECT LAST_INSERT_ID()'));
     $checkFormValues = $formValues + ['custom_' . $this->ids['CustomField']['select_date'] . '_relative' => 0];
     $this->checkArrayEquals($returnedFormValues, $checkFormValues);
+    $this->checkArrayEquals($defaults, $formValues);
   }
 
   /**

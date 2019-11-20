@@ -2532,6 +2532,7 @@
         },
         {
             "name": "symfony/config",
+<<<<<<< HEAD
             "version": "v3.4.40",
             "source": {
                 "type": "git",
@@ -2542,6 +2543,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/config/zipball/3634991bea549e73c45a964c38f30ceeae6ed877",
                 "reference": "3634991bea549e73c45a964c38f30ceeae6ed877",
+=======
+            "version": "v2.8.50",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/config.git",
+                "reference": "7dd5f5040dc04c118d057fb5886563963eb70011"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/config/zipball/7dd5f5040dc04c118d057fb5886563963eb70011",
+                "reference": "7dd5f5040dc04c118d057fb5886563963eb70011",
+>>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
                 "shasum": ""
             },
             "require": {
@@ -2592,6 +2605,7 @@
             ],
             "description": "Symfony Config Component",
             "homepage": "https://symfony.com",
+<<<<<<< HEAD
             "time": "2020-04-12T14:33:46+00:00"
         },
         {
@@ -2606,6 +2620,22 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/dependency-injection/zipball/d10ff5503b0b27711087eef4ac7835a752fe42fd",
                 "reference": "d10ff5503b0b27711087eef4ac7835a752fe42fd",
+=======
+            "time": "2018-11-26T09:38:12+00:00"
+        },
+        {
+            "name": "symfony/dependency-injection",
+            "version": "v2.8.50",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/dependency-injection.git",
+                "reference": "c306198fee8f872a8f5f031e6e4f6f83086992d8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/dependency-injection/zipball/c306198fee8f872a8f5f031e6e4f6f83086992d8",
+                "reference": "c306198fee8f872a8f5f031e6e4f6f83086992d8",
+>>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
                 "shasum": ""
             },
             "require": {
@@ -2663,6 +2693,7 @@
             ],
             "description": "Symfony DependencyInjection Component",
             "homepage": "https://symfony.com",
+<<<<<<< HEAD
             "time": "2020-04-13T09:33:40+00:00"
         },
         {
@@ -2677,6 +2708,22 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/9d4e22943b73acc1ba50595b7de1a01fe9dbad48",
                 "reference": "9d4e22943b73acc1ba50595b7de1a01fe9dbad48",
+=======
+            "time": "2019-04-16T11:33:46+00:00"
+        },
+        {
+            "name": "symfony/event-dispatcher",
+            "version": "v2.8.50",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/event-dispatcher.git",
+                "reference": "a77e974a5fecb4398833b0709210e3d5e334ffb0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/a77e974a5fecb4398833b0709210e3d5e334ffb0",
+                "reference": "a77e974a5fecb4398833b0709210e3d5e334ffb0",
+>>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
                 "shasum": ""
             },
             "require": {
@@ -2726,6 +2773,7 @@
             ],
             "description": "Symfony EventDispatcher Component",
             "homepage": "https://symfony.com",
+<<<<<<< HEAD
             "time": "2020-03-15T09:38:08+00:00"
         },
         {
@@ -2740,6 +2788,22 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/filesystem/zipball/78a93e5606a19d0fb490afc3c4a9b7ecd86e1515",
                 "reference": "78a93e5606a19d0fb490afc3c4a9b7ecd86e1515",
+=======
+            "time": "2018-11-21T14:20:20+00:00"
+        },
+        {
+            "name": "symfony/filesystem",
+            "version": "v2.8.50",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/filesystem.git",
+                "reference": "7ae46872dad09dffb7fe1e93a0937097339d0080"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/7ae46872dad09dffb7fe1e93a0937097339d0080",
+                "reference": "7ae46872dad09dffb7fe1e93a0937097339d0080",
+>>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
                 "shasum": ""
             },
             "require": {
@@ -2776,6 +2840,7 @@
             ],
             "description": "Symfony Filesystem Component",
             "homepage": "https://symfony.com",
+<<<<<<< HEAD
             "time": "2020-04-12T16:54:01+00:00"
         },
         {
@@ -2790,6 +2855,22 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/finder/zipball/5ec813ccafa8164ef21757e8c725d3a57da59200",
                 "reference": "5ec813ccafa8164ef21757e8c725d3a57da59200",
+=======
+            "time": "2018-11-11T11:18:13+00:00"
+        },
+        {
+            "name": "symfony/finder",
+            "version": "v2.8.50",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/finder.git",
+                "reference": "1444eac52273e345d9b95129bf914639305a9ba4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/1444eac52273e345d9b95129bf914639305a9ba4",
+                "reference": "1444eac52273e345d9b95129bf914639305a9ba4",
+>>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
                 "shasum": ""
             },
             "require": {
@@ -3077,6 +3158,7 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< HEAD
             "time": "2020-05-12T16:47:27+00:00"
         },
         {
@@ -3091,6 +3173,24 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/polyfill-php72/zipball/f048e612a3905f34931127360bdd2def19a5e582",
                 "reference": "f048e612a3905f34931127360bdd2def19a5e582",
+=======
+            "description": "Symfony Finder Component",
+            "homepage": "https://symfony.com",
+            "time": "2018-11-11T11:18:13+00:00"
+        },
+        {
+            "name": "symfony/polyfill-ctype",
+            "version": "v1.8.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-ctype.git",
+                "reference": "7cc359f1b7b80fc25ed7796be7d96adc9b354bae"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/7cc359f1b7b80fc25ed7796be7d96adc9b354bae",
+                "reference": "7cc359f1b7b80fc25ed7796be7d96adc9b354bae",
+>>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
                 "shasum": ""
             },
             "require": {
@@ -3099,7 +3199,11 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
+<<<<<<< HEAD
                     "dev-master": "1.17-dev"
+=======
+                    "dev-master": "1.8-dev"
+>>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
                 }
             },
             "autoload": {
@@ -3132,6 +3236,7 @@
                 "portable",
                 "shim"
             ],
+<<<<<<< HEAD
             "time": "2020-05-12T16:47:27+00:00"
         },
         {
@@ -3150,11 +3255,35 @@
             },
             "require": {
                 "php": "^5.5.9|>=7.0.8"
+=======
+            "time": "2018-04-30T19:57:29+00:00"
+        },
+        {
+            "name": "symfony/polyfill-iconv",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-iconv.git",
+                "reference": "21a18998764e569c1675efc7191887130b319605"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-iconv/zipball/21a18998764e569c1675efc7191887130b319605",
+                "reference": "21a18998764e569c1675efc7191887130b319605",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+>>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
+<<<<<<< HEAD
                     "dev-master": "3.4-dev"
+=======
+                    "dev-master": "1.0-dev"
+>>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
                 }
             },
             "autoload": {
@@ -3181,6 +3310,7 @@
             ],
             "description": "Symfony Process Component",
             "homepage": "https://symfony.com",
+<<<<<<< HEAD
             "time": "2020-04-12T14:33:46+00:00"
         },
         {
@@ -3195,6 +3325,29 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/var-dumper/zipball/3e31b82077039b1ea3b5a203ec1e3016606f4484",
                 "reference": "3e31b82077039b1ea3b5a203ec1e3016606f4484",
+=======
+            "keywords": [
+                "compatibility",
+                "iconv",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "time": "2015-11-04T20:28:58+00:00"
+        },
+        {
+            "name": "symfony/process",
+            "version": "v2.8.50",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/process.git",
+                "reference": "c3591a09c78639822b0b290d44edb69bf9f05dc8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/process/zipball/c3591a09c78639822b0b290d44edb69bf9f05dc8",
+                "reference": "c3591a09c78639822b0b290d44edb69bf9f05dc8",
+>>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
                 "shasum": ""
             },
             "require": {
@@ -3246,6 +3399,7 @@
             ],
             "description": "Symfony mechanism for exploring and dumping PHP variables",
             "homepage": "https://symfony.com",
+<<<<<<< HEAD
             "keywords": [
                 "debug",
                 "dump"
@@ -3265,6 +3419,9 @@
                 }
             ],
             "time": "2020-08-17T07:27:37+00:00"
+=======
+            "time": "2018-11-11T11:18:13+00:00"
+>>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
         },
         {
             "name": "tecnickcom/tcpdf",
@@ -3882,6 +4039,117 @@
                 },
                 {
                     "name": "Mikko Koppanen"
+<<<<<<< HEAD
+=======
+                }
+            ],
+            "description": "The component allows you construct and/or parse Mail messages conforming to  the mail standard. It has support for attachments, multipart messages and HTML  mail. It also interfaces with SMTP to send mail or IMAP, POP3 or mbox to  retrieve e-mail.",
+            "homepage": "https://github.com/zetacomponents",
+            "time": "2019-02-13T11:33:09+00:00"
+        }
+    ],
+    "packages-dev": [
+        {
+            "name": "cache/integration-tests",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-cache/integration-tests.git",
+                "reference": "b97328797ab199f0ac933e39842a86ab732f21f9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-cache/integration-tests/zipball/b97328797ab199f0ac933e39842a86ab732f21f9",
+                "reference": "b97328797ab199f0ac933e39842a86ab732f21f9",
+                "shasum": ""
+            },
+            "require": {
+                "cache/tag-interop": "^1.0",
+                "php": "^5.4|^7",
+                "psr/cache": "~1.0"
+            },
+            "conflict": {
+                "phpunit/phpunit": "<4.8.35|<5.4.3,>=5.0"
+            },
+            "require-dev": {
+                "cache/cache": "^1.0",
+                "illuminate/cache": "^5.4|^5.5|^5.6",
+                "mockery/mockery": "^1.0",
+                "phpunit/phpunit": "^4.8.35|^5.4.3",
+                "symfony/cache": "^3.1|^4.0|^5.0",
+                "tedivm/stash": "^0.14"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cache\\IntegrationTests\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aaron Scherer",
+                    "email": "aequasi@gmail.com",
+                    "homepage": "https://github.com/aequasi"
+                },
+                {
+                    "name": "Tobias Nyholm",
+                    "email": "tobias.nyholm@gmail.com",
+                    "homepage": "https://github.com/nyholm"
+                }
+            ],
+            "description": "Integration tests for PSR-6 and PSR-16 cache implementations",
+            "homepage": "https://github.com/php-cache/integration-tests",
+            "keywords": [
+                "cache",
+                "psr16",
+                "psr6",
+                "test"
+            ],
+            "time": "2019-05-28T15:23:38+00:00"
+        },
+        {
+            "name": "cache/tag-interop",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-cache/tag-interop.git",
+                "reference": "c7496dd81530f538af27b4f2713cde97bc292832"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-cache/tag-interop/zipball/c7496dd81530f538af27b4f2713cde97bc292832",
+                "reference": "c7496dd81530f538af27b4f2713cde97bc292832",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.5 || ^7.0",
+                "psr/cache": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Cache\\TagInterop\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tobias Nyholm",
+                    "email": "tobias.nyholm@gmail.com",
+                    "homepage": "https://github.com/Nyholm"
+>>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
                 },
                 {
                     "name": "Christian Michel"

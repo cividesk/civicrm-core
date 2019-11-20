@@ -270,6 +270,13 @@ class CRM_Contribute_Form_AdditionalPayment extends CRM_Contribute_Form_Abstract
    */
   public static function formRule($fields, $files, $self) {
     $errors = [];
+    if ($self->_paymentType == 'owed' && $fields['total_amount'] > $self->_owed) {
+      $errors['total_amount'] = ts('Payment amount cannot be greater than owed amount');
+    }
+    if ($self->_paymentType == 'refund' && $fields['total_amount'] != abs($self->_refund)) {
+      $errors['total_amount'] = ts('Refund amount must equal refund due amount.');
+    }
+
     if ($self->_paymentProcessor['id'] === 0 && empty($fields['payment_instrument_id'])) {
       $errors['payment_instrument_id'] = ts('Payment method is a required field');
     }

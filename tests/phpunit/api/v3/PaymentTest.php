@@ -940,6 +940,17 @@ class api_v3_PaymentTest extends CiviUnitTestCase {
   }
 
   /**
+   * Test net amount is set when fee amount is passed in.
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testNetAmount() {
+    $order = $this->createPendingParticipantOrder();
+    $payment = $this->callAPISuccess('Payment', 'create', ['order_id' => $order['id'], 'total_amount' => 10, 'fee_amount' => .25]);
+    $this->assertEquals('9.75', $this->callAPISuccessGetValue('Payment', ['id' => $payment['id'], 'return' => 'net_amount']));
+  }
+
+  /**
    * Test create payment api for pay later contribution with partial payment.
    *
    * https://lab.civicrm.org/dev/financial/issues/69
@@ -1304,6 +1315,17 @@ class api_v3_PaymentTest extends CiviUnitTestCase {
     $this->validateAllPayments();
     $this->validateAllContributions();
 
+  }
+
+  /**
+   * Add participant with contribution
+   *
+   * @return array
+   *
+   * @throws \CRM_Core_Exception
+   */
+  protected function createPendingParticipantOrder() {
+    return $this->callAPISuccess('Order', 'create', $this->getParticipantOrderParams());
   }
 
 }

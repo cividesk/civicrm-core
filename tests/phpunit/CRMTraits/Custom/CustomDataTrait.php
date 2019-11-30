@@ -52,6 +52,7 @@ trait CRMTraits_Custom_CustomDataTrait {
       'max_multiple' => 0,
     ], $params);
     $identifier = $params['name'] ?? $params['title'];
+
     $this->ids['CustomGroup'][$identifier] = CustomGroup::create(FALSE)->setValues($params)->execute()->first()['id'];
     return $this->ids['CustomGroup'][$identifier];
   }
@@ -132,7 +133,6 @@ trait CRMTraits_Custom_CustomDataTrait {
       case 'multi_country':
         $reference = $this->createMultiCountryCustomField($fieldParams)['id'];
         return;
-
     }
   }
 

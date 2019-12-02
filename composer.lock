@@ -2532,7 +2532,6 @@
         },
         {
             "name": "symfony/config",
-<<<<<<< HEAD
             "version": "v3.4.40",
             "source": {
                 "type": "git",
@@ -2543,18 +2542,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/config/zipball/3634991bea549e73c45a964c38f30ceeae6ed877",
                 "reference": "3634991bea549e73c45a964c38f30ceeae6ed877",
-=======
-            "version": "v2.8.50",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/config.git",
-                "reference": "7dd5f5040dc04c118d057fb5886563963eb70011"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/config/zipball/7dd5f5040dc04c118d057fb5886563963eb70011",
-                "reference": "7dd5f5040dc04c118d057fb5886563963eb70011",
->>>>>>> securiry/core#70 Upgrade Symfony version to 2.8.50
                 "shasum": ""
             },
             "require": {

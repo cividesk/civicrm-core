@@ -281,33 +281,7 @@ FROM civicrm_navigation WHERE domain_id = $domainID";
     }
 
     return $branch;
-  }
-
-  /**
-   * buildNavigationTree retreives items in order. We call this function to
-   * ensure that any items added by the hook are also in the correct order.
-   */
-  public static function orderByWeight(&$navigations) {
-    // sort each item in navigations by weight
-    usort($navigations, function($a, $b) {
-
-      // If no weight have been defined for an item put it at the end of the list
-      if (!isset($a['attributes']['weight'])) {
-        $a['attributes']['weight'] = 1000;
-      }
-      if (!isset($b['attributes']['weight'])) {
-        $b['attributes']['weight'] = 1000;
-      }
-      return $a['attributes']['weight'] - $b['attributes']['weight'];
-    });
-
-    // If any of the $navigations have children, recurse
-    foreach ($navigations as $navigation) {
-      if (isset($navigation['child'])) {
-        self::orderByWeight($navigation['child']);
-      }
-    }
-  }
+}
 
   /**
    * Given a navigation menu, generate navIDs for any items which are

@@ -172,6 +172,7 @@ class CRM_Admin_Page_Job extends CRM_Core_Page_Basic {
         $action -= CRM_Core_Action::ENABLE;
       }
       else {
+        $action -= CRM_Core_Action::VIEW;
         $action -= CRM_Core_Action::DISABLE;
       }
 

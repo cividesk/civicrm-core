@@ -999,7 +999,7 @@ ORDER BY   civicrm_email.is_bulkmail DESC
       'Return-Path' => $verp['bounce'],
       'From' => "\"{$this->from_name}\" <{$this->from_email}>",
       'Subject' => $this->subject,
-      'List-Unsubscribe' => "<{$urls['unsubscribeUrl']}>",
+      'List-Unsubscribe' => "<mailto:{$verp['unsubscribe']}>",
     );
     self::addMessageIdHeader($headers, 'm', $job_id, $event_queue_id, $hash);
     if ($isForward) {

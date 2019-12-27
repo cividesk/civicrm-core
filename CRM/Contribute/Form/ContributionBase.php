@@ -695,7 +695,8 @@ class CRM_Contribute_Form_ContributionBase extends CRM_Core_Form {
           ) {
             $this->_emailExists = TRUE;
             $this->set('emailExists', TRUE);
-
+          }
+        }
         // Prepare list of email only field in profile
         $emailFields = array_filter($fields,
           function($field) {

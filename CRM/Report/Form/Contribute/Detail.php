@@ -616,22 +616,23 @@ UNION ALL
     else {
       parent::storeGroupByArray();
     }
+    if ($this->isTempTableBuilt) {
+      // 6. show result set from temp table 3
+      $rows = array();
+      // apply limit on final query and add SQL_CALC_FOUND_ROWS to count total rows
+      $this->limit();
+      $sql = "SELECT SQL_CALC_FOUND_ROWS * FROM civireport_contribution_detail_temp3 {$orderBy} {$this->_limit}";
+      $this->buildRows($sql, $rows);
 
-    // 6. show result set from temp table 3
-    $rows = array();
-    // apply limit on final query and add SQL_CALC_FOUND_ROWS to count total rows
-    $this->limit();
-    $sql = "SELECT SQL_CALC_FOUND_ROWS * FROM civireport_contribution_detail_temp3 {$orderBy} {$this->_limit}";
-    $this->buildRows($sql, $rows);
+      // format result set.
+      $this->formatDisplay($rows, TRUE);
 
-    // format result set.
-    $this->formatDisplay($rows, TRUE);
-
-    // assign variables to templates
-    $this->doTemplateAssignment($rows);
-    // do print / pdf / instance stuff if needed
-    $this->endPostProcess($rows);
-  }
+      // assign variables to templates
+      $this->doTemplateAssignment($rows);
+      // do print / pdf / instance stuff if needed
+      $this->endPostProcess($rows);
+    }
+  }  
 
   /**
    * Alter display of rows.

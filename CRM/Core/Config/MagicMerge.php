@@ -106,8 +106,6 @@ class CRM_Core_Config_MagicMerge {
       'userFrameworkURLVar' => ['runtime'],
       'userHookClass' => ['runtime'],
       'cleanURL' => ['runtime'],
-      'configAndLogDir' => ['runtime'],
-      'templateCompileDir' => ['runtime'],
       'templateDir' => ['runtime'],
 
       // "boot-svc" properties are critical services needed during init.
@@ -170,6 +168,7 @@ class CRM_Core_Config_MagicMerge {
       'maxFileSize' => ['setting'],
       // renamed.
       'maxAttachments' => ['setting', 'max_attachments'],
+      'maxAttachmentsBackend' => ['setting', 'max_attachments_backend'],
       'monetaryDecimalPoint' => ['setting'],
       'monetaryThousandSeparator' => ['setting'],
       'moneyformat' => ['setting'],
@@ -193,8 +192,8 @@ class CRM_Core_Config_MagicMerge {
       // "path" properties are managed via Civi::paths and $civicrm_paths
       // Option: `mkdir` - auto-create dir
       // Option: `restrict` - auto-restrict remote access
-      'configAndLogDir' => array('path', 'civicrm.log', array('mkdir', 'restrict')),
-      'templateCompileDir' => array('path', 'civicrm.compile', array('mkdir', 'restrict')),
+      'configAndLogDir' => ['path', 'civicrm.log', ['mkdir', 'restrict']],
+      'templateCompileDir' => ['path', 'civicrm.compile', ['mkdir', 'restrict']],
 
       // "setting-path" properties are settings with special filtering
       // to return normalized file paths.
@@ -328,10 +327,6 @@ class CRM_Core_Config_MagicMerge {
     unset($this->cache[$k]);
     $type = $this->map[$k][0];
 
-    // If foreign name is set, use that name (except with callback types because
-    // their second parameter is the object, not the foreign name).
-    $name = isset($this->map[$k][1]) && $type != 'callback' ? $this->map[$k][1] : $k;
-
     switch ($type) {
       case 'setting':
       case 'setting-path':
@@ -342,12 +337,12 @@ class CRM_Core_Config_MagicMerge {
       case 'callback':
       case 'boot-svc':
         // In the past, changes to $config were not persisted automatically.
-        $this->cache[$name] = $v;
+        $this->cache[$k] = $v;
         return;
 
       case 'local':
         $this->initLocals();
-        $this->locals[$name] = $v;
+        $this->locals[$k] = $v;
         return;
 
       default:

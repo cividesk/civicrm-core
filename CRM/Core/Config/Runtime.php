@@ -88,10 +88,6 @@ class CRM_Core_Config_Runtime extends CRM_Core_Config_MagicMerge {
     }
     $this->dsn = defined('CIVICRM_DSN') ? CIVICRM_DSN : NULL;
 
-    if (!defined('CIVICRM_TEMPLATE_COMPILEDIR') && $loadFromDB) {
-      $this->fatal('You need to define CIVICRM_TEMPLATE_COMPILEDIR in civicrm.settings.php');
-    }
-
     if (!defined('CIVICRM_UF')) {
       $this->fatal('You need to define CIVICRM_UF in civicrm.settings.php');
     }
@@ -167,6 +163,8 @@ class CRM_Core_Config_Runtime extends CRM_Core_Config_MagicMerge {
         \CRM_Utils_Array::value('HTTP_HOST', $_SERVER, ''),
         // e.g. port-based vhosts
         \CRM_Utils_Array::value('SERVER_PORT', $_SERVER, ''),
+        // e.g. unit testing
+        defined('CIVICRM_TEST') ? 1 : 0,
         // Depending on deployment arch, these signals *could* be redundant, but who cares?
       ]));
     }

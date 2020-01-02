@@ -126,7 +126,7 @@ class CRM_Core_Payment_AuthorizeNetTest extends CiviUnitTestCase {
       'state_province-5' => 'IL',
       'billing_country-5' => 'US',
       'country-5' => 'US',
-      'year' => 2015,
+      'year' => 2025,
       'month' => 9,
       'ip_address' => '127.0.0.1',
       'amount' => 7,

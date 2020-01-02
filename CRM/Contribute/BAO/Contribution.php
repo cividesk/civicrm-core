@@ -3905,15 +3905,24 @@ INNER JOIN civicrm_activity ON civicrm_activity_contact.activity_id = civicrm_ac
    */
   public static function recordAdditionalPayment($contributionId, $trxnsData, $paymentType = 'owed', $participantId = NULL, $updateStatus = TRUE) {
 
+    $contributionDAO = new CRM_Contribute_BAO_Contribution();
+    $contributionDAO->id = $contributionId;
+    $contributionDAO->find(TRUE);
+    $params['contribution'] = $contributionDAO;
+
     if ($paymentType == 'owed') {
       $params['partial_payment_total'] = $contributionDAO->total_amount;
       $params['partial_amount_to_pay'] = $trxnsData['total_amount'];
       $trxnsData['net_amount'] = !empty($trxnsData['net_amount']) ? $trxnsData['net_amount'] : $trxnsData['total_amount'];
       $params['pan_truncation'] = CRM_Utils_Array::value('pan_truncation', $trxnsData);
+
       $params['card_type_id'] = CRM_Utils_Array::value('card_type_id', $trxnsData);
 
       // record the entry
+      $params['skipLineItem'] = TRUE;
       $financialTrxn = CRM_Contribute_BAO_Contribution::recordFinancialAccounts($params, $trxnsData);
+      $financialTypeID = $contributionDAO->financial_type_id;
+      $arAccountId = CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($financialTypeID, 'Accounts Receivable Account is');
       $toFinancialAccount = $arAccountId;
       $trxnId = CRM_Core_BAO_FinancialTrxn::getBalanceTrxnAmt($contributionId, $contributionDAO->financial_type_id);
       if (!empty($trxnId)) {
@@ -3927,6 +3936,8 @@ INNER JOIN civicrm_activity ON civicrm_activity_contact.activity_id = civicrm_ac
         $queryParams = array(1 => array($relationTypeId, 'Integer'));
         $trxnId = CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_financial_account WHERE is_default = 1 AND financial_account_type_id = %1", $queryParams);
       }
+
+      $statusId = $contributionDAO->contribution_status_id;
 
       // update statuses
       // criteria for updates contribution total_amount == financial_trxns of partial_payments

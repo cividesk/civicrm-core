@@ -38,6 +38,12 @@ class CRM_Contact_BAO_Relationship extends CRM_Contact_DAO_Relationship {
   const ALL = 0, PAST = 1, DISABLED = 2, CURRENT = 4, INACTIVE = 8;
 
   /**
+   * The list of column headers
+   * @var array
+   */
+  private static $columnHeaders;
+
+  /**
    * Constants for is_permission fields.
    * Note: the slightly non-obvious ordering is due to history...
    */
@@ -2080,6 +2086,59 @@ AND cc.sort_name LIKE '%$name%'";
         $params['relationship_type_id'] = 0;
       }
     }
+  }
+
+  /**
+   * @return array
+   */
+  public static function getColumnHeaders() {
+    return [
+      'relation' => [
+        'name' => ts('Relationship'),
+        'sort' => 'relation',
+        'direction' => CRM_Utils_Sort::ASCENDING,
+      ],
+      'sort_name' => [
+        'name' => '',
+        'sort' => 'sort_name',
+        'direction' => CRM_Utils_Sort::ASCENDING,
+      ],
+      'start_date' => [
+        'name' => ts('Start'),
+        'sort' => 'start_date',
+        'direction' => CRM_Utils_Sort::DONTCARE,
+      ],
+      'end_date' => [
+        'name' => ts('End'),
+        'sort' => 'end_date',
+        'direction' => CRM_Utils_Sort::DONTCARE,
+      ],
+      'city' => [
+        'name' => ts('City'),
+        'sort' => 'city',
+        'direction' => CRM_Utils_Sort::DONTCARE,
+      ],
+      'state' => [
+        'name' => ts('State/Prov'),
+        'sort' => 'state',
+        'direction' => CRM_Utils_Sort::DONTCARE,
+      ],
+      'email' => [
+        'name' => ts('Email'),
+        'sort' => 'email',
+        'direction' => CRM_Utils_Sort::DONTCARE,
+      ],
+      'phone' => [
+        'name' => ts('Phone'),
+        'sort' => 'phone',
+        'direction' => CRM_Utils_Sort::DONTCARE,
+      ],
+      'links' => [
+        'name' => '',
+        'sort' => 'links',
+        'direction' => CRM_Utils_Sort::DONTCARE,
+      ],
+    ];
   }
 
   /**

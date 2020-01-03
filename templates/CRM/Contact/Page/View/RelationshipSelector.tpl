@@ -30,7 +30,7 @@
 <div class="crm-contact-{$entityInClassFormat}-{$context}">
   <table
     class="crm-contact-{$entityInClassFormat}-selector-{$context} crm-ajax-table"
-    data-ajax="{crmURL p="civicrm/ajax/contactrelationships" q="context=$context&cid=$contactId"}"
+    data-ajax="{crmURL p="civicrm/ajax/contactrelationships" q="context=$context&cid=$contactId&relationship_type_id=$relTypeId"}"
     style="width: 100%;">
     <thead>
     <tr>

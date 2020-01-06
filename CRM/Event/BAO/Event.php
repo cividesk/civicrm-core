@@ -1005,7 +1005,7 @@ WHERE civicrm_event.is_active = 1
    * @param int $oldEventID
    * @param int $newCopyID
    */
-  public static function copyCustomFields($oldEventID, $newCopyID) {
+  public static function copyCustomFields($oldEventID, $newCopyID, $entityTable = NULL) {
     // Obtain custom values for old event
     $customParams = $htmlType = [];
     $customValues = CRM_Core_BAO_CustomValueTable::getEntityValues($oldEventID, 'Event');

@@ -72,6 +72,10 @@ class CRM_Core_I18n_LocaleTest extends CiviUnitTestCase {
     $result = CRM_Core_I18n::uiLanguages(TRUE);
     $this->assertArrayValuesEqual($codes, $result);
 
+    //Check if l10n directory exists or not
+    $directoryPath = $GLOBALS['civicrm_root'] . '/l10n';
+    $this->assertDirectoryExists($directoryPath, "directoryPath doesn't exists");
+
     // Monolingual, codes and language labels
     $result = CRM_Core_I18n::uiLanguages();
     $this->assertTreeEquals($languages, $result);

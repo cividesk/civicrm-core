@@ -253,7 +253,6 @@ class CRM_Core_Payment_AuthorizeNetIPNTest extends CiviUnitTestCase {
       'First Name: Anthony',
       'Last Name: Anderson',
       'Email Address: anthony_anderson@civicrm.org',
-      'Honor',
       'This membership will be automatically renewed every',
       'Dear Mr. Anthony Anderson II',
       'Thanks for your auto renew membership sign-up',

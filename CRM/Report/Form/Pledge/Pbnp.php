@@ -37,16 +37,19 @@ class CRM_Report_Form_Pledge_Pbnp extends CRM_Report_Form {
     'pieChart' => 'Pie Chart',
   );
   public $_drilldownReport = array('pledge/summary' => 'Link to Detail Report');
-
+  protected $_pledgeStatuses = array();
   protected $_customGroupExtends = array(
     'Pledge',
   );
+  protected $_totalPaid = FALSE;
 
   /**
    * Class constructor.
    */
   public function __construct() {
-
+    $this->_pledgeStatuses = CRM_Core_OptionGroup::values('pledge_status',
+      FALSE, FALSE, FALSE, NULL, 'label'
+    );
     // Check if CiviCampaign is a) enabled and b) has active campaigns
     $config = CRM_Core_Config::singleton();
     $campaignEnabled = in_array("CiviCampaign", $config->enableComponents);
@@ -150,6 +153,15 @@ class CRM_Report_Form_Pledge_Pbnp extends CRM_Report_Form {
             'type' => CRM_Utils_Type::T_MONEY,
             'title' => ts('Next Payment Amount'),
           ),
+          'total_paid' => array(
+            'title' => ts('Total Amount Paid'),
+            'type' => CRM_Utils_Type::T_MONEY,
+          ),
+          'balance_due' => array(
+            'title' => ts('Balance Due'),
+            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_MONEY,
+          ),
         ),
         'filters' => array(
           'scheduled_date' => array(
@@ -238,11 +250,33 @@ class CRM_Report_Form_Pledge_Pbnp extends CRM_Report_Form {
             elseif ($tableName == 'civicrm_email') {
               $this->_emailField = TRUE;
             }
-            $select[] = "{$field['dbAlias']} as {$tableName}_{$fieldName}";
-            $this->_columnHeaders["{$tableName}_{$fieldName}"]['type'] = CRM_Utils_Array::value('type', $field);
-            $this->_columnHeaders["{$tableName}_{$fieldName}"]['title'] = CRM_Utils_Array::value('title', $field);
-          }
-        }
+
+            if ($fieldName == 'total_paid') {
+              $this->_totalPaid = TRUE; // add pledge_payment join
+              $this->_columnHeaders["{$tableName}_{$fieldName}"] = array(
+                'title' => $field['title'],
+                'type' => $field['type'],
+              );
+	      $select[] = "COALESCE(sum({$this->_aliases[$tableName]}.actual_amount), 0) as {$tableName}_{$fieldName}";
+	    }
+	    elseif ($fieldName == 'balance_due') {
+              $cancelledStatus = array_search('Cancelled', $this->_pledgeStatuses);
+	      $completedStatus = array_search('Completed', $this->_pledgeStatuses);
+	      $this->_totalPaid = TRUE; // add pledge_payment join
+	      $this->_columnHeaders["{$tableName}_{$fieldName}"] = $field['title'];
+	      $this->_columnHeaders["{$tableName}_{$fieldName}"] = array(
+                'title' => $field['title'],
+		'type' => $field['type'],
+              );
+	      $select[] = "IF({$this->_aliases['civicrm_pledge']}.status_id IN({$cancelledStatus}, $completedStatus), 0, COALESCE({$this->_aliases['civicrm_pledge']}.amount, 0) - COALESCE(sum({$this->_aliases[$tableName]}.actual_amount),0)) as {$tableName}_{$fieldName}";
+	    }
+	    else {
+	      $select[] = "{$field['dbAlias']} as {$tableName}_{$fieldName}";
+	      $this->_columnHeaders["{$tableName}_{$fieldName}"]['type'] = CRM_Utils_Array::value('type', $field);
+	      $this->_columnHeaders["{$tableName}_{$fieldName}"]['title'] = CRM_Utils_Array::value('title', $field);
+	    }
+	  }
+	}
       }
     }
     $this->_selectClauses = $select;
@@ -277,7 +311,7 @@ class CRM_Report_Form_Pledge_Pbnp extends CRM_Report_Form {
     // payments have been edited such that they are not in id order. This might be better as a temp table.
     $this->_from .= "LEFT JOIN (SELECT * FROM civicrm_pledge_payment ORDER BY scheduled_date) as {$this->_aliases['civicrm_pledge_payment']}
                         ON ({$this->_aliases['civicrm_pledge']}.id =
-                            {$this->_aliases['civicrm_pledge_payment']}.pledge_id AND  {$this->_aliases['civicrm_pledge_payment']}.status_id = {$pendingStatus} ) ";
+                            {$this->_aliases['civicrm_pledge_payment']}.pledge_id ) ";
 
     // include address field if address column is to be included
     if ($this->_addressField) {
@@ -314,6 +348,27 @@ class CRM_Report_Form_Pledge_Pbnp extends CRM_Report_Form {
   public function postProcess() {
     // get the acl clauses built before we assemble the query
     $this->buildACLClause($this->_aliases['civicrm_contact']);
+
+    /*
+     * this is purely about ordering the total paid & balance due fields off to the end
+     * of the table in case custom or address fields cause them to fall in the middle
+     * (arguably the pledge amount should be moved to after these fields too)
+     *
+     */
+    $tableHeaders = array(
+      'civicrm_pledge_payment_total_paid',
+      'civicrm_pledge_payment_balance_due',
+    );
+
+    foreach ($tableHeaders as $header) {
+      //per above, unset & reset them so they move to the end
+      if (isset($this->_columnHeaders[$header])) {
+        $headervalue = $this->_columnHeaders[$header];
+        unset($this->_columnHeaders[$header]);
+        $this->_columnHeaders[$header] = $headervalue;
+      }
+    }
+
     parent::PostProcess();
   }
 

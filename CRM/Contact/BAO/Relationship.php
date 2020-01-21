@@ -38,12 +38,6 @@ class CRM_Contact_BAO_Relationship extends CRM_Contact_DAO_Relationship {
   const ALL = 0, PAST = 1, DISABLED = 2, CURRENT = 4, INACTIVE = 8;
 
   /**
-   * The list of column headers
-   * @var array
-   */
-  private static $columnHeaders;
-
-  /**
    * Constants for is_permission fields.
    * Note: the slightly non-obvious ordering is due to history...
    */

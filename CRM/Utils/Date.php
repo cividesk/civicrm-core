@@ -1019,8 +1019,8 @@ class CRM_Utils_Date {
   /**
    * Resolves the given relative time interval into finite time limits.
    *
-   * @param array $relativeTerm
-   *   Relative time frame like this, previous, etc.
+   * @param string $relativeTerm
+   *   Relative time frame: this, previous, previous_1.
    * @param int $unit
    *   Frequency unit like year, month, week etc.
    *
@@ -1031,6 +1031,9 @@ class CRM_Utils_Date {
     $now = getdate();
     $from = $to = $dateRange = array();
     $from['H'] = $from['i'] = $from['s'] = 0;
+    $relativeTermParts = explode('_', $relativeTerm);
+    $relativeTermPrefix = $relativeTermParts[0];
+    $relativeTermSuffix = isset($relativeTermParts[1]) ? $relativeTermParts[1] : '';
 
     switch ($unit) {
       case 'year':
@@ -1146,6 +1149,17 @@ class CRM_Utils_Date {
             $to['M'] = $now['mon'];
             $to['Y'] = $now['year'] + 1;
             break;
+
+          default:
+            if ($relativeTermPrefix === 'ending') {
+              $to['d'] = $now['mday'];
+              $to['M'] = $now['mon'];
+              $to['Y'] = $now['year'];
+              $to['H'] = 23;
+              $to['i'] = $to['s'] = 59;
+              $from = self::intervalAdd('year', -$relativeTermSuffix, $to);
+              $from = self::intervalAdd('second', 1, $from);
+            }
         }
         break;
 
@@ -1154,7 +1168,7 @@ class CRM_Utils_Date {
         $from['d'] = $config->fiscalYearStart['d'];
         $from['M'] = $config->fiscalYearStart['M'];
         $fYear = self::calculateFiscalYear($from['d'], $from['M']);
-        switch ($relativeTerm) {
+        switch ($relativeTermPrefix) {
           case 'this':
             $from['Y'] = $fYear;
             $fiscalYear = mktime(0, 0, 0, $from['M'], $from['d'] - 1, $from['Y'] + 1);
@@ -1166,12 +1180,22 @@ class CRM_Utils_Date {
             break;
 
           case 'previous':
-            $from['Y'] = $fYear - 1;
-            $fiscalYear = mktime(0, 0, 0, $from['M'], $from['d'] - 1, $from['Y'] + 1);
-            $fiscalEnd = explode('-', date("Y-m-d", $fiscalYear));
-            $to['d'] = $fiscalEnd['2'];
-            $to['M'] = $fiscalEnd['1'];
-            $to['Y'] = $fiscalEnd['0'];
+            if (!is_numeric($relativeTermSuffix)) {
+              $from['Y'] = ($relativeTermSuffix === 'before') ? $fYear - 2 : $fYear - 1;
+              $fiscalYear = mktime(0, 0, 0, $from['M'], $from['d'] - 1, $from['Y'] + 1);
+              $fiscalEnd = explode('-', date("Y-m-d", $fiscalYear));
+              $to['d'] = $fiscalEnd['2'];
+              $to['M'] = $fiscalEnd['1'];
+              $to['Y'] = $fiscalEnd['0'];
+            }
+            else {
+              $from['Y'] = $fYear - $relativeTermSuffix;
+              $fiscalYear = mktime(0, 0, 0, $from['M'], $from['d'] - 1, $from['Y'] + 1);
+              $fiscalEnd = explode('-', date("Y-m-d", $fiscalYear));
+              $to['d'] = $fiscalEnd['2'];
+              $to['M'] = $fiscalEnd['1'];
+              $to['Y'] = $fYear;
+            }
             break;
 
           case 'next':
@@ -1360,6 +1384,17 @@ class CRM_Utils_Date {
             $to = self::intervalAdd('day', 90, $from);
             $to = self::intervalAdd('second', -1, $to);
             break;
+
+          default:
+            if ($relativeTermPrefix === 'ending') {
+              $to['d'] = $now['mday'];
+              $to['M'] = $now['mon'];
+              $to['Y'] = $now['year'];
+              $to['H'] = 23;
+              $to['i'] = $to['s'] = 59;
+              $from = self::intervalAdd('month', -($relativeTermSuffix * 3), $to);
+              $from = self::intervalAdd('second', 1, $from);
+            }
         }
         break;
 
@@ -1539,6 +1574,17 @@ class CRM_Utils_Date {
             $to = self::intervalAdd('day', 60, $from);
             $to = self::intervalAdd('second', -1, $to);
             break;
+
+          default:
+            if ($relativeTermPrefix === 'ending') {
+              $to['d'] = $now['mday'];
+              $to['M'] = $now['mon'];
+              $to['Y'] = $now['year'];
+              $to['H'] = 23;
+              $to['i'] = $to['s'] = 59;
+              $from = self::intervalAdd($unit, -$relativeTermSuffix, $to);
+              $from = self::intervalAdd('second', 1, $from);
+            }
         }
         break;
 
@@ -1656,6 +1702,17 @@ class CRM_Utils_Date {
             $to = self::intervalAdd('day', 7, $from);
             $to = self::intervalAdd('second', -1, $to);
             break;
+
+          default:
+            if ($relativeTermPrefix === 'ending') {
+              $to['d'] = $now['mday'];
+              $to['M'] = $now['mon'];
+              $to['Y'] = $now['year'];
+              $to['H'] = 23;
+              $to['i'] = $to['s'] = 59;
+              $from = self::intervalAdd($unit, -$relativeTermSuffix, $to);
+              $from = self::intervalAdd('second', 1, $from);
+            }
         }
         break;
 
@@ -1719,6 +1776,16 @@ class CRM_Utils_Date {
             $from['Y'] = $to['Y'];
             break;
 
+          default:
+            if ($relativeTermPrefix === 'ending') {
+              $to['d'] = $now['mday'];
+              $to['M'] = $now['mon'];
+              $to['Y'] = $now['year'];
+              $to['H'] = 23;
+              $to['i'] = $to['s'] = 59;
+              $from = self::intervalAdd($unit, -$relativeTermSuffix, $to);
+              $from = self::intervalAdd('second', 1, $from);
+            }
         }
         break;
     }
@@ -1747,7 +1814,7 @@ class CRM_Utils_Date {
    *   Fiscal Start Month.
    *
    * @return int
-   *   $fy       Current Fiscl Year
+   *   $fy       Current Fiscal Year
    */
   public static function calculateFiscalYear($fyDate, $fyMonth) {
     $date = date("Y-m-d");

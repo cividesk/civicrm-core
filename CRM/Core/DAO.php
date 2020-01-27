@@ -1102,7 +1102,7 @@ FROM   civicrm_domain
    *
    * @return array
    */
-  public function fetchAll() {
+  public function fetchAll($k= false, $v = false, $method = false) {
     $result = [];
     while ($this->fetch()) {
       $result[] = $this->toArray();

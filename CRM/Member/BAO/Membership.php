@@ -2464,7 +2464,11 @@ WHERE {$whereClause}";
     if (!empty($params['batch_id'])) {
       $contributionParams['batch_id'] = $params['batch_id'];
     }
-
+    // for existing contributions.
+    if (!empty($params['id'])) {
+      $contributionParams['id'] = $params['id'];
+    }
+    
     if (!empty($params['contribution_contact_id'])) {
       // deal with possibility of a different person paying for contribution
       $contributionParams['contact_id'] = $params['contribution_contact_id'];

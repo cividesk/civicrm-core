@@ -2320,7 +2320,7 @@ WHERE      civicrm_membership.is_test = 0
       self::processOverriddenUntilDateMembership($dao1);
     }
 
-    $query = $baseQuery . " AND (civicrm_membership.is_override = 0 OR civicrm_membership.is_override IS NULL) 
+    $query = $baseQuery . " AND (civicrm_membership.is_override = 0 OR civicrm_membership.is_override IS NULL)
      AND civicrm_membership.status_id NOT IN (%1, %2, %3, %4)
      AND civicrm_membership.owner_membership_id IS NULL ";
     $params = [
@@ -2530,7 +2530,11 @@ WHERE      civicrm_membership.is_test = 0
     if (!empty($params['batch_id'])) {
       $contributionParams['batch_id'] = $params['batch_id'];
     }
-
+    // for existing contributions.
+    if (!empty($params['id'])) {
+      $contributionParams['id'] = $params['id'];
+    }
+    
     if (!empty($params['contribution_contact_id'])) {
       // deal with possibility of a different person paying for contribution
       $contributionParams['contact_id'] = $params['contribution_contact_id'];

@@ -2078,7 +2078,7 @@ HERESQL;
     // copy all cases and connect to main contact id.
     foreach ($processCaseIds as $otherCaseId) {
       if ($duplicateContacts) {
-        $mainCase = CRM_Core_DAO::copyGeneric('CRM_Case_DAO_Case', array('id' => $otherCaseId));
+        $mainCase = CRM_Core_DAO::copyGeneric('CRM_Case_DAO_Case', array('id' => $otherCaseId), NULL, NULL, NULL, NULL, 'civicrm_case');
         $mainCaseId = $mainCase->id;
         if (!$mainCaseId) {
           continue;

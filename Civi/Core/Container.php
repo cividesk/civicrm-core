@@ -159,7 +159,7 @@ class Container {
 
     $container->setDefinition('psr_log', new Definition('CRM_Core_Error_Log', array()));
 
-    foreach (array('js_strings', 'community_messages') as $cacheName) {
+    /*foreach (array('js_strings', 'community_messages') as $cacheName) {
       $container->setDefinition("cache.{$cacheName}", new Definition(
         'CRM_Utils_Cache_Interface',
         array(
@@ -168,6 +168,34 @@ class Container {
             'type' => array('*memory*', 'SqlGroup', 'ArrayCache'),
           ),
         )
+      ))->setFactory('CRM_Utils_Cache::create');
+    }*/
+    $basicCaches = [
+      'js_strings' => 'js_strings',
+      'community_messages' => 'community_messages',
+      'checks' => 'checks',
+      'session' => 'CiviCRM Session',
+      'long' => 'long',
+      'groups' => 'contact groups',
+      'navigation' => 'navigation',
+      'customData' => 'custom data',
+      'fields' => 'contact fields',
+    ];
+    foreach ($basicCaches as $cacheSvc => $cacheGrp) {
+      $definitionParams = [
+        'name' => $cacheGrp,
+        'type' => ['*memory*', 'SqlGroup', 'ArrayCache'],
+      ];
+      // For Caches that we don't really care about the ttl for and/or maybe accessed
+      // fairly often we use the fastArrayDecorator which improves reads and writes, these
+      // caches should also not have concurrency risk.
+      $fastArrayCaches = ['groups', 'navigation', 'customData', 'fields'];
+      if (in_array($cacheSvc, $fastArrayCaches)) {
+        $definitionParams['withArray'] = 'fast';
+      }
+      $container->setDefinition("cache.{$cacheSvc}", new Definition(
+        'CRM_Utils_Cache_Interface',
+        [$definitionParams]
       ))->setFactory('CRM_Utils_Cache::create');
     }
 

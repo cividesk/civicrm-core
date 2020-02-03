@@ -176,6 +176,8 @@ class CRM_Mailing_Page_View extends CRM_Core_Page {
     if (isset($this->_mailing->body_html) && empty($_GET['text'])) {
       $header = 'text/html; charset=utf-8';
       $content = $mime->getHTMLBody();
+      $content = preg_replace(';(\<head.*\<title\>\s*)TITLE(\s*\</title\>.*\</head\>);ms', "\\1{$this->_mailing->subject}\\2", $content, 1);
+
       if (strpos($content, '<head>') === FALSE && strpos($content, '<title>') === FALSE) {
         $title = '<head><title>' . $this->_mailing->subject . '</title></head>';
       }

@@ -1677,7 +1677,7 @@ FROM   civicrm_domain
       }
       $newObject->save();
       if (!$blockCopyofCustomValues) {
-        $newObject->copyCustomFields($object->id, $newObject->id);
+        $newObject->copyCustomFields($object->id, $newObject->id, $newObject->__table);
       }
       CRM_Utils_Hook::post('create', CRM_Core_DAO_AllCoreTables::getBriefName(str_replace('_BAO_', '_DAO_', $daoName)), $newObject->id, $newObject);
     }

@@ -1819,7 +1819,7 @@ LIKE %1
       }
       $newObject->save();
       if (!$blockCopyofCustomValues) {
-        $newObject->copyCustomFields($object->id, $newObject->id);
+        $newObject->copyCustomFields($object->id, $newObject->id, $newObject->__table);
       }
       CRM_Utils_Hook::post('create', CRM_Core_DAO_AllCoreTables::getBriefName($daoName), $newObject->id, $newObject);
     }

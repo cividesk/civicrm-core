@@ -587,7 +587,7 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
     if (!$daoName) {
       CRM_Core_Error::fatal("DAO Mapper missing for $entityTable.");
     }
-    $newObject = CRM_Core_DAO::copyGeneric($daoName, $fromCriteria, $newParams, NULL, NULL. NULL, $entityTable);
+    $newObject = CRM_Core_DAO::copyGeneric($daoName, $fromCriteria, $newParams);
 
     if (is_a($newObject, 'CRM_Core_DAO') && $newObject->id && $createRecurringEntity) {
       $object = new $daoName();

@@ -186,6 +186,8 @@
     </table>
   </td>
 </tr>
+<tr><td><label>{$form.contribution_id.label}</label> {$form.contribution_id.html}</td>
+ </tr>
 
 {* campaign in contribution search *}
 {include file="CRM/Campaign/Form/addCampaignToComponent.tpl" campaignContext="componentSearch"

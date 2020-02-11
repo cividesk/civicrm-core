@@ -173,7 +173,7 @@ class CRM_Price_BAO_PriceFieldValue extends CRM_Price_DAO_PriceFieldValue {
    *
    */
   public static function getValues($fieldId, &$values, $orderBy = 'weight', $isActive = FALSE, $admin = FALSE) {
-    $sql = "SELECT cs.id FROM civicrm_price_set cs INNER JOIN civicrm_price_field cp ON cp.price_set_id = cs.id 
+    $sql = "SELECT cs.id FROM civicrm_price_set cs INNER JOIN civicrm_price_field cp ON cp.price_set_id = cs.id
               WHERE cs.name IN ('default_contribution_amount', 'default_membership_type_amount') AND cp.id = {$fieldId} ";
     $setId = CRM_Core_DAO::singleValueQuery($sql);
     $fieldValueDAO = new CRM_Price_DAO_PriceFieldValue();
@@ -199,7 +199,7 @@ class CRM_Price_BAO_PriceFieldValue extends CRM_Price_DAO_PriceFieldValue {
     $fieldValueDAO->find();
     while ($fieldValueDAO->fetch()) {
       // Do not Generate Price field option for disabled membership Type
-      if ($fieldValueDAO->membership_type_id && ! array_key_exists($fieldValueDAO->membership_type_id, $membershipType)) {
+      if (! isset($fieldValueDAO->membership_type_id) && ! array_key_exists($fieldValueDAO->membership_type_id, $membershipType)) {
         continue;
       }
       CRM_Core_DAO::storeValues($fieldValueDAO, $values[$fieldValueDAO->id]);

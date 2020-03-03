@@ -4039,6 +4039,7 @@ WHERE  $smartGroupClause
    */
   public function privacy(&$values) {
     list($name, $op, $value, $grouping) = $values;
+
     if (is_array($value)) {
       if (in_array(key($value), CRM_Core_DAO::acceptedSQLOperators(), TRUE)) {
         $op = key($value);

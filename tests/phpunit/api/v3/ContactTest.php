@@ -4457,4 +4457,64 @@ class api_v3_ContactTest extends CiviUnitTestCase {
       'skip_undelete' => TRUE,
     ]);
   }
+
+  /**
+   * Create pair of contacts with multiple conflicts.
+   *
+   * @return array
+   *
+   * @throws \CRM_Core_Exception
+   */
+  protected function createDeeplyConflictedContacts(): array {
+    $this->createCustomGroupWithFieldOfType();
+    $contact1 = $this->individualCreate([
+      'email' => 'bob@example.com',
+      'api.address.create' => ['location_type_id' => 'work', 'street_address' => 'big office', 'city' => 'small city'],
+      'api.address.create.2' => ['location_type_id' => 'home', 'street_address' => 'big house', 'city' => 'small city'],
+      'external_identifier' => 'unique and special',
+      $this->getCustomFieldName('text') => 'mummy loves me',
+    ]);
+    $contact2 = $this->individualCreate([
+      'first_name' => 'different',
+      'api.address.create.1' => ['location_type_id' => 'home', 'street_address' => 'medium house', 'city' => 'small city'],
+      'api.address.create.2' => ['location_type_id' => 'work', 'street_address' => 'medium office', 'city' => 'small city'],
+      'external_identifier' => 'uniquer and specialler',
+      'api.email.create' => ['location_type_id' => 'Other', 'email' => 'bob@example.com'],
+      $this->getCustomFieldName('text') => 'mummy loves me more',
+    ]);
+    return [$contact1, $contact2];
+  }
+
+  public function versionAndPrivacyOption() {
+    $version = [3, 4];
+    $fields = ['do_not_mail', 'do_not_email', 'do_not_sms', 'is_opt_out', 'do_not_trade'];
+    $tests = [];
+    foreach ($fields as $field) {
+      foreach ($version as $v) {
+        $tests[] = [$v, 1, $field, 1];
+        $tests[] = [$v, 0, $field, 3];
+        $tests[] = [$v, ['!=' => 1], $field, 3];
+        $tests[] = [$v, ['!=' => 0], $field, 1];
+      }
+    }
+    return $tests;
+  }
+
+ /**
+   * CRM-14743 - test api respects search operators.
+   *
+   * @param int $version
+   *
+   * @dataProvider versionAndPrivacyOption
+   */
+  public function testGetContactsByPrivacyFlag($version, $query, $field, $expected) {
+    $this->_apiversion = $version;
+    $contact1 = $this->individualCreate();
+    $contact2 = $this->individualCreate([$field => 1]);
+    $contact = $this->callAPISuccess('Contact', 'get', [$field => $query]);
+    $this->assertEquals($expected, $contact['count']);
+    $this->callAPISuccess('Contact', 'delete', ['id' => $contact1, 'skip_undelete' => 1]);
+    $this->callAPISuccess('Contact', 'delete', ['id' => $contact2, 'skip_undelete' => 1]);
+  }
+
 }

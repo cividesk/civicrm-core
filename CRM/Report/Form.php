@@ -1559,6 +1559,7 @@ class CRM_Report_Form extends CRM_Core_Form {
       unset($actions['report_instance.csv']);
     }
 
+    CRM_Utils_Hook::links('view.report.links', NULL, $instanceId, $actions);
     return $actions;
   }
 

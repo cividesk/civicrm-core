@@ -1715,7 +1715,7 @@ class CRM_Report_Form extends CRM_Core_Form {
     }
 
     CRM_Utils_Hook::alterReportVar('actions', $actions, $this);
-
+    CRM_Utils_Hook::links('view.report.links', NULL, $instanceId, $actions);
     return $actions;
   }
 

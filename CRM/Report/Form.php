@@ -2369,7 +2369,9 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
         }
       }
     }
-
+    $values = array('stats' => $this->rollupRow, 'rows' => $rows);
+    CRM_Utils_Hook::alterReportVar('grandStat', $values, $this);
+    $this->rollupRow = $values['stats'];
     $this->assign('grandStat', $this->rollupRow);
     return TRUE;
   }

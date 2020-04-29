@@ -3205,6 +3205,7 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
    * @param array $rows
    */
   public function doTemplateAssignment(&$rows) {
+    CRM_Utils_Hook::alterReportVar('columnHeaders', $this->_columnHeaders, $this);
     $this->assign_by_ref('columnHeaders', $this->_columnHeaders);
     $this->assign_by_ref('rows', $rows);
     $this->assign('statistics', $this->statistics($rows));

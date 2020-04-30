@@ -117,7 +117,12 @@ class CRM_Core_Payment_AuthorizeNet extends CRM_Core_Payment {
     foreach ($newParams as $field => $value) {
       $this->_setParam($field, $value);
     }
-
+    // Check if contribution recurring id available.
+    $contributionId = $params['contributionID'];
+    $contribution = civicrm_api3('Contribution', 'get', ['sequential' => 1,'id' => $contributionId]);
+    if (!empty($contribution['values'][0]['contribution_recur_id'])) {
+      $params['contributionRecurID'] = $contribution['values'][0]['contribution_recur_id'];
+    }
     if (!empty($params['is_recur']) && !empty($params['contributionRecurID'])) {
       $result = $this->doRecurPayment();
       if (is_a($result, 'CRM_Core_Error')) {

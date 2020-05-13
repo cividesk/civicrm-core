@@ -55,7 +55,7 @@ return [
     'description' => ts('If you select a default online contribution page for self-service membership renewals, a "renew" link pointing to that page will be displayed on the Contact Dashboard for memberships which were entered offline. You will need to ensure that the membership block for the selected online contribution page includes any currently available memberships.'),
     'help_text' => NULL,
   ],
-  'membership_reassignment' => array(
+  'membership_reassignment' => [
     'group_name' => 'Member Preferences',
     'group' => 'member',
     'name' => 'membership_reassignment',
@@ -68,16 +68,22 @@ return [
     'is_contact' => 0,
     'description' => "If enabled, Cancel Related Membership link will be available (Membership status set to Cancelled with Today date as end date) and while creating new related membership Join and Start date set as Today's date, delete link will not be available.",
     'help_text' => NULL,
-  ),
-  'online_renewal_contribution_page' => array(
+  ],
+  'online_renewal_contribution_page' => [
     'group_name' => 'Member Preferences',
     'group' => 'member',
     'name' => 'online_renewal_contribution_page',
     'type' => 'Integer',
-    'html_type' => 'Select',
+    'html_type' => 'select',
     'default' => NULL,
-    'pseudoconstant' => array(
-      'name' => 'contributionPage',
-    ),
-  ),
+    'pseudoconstant' => [
+      // @todo - handle table style pseudoconstants for settings & avoid deprecated function.
+      'callback' => 'CRM_Contribute_PseudoConstant::contributionPage',
+    ],
+    'title' => 'Default online membership renewal page for <strong> online</strong> memberships',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => ts('If you select a default online contribution page for self-service membership renewals, a "renew" link pointing to that page will be displayed on the Contact Dashboard for memberships which were entered online. You will need to ensure that the membership block for the selected online contribution page includes any currently available memberships.'),
+    'help_text' => NULL,
+  ],
 ];

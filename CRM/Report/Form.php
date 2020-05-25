@@ -2445,7 +2445,7 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
       foreach ($rows as $index => & $row) {
         foreach ($row as $selectedField => $value) {
           if (array_key_exists($selectedField, $alterFunctions)) {
-            $rows[$index][$selectedField] = $this->{$alterFunctions[$selectedField]}($value, $row, $selectedField, $alterMap[$selectedField], $alterSpecs[$selectedField]);
+            //$rows[$index][$selectedField] = $this->{$alterFunctions[$selectedField]}($value, $row, $selectedField, $alterMap[$selectedField], $alterSpecs[$selectedField]);
           }
         }
       }

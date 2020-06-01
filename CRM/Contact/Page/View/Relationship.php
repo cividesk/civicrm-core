@@ -214,6 +214,15 @@ class CRM_Contact_Page_View_Relationship extends CRM_Core_Page {
   public function run() {
     $this->preProcessQuickEntityPage();
 
+    //assign relationship type id
+    //tab hooks are used to append some parameters
+    //to the relationship tab url to restrict the
+    //relationships that show up in the said tab  
+    if (isset($_REQUEST['tid']) && $_REQUEST['tid'] != '') {
+      $relationship_type_id = isset($_REQUEST['tid']) ? $_REQUEST['tid'] : '';
+    }
+    $this->assign('relTypeId', $relationship_type_id);
+
     $this->setContext();
 
     $this->setCaseId(CRM_Utils_Request::retrieve('caseID', 'Integer', $this));

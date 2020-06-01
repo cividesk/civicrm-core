@@ -2177,6 +2177,31 @@ AND cc.sort_name LIKE '%$name%'";
       $links = CRM_Contact_Page_View_UserDashBoard::links();
       $mask = NULL;
     }
+
+    /*
+     * make sure the relationship type and operators that are passed on
+     * from the hooks for relationship tab url are translated as the params
+     * so that the correct results are displayed in the
+     * relationship tabs when split/restricted with criteria
+     */
+    if (isset($_GET['relationship_type_id']) && $_GET['relationship_type_id'] != '') {
+      if (strpos($_GET['relationship_type_id'], 'notin') !== false) {
+        $typeIds = explode('_', str_replace('notin', '', $_GET['relationship_type_id']));
+        if (!empty($typeIds)) {
+          $params['relationship_type_id']["NOT IN"] = $typeIds;
+        }
+      }
+      if (strpos($_GET['relationship_type_id'], 'in') !== false) {
+        $typeIds = explode('_', str_replace('in', '', $_GET['relationship_type_id']));
+        if (!empty($typeIds)) {
+          $params['relationship_type_id']["IN"] = $typeIds;
+        }
+      }
+      else {
+        $params['relationship_type_id'] = $_GET['relationship_type_id'];
+      }
+    }
+
     // get contact relationships
     $relationships = CRM_Contact_BAO_Relationship::getRelationship($params['contact_id'],
       $relationshipStatus,

@@ -2464,12 +2464,6 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
     // use this method for formatting custom rows for display purpose.
     $this->alterCustomDataDisplay($rows);
 
-    
-    // build array of section totals
-    $this->sectionTotals();
-
-    // process grand-total row
-    $this->grandTotal($rows);
   }
 
   /**

@@ -381,10 +381,6 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
         if (!(CRM_Utils_Array::value('membership', $componentDetails) || CRM_Utils_Array::value('participant', $componentDetails))) {
           $defaults['total_amount'] = CRM_Utils_Money::format($total_value - $defaults['tax_amount'], NULL, '%a');
         }
-        else {
-          //Format total amount if above condition fails.
-          $defaults['total_amount'] = CRM_Utils_Money::format($defaults['total_amount'], NULL, '%a');
-        }
       }
     }
 

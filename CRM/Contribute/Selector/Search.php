@@ -571,14 +571,18 @@ class CRM_Contribute_Selector_Search extends CRM_Core_Selector_Base implements C
           ],
         ]
       );
-    if (CRM_Contribute_BAO_Query::isSiteHasProducts()) {
+
+    //Reverted to the previous behavior of showing
+    //premium irrespective, which is then used by various hooks
+    //to be overwritten into a different column
+    //if (CRM_Contribute_BAO_Query::isSiteHasProducts()) {
       self::$_columnHeaders[] = [
         'name' => ts('Premium'),
         'sort' => 'product_name',
         'field_name' => 'product_name',
         'direction' => CRM_Utils_Sort::DONTCARE,
       ];
-    }
+    //}
     if (!$this->_single) {
       $pre = [
         [

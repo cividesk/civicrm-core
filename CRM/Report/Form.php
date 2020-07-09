@@ -2441,11 +2441,20 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
         }
       }
 
+      //get class name for report
+      $className = get_class($this);
+      $ext = strpos($className, 'CRM_Extendedreport');
+
       // Run the alter display functions
       foreach ($rows as $index => & $row) {
         foreach ($row as $selectedField => $value) {
           if (array_key_exists($selectedField, $alterFunctions)) {
-            //$rows[$index][$selectedField] = $this->{$alterFunctions[$selectedField]}($value, $row, $selectedField, $alterMap[$selectedField], $alterSpecs[$selectedField]);
+            //do this for all reports except extended reports
+            //to ensure backward compatibility
+            //remove this once extended reports are upgraded as well
+            if (!($ext === 0)) {
+              $rows[$index][$selectedField] = $this->{$alterFunctions[$selectedField]}($value, $row, $selectedField, $alterMap[$selectedField], $alterSpecs[$selectedField]);
+            }
           }
         }
       }

@@ -375,10 +375,12 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
    *
    * @return HTML_QuickForm_Element
    *   Could be an error object
+   *
+   * @throws \CRM_Core_Exception
    */
   public function &add(
     $type, $name, $label = '',
-    $attributes = '', $required = FALSE, $extra = NULL
+    $attributes = [], $required = FALSE, $extra = NULL
   ) {
     // Fudge some extra types that quickform doesn't support
     $inputType = $type;
@@ -402,8 +404,24 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
       $extra = NULL;
     }
     // @see http://wiki.civicrm.org/confluence/display/CRMDOC/crmDatepicker
-    if ($type == 'datepicker') {
-      $attributes = ($attributes ? $attributes : []);
+    if ($type === 'datepicker') {
+      if (!empty($attributes['format'])) {
+        $dateAttributes = CRM_Core_SelectValues::date($attributes['format'], NULL, NULL, NULL, 'Input');
+        if (empty($extra['minDate']) && !empty($dateAttributes['minYear'])) {
+          $extra['minDate'] = $dateAttributes['minYear'] . '-01-01';
+        }
+        if (empty($extra['maxDate']) && !empty($dateAttributes['minYear'])) {
+          $extra['maxDate'] = $dateAttributes['maxYear'] . '-12-31';
+        }
+      }
+      // Support minDate/maxDate properties
+      if (isset($extra['minDate'])) {
+        $extra['minDate'] = date('Y-m-d', strtotime($extra['minDate']));
+      }
+      if (isset($extra['maxDate'])) {
+        $extra['maxDate'] = date('Y-m-d', strtotime($extra['maxDate']));
+      }
+
       $attributes['data-crm-datepicker'] = json_encode((array) $extra);
       if (!empty($attributes['aria-label']) || $label) {
         $attributes['aria-label'] = CRM_Utils_Array::value('aria-label', $attributes, $label);

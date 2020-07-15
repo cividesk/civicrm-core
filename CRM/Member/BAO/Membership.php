@@ -1525,8 +1525,10 @@ WHERE  civicrm_membership.contact_id = civicrm_contact.id
         // CRM-20966: Do not create membership_payment record for inherited membership.
         unset($params['relate_contribution_id']);
 
-        if (($params['status_id'] == $deceasedStatusId) || ($params['status_id'] == $expiredStatusId)) {
-          // related membership is not active so does not count towards maximum
+        if (($params['status_id'] == $deceasedStatusId)
+            || (($membership->status_id != $expiredStatusId) && ($params['status_id'] == $expiredStatusId))) {
+          // contacts is deceased OR primary memberhsip is not expired and relationship is not active
+          // so cancel the membership and do not decrease available memberships ($numRelatedAvailable)
           CRM_Member_BAO_Membership::create($params, $relMemIds);
         }
         else {

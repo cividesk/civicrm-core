@@ -137,6 +137,7 @@ class CRM_Queue_DAO_QueueItem extends CRM_Core_DAO {
           'localizable' => 0,
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'activityDateTime',
           ],
         ],
         'release_time' => [
@@ -151,6 +152,7 @@ class CRM_Queue_DAO_QueueItem extends CRM_Core_DAO {
           'localizable' => 0,
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'activityDateTime',
           ],
         ],
         'data' => [

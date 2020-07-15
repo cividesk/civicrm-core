@@ -435,6 +435,7 @@ class CRM_Pledge_DAO_Pledge extends CRM_Core_DAO {
           'unique_title' => ts('Payments Start Date'),
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'activityDate',
           ],
         ],
         'pledge_create_date' => [
@@ -452,6 +453,7 @@ class CRM_Pledge_DAO_Pledge extends CRM_Core_DAO {
           'localizable' => 0,
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'activityDate',
           ],
         ],
         'acknowledge_date' => [
@@ -466,6 +468,7 @@ class CRM_Pledge_DAO_Pledge extends CRM_Core_DAO {
           'localizable' => 0,
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'activityDate',
           ],
         ],
         'modified_date' => [
@@ -491,6 +494,7 @@ class CRM_Pledge_DAO_Pledge extends CRM_Core_DAO {
           'localizable' => 0,
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'activityDate',
           ],
         ],
         'pledge_end_date' => [
@@ -507,6 +511,7 @@ class CRM_Pledge_DAO_Pledge extends CRM_Core_DAO {
           'unique_title' => ts('Payments Ended Date'),
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'activityDate',
           ],
         ],
         'max_reminders' => [

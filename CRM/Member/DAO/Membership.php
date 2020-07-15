@@ -360,6 +360,7 @@ class CRM_Member_DAO_Membership extends CRM_Core_DAO {
           'localizable' => 0,
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'activityDate',
           ],
         ],
         'owner_membership_id' => [

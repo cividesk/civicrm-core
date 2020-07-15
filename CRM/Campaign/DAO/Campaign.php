@@ -262,6 +262,7 @@ class CRM_Campaign_DAO_Campaign extends CRM_Core_DAO {
           'localizable' => 0,
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'activityDateTime',
           ],
         ],
         'end_date' => [
@@ -279,6 +280,7 @@ class CRM_Campaign_DAO_Campaign extends CRM_Core_DAO {
           'localizable' => 0,
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'activityDateTime',
           ],
         ],
         'campaign_type_id' => [
@@ -400,6 +402,7 @@ class CRM_Campaign_DAO_Campaign extends CRM_Core_DAO {
           'localizable' => 0,
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'activityDateTime',
           ],
         ],
         'last_modified_id' => [

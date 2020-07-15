@@ -262,6 +262,7 @@ class CRM_Batch_DAO_Batch extends CRM_Core_DAO {
           'localizable' => 0,
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'activityDateTime',
           ],
         ],
         'modified_id' => [

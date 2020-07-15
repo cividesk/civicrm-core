@@ -323,6 +323,7 @@ class CRM_Mailing_DAO_MailingAB extends CRM_Core_DAO {
           'localizable' => 0,
           'html' => [
             'type' => 'Select Date',
+            'formatType' => 'mailing',
           ],
         ],
       ];

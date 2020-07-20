@@ -91,6 +91,12 @@
     <table style="width:auto">
       <tbody>
       <tr>
+        <td>{$form.contribution_contribution_has_soft_credits_is_not_null.label}</td>
+        <td>
+          {$form.contribution_contribution_has_soft_credits_is_not_null.html}
+        </td>
+      </tr>
+      <tr>
         <td>{$form.contribution_thankyou_date_is_not_null.label}</td>
         <td>
           {$form.contribution_thankyou_date_is_not_null.html}

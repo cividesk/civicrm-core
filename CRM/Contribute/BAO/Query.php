@@ -209,6 +209,20 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
         );
         return;
 
+      case 'contribution_contribution_has_soft_credits_is_not_null':
+        if ($value) {
+          $op = "IS NOT NULL";
+          $query->_qill[$grouping][] = ts('Contribution has soft credits');
+        }
+        else {
+          $op = "IS NULL";
+          $query->_qill[$grouping][] = ts('Contribution does not have soft credits');
+        }
+        $query->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("civicrm_contribution_soft.amount", $op);
+        $query->_tables['civicrm_contribution'] = $query->_whereTables['civicrm_contribution'] = 1;
+        $query->_tables['civicrm_contribution_soft'] = $query->_whereTables['civicrm_contribution_soft'] = 1;
+        return;
+
       case 'contribution_thankyou_date_is_not_null':
         if ($value) {
           $op = "IS NOT NULL";
@@ -971,6 +985,9 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
       CRM_Contribute_PseudoConstant::contributionPage(),
       FALSE, ['class' => 'crm-select2', 'multiple' => 'multiple', 'placeholder' => ts('- any -')]
     );
+
+    // Soft credit.
+    $form->addYesNo('contribution_contribution_has_soft_credits_is_not_null', ts('Contribution has soft credit(s)?'), TRUE);
 
     // use contribution_payment_instrument_id instead of payment_instrument_id
     // Contribution Edit form (pop-up on contribution/Contact(display Result as Contribution) open on search form),

@@ -46,14 +46,15 @@ class CRM_Contact_Page_ImageFile extends CRM_Core_Page {
    * @throws \Exception
    */
   public function run() {
-    if (!preg_match('/^[^\/]+\.(jpg|jpeg|png|gif)$/i', $_GET['photo'])) {
+    $photo = CRM_Utils_Request::retrieve('photo', 'String', CRM_Core_DAO::$_nullObject);
+    if (!preg_match('/^[^\/]+\.(jpg|jpeg|png|gif)$/i', $photo)) {
       throw new CRM_Core_Exception(ts('Malformed photo name'));
     }
 
     // FIXME Optimize performance of image_url query
     $sql = "SELECT id FROM civicrm_contact WHERE image_url like %1;";
     $params = [
-      1 => ["%" . $_GET['photo'], 'String'],
+      1 => ["%" . $photo, 'String'],
     ];
 
     $dao = CRM_Core_DAO::executeQuery($sql, $params);

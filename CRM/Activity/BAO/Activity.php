@@ -2843,4 +2843,36 @@ INNER JOIN  civicrm_option_group grp ON (grp.id = option_group_id AND grp.name =
     ];
   }
 
+
+  /**
+   * Make a copy of an Activity.
+   *
+   * @param int $id
+   *   The activity id to copy.
+   * @param array $params
+   *
+   * @return CRM_Activity_DAO_Activity
+   * @throws \CRM_Core_Exception
+   */
+  public static function copy($id, $params = []) {
+    $activityValues = [];
+
+    //get the required activity values.
+    $activityParams = ['id' => $id];
+
+    $copyActivity = CRM_Core_DAO::copyGeneric('CRM_Activity_DAO_Activity',
+      ['id' => $id]
+    );
+
+
+    $copyActivityContact = CRM_Core_DAO::copyGeneric('CRM_Activity_DAO_ActivityContact',
+      ['activity_id' => $id],
+      ['activity_id' => $copyActivity->id]
+    );
+
+    self::copyCustomFields($id, $copyActivity->id, 'civicrm_activity');
+
+    $copyActivity->save();
+  }
+
 }

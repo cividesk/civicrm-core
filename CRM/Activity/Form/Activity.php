@@ -242,6 +242,12 @@ class CRM_Activity_Form_Activity extends CRM_Contact_Form_Task {
    * Build the form object.
    */
   public function preProcess() {
+
+    if ($this->_action & (CRM_Core_Action::COPY)) {
+      $id = CRM_Utils_Request::retrieve('id', 'Positive', $this, TRUE, 0, 'GET');
+      $copy = CRM_Activity_BAO_Activity::copy($id);
+    }
+
     CRM_Core_Form_RecurringEntity::preProcess('civicrm_activity');
     $this->_atypefile = CRM_Utils_Array::value('atypefile', $_GET);
     $this->assign('atypefile', FALSE);
@@ -614,6 +620,12 @@ class CRM_Activity_Form_Activity extends CRM_Contact_Form_Task {
    * @throws \CiviCRM_API3_Exception
    */
   public function buildQuickForm() {
+    if ($this->_action & (CRM_Core_Action::COPY)) {
+      $this->ajaxResponse['updateTabs'] = [
+        '#tab_activity' => CRM_Contact_BAO_Contact::getCountComponent('activity', $this->_currentUserId),
+      ];
+      return;
+    }
     if ($this->_action & (CRM_Core_Action::DELETE | CRM_Core_Action::RENEW)) {
       //enable form element (ActivityLinks sets this true)
       $this->assign('suppressForm', FALSE);

@@ -1,0 +1,15 @@
+If you upload the same file twice, the second upload has a (1) at the end of the filename
+This patch allows kcfinder to display thumbs for such names in the browser window
+  (and fixes rihgt-click delete action on these files as well)
+
+--- a/packages/kcfinder/core/class/uploader.php
++++ b/packages/kcfinder/core/class/uploader.php
+@@ -430,7 +430,7 @@
+             (
+                 isset($this->config['_normalizeFilenames']) &&
+                 $this->config['_normalizeFilenames'] &&
+-                preg_match('/[^0-9a-z\.\- _]/si', $file)
++                preg_match('/[^0-9a-z()\.\- _]/si', $file)
+             )
+         )
+             return false;

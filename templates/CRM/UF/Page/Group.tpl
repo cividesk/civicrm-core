@@ -93,7 +93,7 @@
                     <a href="{crmURL p='civicrm/contact/view' q="reset=1&cid=`$row.created_id`"}">{ts}{$row.created_by}{/ts}</a>
                   {/if}
                 </td>
-                <td class="crmf-description crm-editable" data-type="textarea">{$row.description}</td>
+                <td class="crmf-description crm-editable" data-type="textarea">{$row.description|escape}</td>
                 <td>{$row.group_type}</td>
                 <td>{$row.id}</td>
                 <td>{$row.module}</td>
@@ -138,7 +138,7 @@
                     <a href="{crmURL p='civicrm/contact/view' q="reset=1&cid=`$row.created_id`"}">{ts}{$row.created_by}{/ts}</a>
                   {/if}
                 </td>
-                <td>{$row.description}</td>
+                <td>{$row.description|escape}</td>
                 <td>{$row.group_type}</td>
                 <td>{$row.id}</td>
                 <td>{$row.module}</td>

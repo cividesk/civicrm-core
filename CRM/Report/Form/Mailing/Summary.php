@@ -74,6 +74,12 @@ class CRM_Report_Form_Mailing_Summary extends CRM_Report_Form {
         'subject' => array(
           'title' => ts('Subject'),
         ),
+        'from_name' => array(
+          'title' => ts('Sender Name'),
+       ),
+        'from_email' => array(
+          'title' => ts('Sender Email'),
+       ),
       ),
       'filters' => array(
         'is_completed' => array(

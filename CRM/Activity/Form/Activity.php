@@ -242,6 +242,12 @@ class CRM_Activity_Form_Activity extends CRM_Contact_Form_Task {
    * Build the form object.
    */
   public function preProcess() {
+
+    if ($this->_action & (CRM_Core_Action::COPY)) {
+      $id = CRM_Utils_Request::retrieve('id', 'Positive', $this, TRUE, 0, 'GET');
+      $copy = CRM_Activity_BAO_Activity::copy($id);
+    }
+
     CRM_Core_Form_RecurringEntity::preProcess('civicrm_activity');
     $this->_atypefile = CRM_Utils_Array::value('atypefile', $_GET);
     $this->assign('atypefile', FALSE);
@@ -518,6 +524,7 @@ class CRM_Activity_Form_Activity extends CRM_Contact_Form_Task {
     }
 
     if ($this->_action & CRM_Core_Action::VIEW) {
+      $this->_values['details'] = CRM_Utils_String::purifyHtml($this->_values['details']);
       $url = CRM_Utils_System::url(implode("/", $this->urlPath), "reset=1&id={$this->_activityId}&action=view&cid={$this->_values['source_contact_id']}");
       CRM_Utils_Recent::add(CRM_Utils_Array::value('subject', $this->_values, ts('(no subject)')),
         $url,
@@ -614,6 +621,12 @@ class CRM_Activity_Form_Activity extends CRM_Contact_Form_Task {
    * @throws \CiviCRM_API3_Exception
    */
   public function buildQuickForm() {
+    if ($this->_action & (CRM_Core_Action::COPY)) {
+      $this->ajaxResponse['updateTabs'] = [
+        '#tab_activity' => CRM_Contact_BAO_Contact::getCountComponent('activity', $this->_currentUserId),
+      ];
+      return;
+    }
     if ($this->_action & (CRM_Core_Action::DELETE | CRM_Core_Action::RENEW)) {
       //enable form element (ActivityLinks sets this true)
       $this->assign('suppressForm', FALSE);

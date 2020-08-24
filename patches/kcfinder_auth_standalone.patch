@@ -1,0 +1,30 @@
+--- a/packages/kcfinder/integration/civicrm.php
++++ b/packages/kcfinder/integration/civicrm.php
+@@ -69,6 +69,9 @@
+     case 'Drupal8':
+       $auth_function = 'authenticate_drupal8';
+       break;
++    case 'Standalone':
++      $auth_function = 'authenticate_standalone';
++      break;
+     }
+     if(!$auth_function($config)) {
+       CRM_Core_Error::fatal(ts("You must be logged in with proper permissions to edit, add, or delete uploaded images."));
+@@ -205,6 +208,17 @@
+   return true;
+ }
+ 
++function authenticate_standalone($config) {
++  session_start();
++  // make sure user has access to civicrm
++  CRM_Utils_System::loadBootStrap();
++  require_once "CRM/Core/Permission.php";
++  if (CRM_Core_Permission::check('access CiviCRM')) {
++    return true;
++  }
++  return false;
++}
++
+ checkAuthentication( );
+ 
+ //spl_autoload_register('__autoload');

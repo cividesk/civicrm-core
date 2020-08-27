@@ -243,7 +243,7 @@ class CRM_Activity_Form_Activity extends CRM_Contact_Form_Task {
    */
   public function preProcess() {
 
-    if ($this->_action & (CRM_Core_Action::COPY)) {
+    if ($this->_action & (CRM_Core_Action::DETACH)) {
       $id = CRM_Utils_Request::retrieve('id', 'Positive', $this, TRUE, 0, 'GET');
       $copy = CRM_Activity_BAO_Activity::copy($id);
     }
@@ -621,7 +621,7 @@ class CRM_Activity_Form_Activity extends CRM_Contact_Form_Task {
    * @throws \CiviCRM_API3_Exception
    */
   public function buildQuickForm() {
-    if ($this->_action & (CRM_Core_Action::COPY)) {
+    if ($this->_action & (CRM_Core_Action::DETACH)) {
       $this->ajaxResponse['updateTabs'] = [
         '#tab_activity' => CRM_Contact_BAO_Contact::getCountComponent('activity', $this->_currentUserId),
       ];

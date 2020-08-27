@@ -24,7 +24,7 @@
  +--------------------------------------------------------------------+
 *}
 {* this template is used for adding/editing other (custom) activities. *}
-  {if $action eq 16384}
+  {if $action eq 65536}
     <div class="status">The activity has been copied.</div>
   {/if}
   {if $action eq 4}

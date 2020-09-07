@@ -434,6 +434,7 @@ class CRM_Contribute_Form_AdditionalInfo {
       $form->assign('customGroup', $customGroup);
     }
 
+    $params['contributionStatus_name'] = CRM_Contribute_PseudoConstant::contributionStatus($params['contribution_status_id']);
     $form->assign_by_ref('formValues', $params);
     list($contributorDisplayName,
       $contributorEmail

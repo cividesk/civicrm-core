@@ -802,17 +802,40 @@ class CRM_Activity_Form_Activity extends CRM_Contact_Form_Task {
       ]);
     }
     else {
-      $this->addButtons([
-        [
-          'type' => 'upload',
-          'name' => ts('Save'),
-          'isDefault' => TRUE,
-        ],
-        [
-          'type' => 'cancel',
-          'name' => ts('Cancel'),
-        ],
-      ]);
+      if ($this->_action == CRM_Core_Action::UPDATE) {
+        $btn = [
+          [
+            'type' => 'upload',
+            'name' => ts('Copy as new'),
+            'js' => ['onclick' => "return verify( );"],
+            'subName' => 'new',
+          ],
+          [
+            'type' => 'upload',
+            'name' => ts('Save'),
+            'isDefault' => TRUE,
+          ],
+          [
+            'type' => 'cancel',
+            'name' => ts('Cancel'),
+          ],
+       ];
+      }
+      else {
+        $btn = [
+          [
+            'type' => 'upload',
+            'name' => ts('Save'),
+            'isDefault' => TRUE,
+          ],
+          [
+            'type' => 'cancel',
+            'name' => ts('Cancel'),
+          ],
+       ];
+
+      }
+      $this->addButtons($btn);
     }
 
     if ($this->_activityTypeFile) {
@@ -976,6 +999,11 @@ class CRM_Activity_Form_Activity extends CRM_Contact_Form_Task {
 
     if (isset($this->_activityId)) {
       $params['id'] = $this->_activityId;
+    }
+
+    //create a new activity with newly made changes to the activity
+    if ($this->controller->getButtonName('submit') == '_qf_Activity_upload_new') {
+      unset($params['id']);
     }
 
     // add attachments as needed

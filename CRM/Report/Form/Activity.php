@@ -662,6 +662,11 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
     $select = str_ireplace('AS civicrm_contact_contact_target_id', $new_select, $this->_select);
     $new_having = ' addtogroup_contact_id';
     $having = str_ireplace(' civicrm_contact_contact_target_id', $new_having, $this->_having);
+
+    $select = str_ireplace('AS civicrm_contact_contact_target_birth', $new_select, $this->_select);
+    $new_having = ' addtogroup_contact_id';
+    $having = str_ireplace(' civicrm_contact_contact_target_birth', $new_having, $this->_having);
+
     $query = "$select
 FROM {$this->temporaryTables['activity_temp_table']['name']} tar
 GROUP BY civicrm_activity_id $having {$this->_orderBy}";

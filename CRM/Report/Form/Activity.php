@@ -122,6 +122,13 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
             'dbAlias' => "civicrm_contact_target.birth_date",
             'default' => TRUE,
           ],
+          'contact_target_gender' => [
+            'name' => 'gender_id',
+            'title' => ts('Target Gender'),
+            'alias' => 'civicrm_contact_target',
+            'dbAlias' => "civicrm_contact_target.gender_id",
+            'default' => TRUE,
+          ],
           'contact_source_id' => [
             'name' => 'id',
             'alias' => 'civicrm_contact_source',
@@ -688,10 +695,6 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
     $new_having = ' addtogroup_contact_id';
     $having = str_ireplace(' civicrm_contact_contact_target_id', $new_having, $this->_having);
 
-    $select = str_ireplace('AS civicrm_contact_contact_target_birth', $new_select, $this->_select);
-    $new_having = ' addtogroup_contact_id';
-    $having = str_ireplace(' civicrm_contact_contact_target_birth', $new_having, $this->_having);
-
     $query = "$select
 FROM {$this->temporaryTables['activity_temp_table']['name']} tar
 GROUP BY civicrm_activity_id $having {$this->_orderBy}";
@@ -894,6 +897,7 @@ GROUP BY civicrm_activity_id $having {$this->_orderBy}";
     $activityType = CRM_Core_PseudoConstant::activityType(TRUE, TRUE, FALSE, 'label', TRUE);
     $activityStatus = CRM_Core_PseudoConstant::activityStatus();
     $priority = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id');
+    $genders = CRM_Core_PseudoConstant::get('CRM_Contact_DAO_Contact', 'gender_id');
     $viewLinks = FALSE;
 
     // Would we ever want to retrieve from the form controller??
@@ -1053,6 +1057,13 @@ GROUP BY civicrm_activity_id $having {$this->_orderBy}";
           $activityStatus[$row['civicrm_activity_status_id']] != 'Completed'
         ) {
           $rows[$rowNum]['class'] = "status-overdue";
+          $entryFound = TRUE;
+        }
+      }
+
+      if (array_key_exists('civicrm_contact_contact_target_gender', $row)) {
+        if ($value = $row['civicrm_contact_contact_target_gender']) {
+          $rows[$rowNum]['civicrm_contact_contact_target_gender'] = $genders[$value];
           $entryFound = TRUE;
         }
       }

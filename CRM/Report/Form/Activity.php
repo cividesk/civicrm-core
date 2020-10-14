@@ -35,6 +35,7 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
 
   protected $_customGroupExtends = [
     'Activity',
+    'Individual',
   ];
 
   protected $_nonDisplayFields = [];

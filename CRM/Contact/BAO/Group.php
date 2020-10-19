@@ -308,6 +308,7 @@ class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
 
     $permissions = NULL;
     if (CRM_Core_Permission::check('edit all contacts') ||
+      CRM_Core_Permission::check('edit all contacts in domain') ||
       CRM_ACL_API::groupPermission(CRM_ACL_API::EDIT, $id, NULL,
         'civicrm_saved_search', $allGroups
       )
@@ -316,6 +317,7 @@ class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
     }
 
     if (CRM_Core_Permission::check('view all contacts') ||
+      CRM_Core_Permission::check('view all contacts in domain') ||
       CRM_ACL_API::groupPermission(CRM_ACL_API::VIEW, $id, NULL,
         'civicrm_saved_search', $allGroups
       )

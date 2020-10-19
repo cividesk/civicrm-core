@@ -36,6 +36,12 @@ class CRM_Event_DAO_Event extends CRM_Core_DAO {
   public $id;
 
   /**
+   * Which Domain is this match entry for
+   *
+   * @var int unsigned
+   */
+  public $domain_id;
+  /**
    * Event Title (e.g. Fall Fundraiser Dinner)
    *
    * @var string
@@ -526,6 +532,7 @@ class CRM_Event_DAO_Event extends CRM_Core_DAO {
   public static function getReferenceColumns() {
     if (!isset(Civi::$statics[__CLASS__]['links'])) {
       Civi::$statics[__CLASS__]['links'] = static::createReferenceColumns(__CLASS__);
+      Civi::$statics[__CLASS__]['links'][] = new CRM_Core_Reference_Basic(self::getTableName(), 'domain_id', 'civicrm_domain', 'id');
       Civi::$statics[__CLASS__]['links'][] = new CRM_Core_Reference_Basic(self::getTableName(), 'loc_block_id', 'civicrm_loc_block', 'id');
       Civi::$statics[__CLASS__]['links'][] = new CRM_Core_Reference_Basic(self::getTableName(), 'created_id', 'civicrm_contact', 'id');
       Civi::$statics[__CLASS__]['links'][] = new CRM_Core_Reference_Basic(self::getTableName(), 'campaign_id', 'civicrm_campaign', 'id');
@@ -555,6 +562,24 @@ class CRM_Event_DAO_Event extends CRM_Core_DAO {
           'bao' => 'CRM_Event_BAO_Event',
           'localizable' => 0,
         ],
+
+        'domain_id' => [
+          'name' => 'domain_id',
+          'type' => CRM_Utils_Type::T_INT,
+          'title' => ts('Event Domain ID') ,
+          'description' => 'Which Domain is this match entry for',
+          'required' => true,
+          'table_name' => 'civicrm_event',
+          'entity' => 'Event',
+          'bao' => 'CRM_Event_BAO_Event',
+          'localizable' => 0,
+          'FKClassName' => 'CRM_Core_DAO_Domain',
+          'pseudoconstant' => [
+            'table' => 'civicrm_domain',
+            'keyColumn' => 'id',
+            'labelColumn' => 'name',
+          ]
+        ] ,
         'event_title' => [
           'name' => 'title',
           'type' => CRM_Utils_Type::T_STRING,

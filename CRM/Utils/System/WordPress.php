@@ -605,7 +605,6 @@ class CRM_Utils_System_WordPress extends CRM_Utils_System_Base {
       // TODO: Set locale for other WordPress plugins.
       // @see https://wordpress.org/plugins/tags/multilingual/
       // A hook would be nice here.
-
     }
 
     if (!empty($locale)) {

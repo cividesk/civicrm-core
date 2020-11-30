@@ -455,6 +455,14 @@ class CRM_Utils_System_WordPress extends CRM_Utils_System_Base {
     }
 
     // TODO: set language variable for others WordPress plugin
+    // FIXME: this is done specifically for fff
+    // https://projects.cividesk.com/projects/43/tasks/4199
+    if ($_SERVER['DOMAIN'] == 'fff') {
+      // Uncomment below to analyze if/how WordPress sets the language per url
+      // file_put_contents('/home/fff/log/i18n.log', "$language $_SERVER[REQUEST_URI]" . PHP_EOL, FILE_APPEND | LOCK_EX);
+      // WordPress does not set language for CiviCRM Ajax calls, so do it ourselves based on url prefix
+      if (empty($language)) $language = (substr($_SERVER['REQUEST_URI'], 0, 4) == '/fr/' ? 'fr' : 'en');
+    }
 
     if (!empty($language)) {
       return CRM_Core_I18n_PseudoConstant::longForShort(substr($language, 0, 2));

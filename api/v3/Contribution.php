@@ -670,6 +670,7 @@ function _ipn_process_transaction($params, $contribution, $input, $ids) {
     $input['receipt_from_name'] = CRM_Utils_Array::value('receipt_from_name', $params, $domainFromName);
     $input['receipt_from_email'] = CRM_Utils_Array::value('receipt_from_email', $params, $domainFromEmail);
   }
+
   $input['card_type_id'] = $params['card_type_id'] ?? NULL;
   $input['pan_truncation'] = $params['pan_truncation'] ?? NULL;
   if (!empty($params['payment_instrument_id'])) {

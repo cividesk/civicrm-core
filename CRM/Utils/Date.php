@@ -1150,6 +1150,13 @@ class CRM_Utils_Date {
             unset($from);
             break;
 
+          case 'earlier_1':
+            $to['d'] = 31;
+            $to['M'] = 12;
+            $to['Y'] = $now['year'] - 2;
+            unset($from);
+            break;
+
           case 'greater':
             $from['M'] = $from['d'] = 1;
             $from['Y'] = $now['year'];

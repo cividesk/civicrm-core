@@ -55,10 +55,14 @@ class CRM_Activity_BAO_ActivityContact extends CRM_Activity_DAO_ActivityContact 
   public static function create(&$params) {
     $activityContact = new CRM_Activity_DAO_ActivityContact();
 
+    CRM_Utils_Hook::pre('create', 'ActivityContact', NULL, $params);
     $activityContact->copyValues($params);
     if (!$activityContact->find(TRUE)) {
-      return $activityContact->save();
+      $result = $activityContact->save();
+      CRM_Utils_Hook::post('create', 'ActivityContact', $activityContact->id, $activityContact);
+      return $result;
     }
+
     return $activityContact;
   }
 

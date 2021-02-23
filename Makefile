@@ -13,8 +13,10 @@ build: civicrm
 	rm -Rf civicrm
 
 secure:
-	rm vendor/pear/log/README.rst
+	rm -f vendor/pear/log/README.rst
 	chown -R root:apache *
+	find . -type d -exec chmod 755 {} + 
+	find . -type f -exec chmod go-w {} + 
 
 diff:
 	diff -rwq --exclude=".git" . /var/www/html/civicrm-stable-5.19.4

@@ -1,0 +1,707 @@
+From c5923f0428490004fc2b335a4be9373de642c6a1 Mon Sep 17 00:00:00 2001
+From: yashodha <yashodha@cividesk.com>
+Date: Mon, 19 Oct 2020 15:07:04 +0530
+Subject: [PATCH] multisite changes for 5.19
+
+---
+ CRM/ACL/BAO/ACL.php                          | 17 +++++++++
+ CRM/Contact/BAO/Contact/Permission.php       | 27 +++++++++------
+ CRM/Contact/BAO/Group.php                    |  2 ++
+ CRM/Core/Error.php                           |  2 +-
+ CRM/Core/PseudoConstant.php                  | 36 ++++++++++++++++++++
+ CRM/Event/BAO/Event.php                      |  4 +++
+ CRM/Event/DAO/Event.php                      | 25 ++++++++++++++
+ CRM/Event/Page/ManageEvent.php               |  5 +++
+ CRM/Event/PseudoConstant.php                 | 10 ++++++
+ CRM/Grant/BAO/Grant.php                      |  9 +++--
+ CRM/Grant/BAO/Query.php                      |  5 +--
+ CRM/Grant/DAO/Grant.php                      |  2 +-
+ CRM/Mailing/BAO/Mailing.php                  | 18 ++++++++++
+ CRM/Mailing/Selector/Browse.php              |  3 +-
+ CRM/Member/BAO/MembershipType.php            |  1 +
+ CRM/Member/BAO/Query.php                     | 11 +++++-
+ CRM/Member/Page/DashBoard.php                |  2 ++
+ CRM/Member/Page/MembershipType.php           |  2 +-
+ CRM/Member/PseudoConstant.php                |  3 +-
+ CRM/Report/Form/Event/ParticipantListing.php |  1 +
+ CRM/Report/Form/Event/Summary.php            |  4 +++
+ CRM/Report/Page/InstanceList.php             |  6 ++--
+ api/v3/Contact.php                           |  7 ++--
+ api/v3/Event.php                             |  4 +++
+ templates/CRM/Report/Page/InstanceList.tpl   |  2 +-
+ templates/CRM/Report/Page/TemplateList.tpl   |  2 +-
+ xml/schema/Event/Event.xml                   | 19 +++++++++++
+ 27 files changed, 201 insertions(+), 28 deletions(-)
+
+diff --git a/CRM/ACL/BAO/ACL.php b/CRM/ACL/BAO/ACL.php
+index 71050fffbc..9a1f3960b1 100644
+--- a/CRM/ACL/BAO/ACL.php
++++ b/CRM/ACL/BAO/ACL.php
+@@ -42,6 +42,7 @@ class CRM_ACL_BAO_ACL extends CRM_ACL_DAO_ACL {
+   public static $_objectTable = NULL;
+   public static $_operation = NULL;
+ 
++  static $_aclCache = NULL;
+   public static $_fieldKeys = NULL;
+ 
+   /**
+@@ -979,4 +980,20 @@ ORDER BY a.object_id
+     $acl->delete();
+   }
+ 
++  public static function getAclClause() {
++    if (! self::$_aclCache ) {
++      $acl=  new CRM_Contact_BAO_Query();
++      $acl->generatePermissionClause(false, true);
++      if (array_key_exists('multisiteGroupTable', $acl->_whereTables)) {
++        $aclFrom  = CRM_Utils_Array::value('multisiteGroupTable', $acl->_whereTables);
++      }
++      else {
++        $aclFrom  = CRM_Utils_Array::value('civicrm_group_contact', $acl->_whereTables);
++      }
++      $aclWhere = $acl->_permissionWhereClause ?  ' AND '.  $acl->_permissionWhereClause : '';
++      self::$_aclCache = array('aclFromClause' => $aclFrom, 'aclWhereClause' => $aclWhere);
++    }
++    return self::$_aclCache;
++  }
++
+ }
+diff --git a/CRM/Contact/BAO/Contact/Permission.php b/CRM/Contact/BAO/Contact/Permission.php
+index 80cbe37847..74461cb0a1 100644
+--- a/CRM/Contact/BAO/Contact/Permission.php
++++ b/CRM/Contact/BAO/Contact/Permission.php
+@@ -99,12 +99,14 @@ class CRM_Contact_BAO_Contact_Permission {
+ 
+     // RUN the query
+     $contact_id_list = implode(',', $contact_ids);
++    $domain_id = CRM_Core_Config::domainID();
+     $query = "
+ SELECT contact_id
+  FROM civicrm_acl_contact_cache
+  {$LEFT_JOIN_DELETED}
+ WHERE contact_id IN ({$contact_id_list})
+   AND user_id = {$contactID}
++  AND domain_id = {$domain_id}
+   AND operation = '{$operation}'
+   {$AND_CAN_ACCESS_DELETED}";
+     $result = CRM_Core_DAO::executeQuery($query);
+@@ -199,6 +201,7 @@ WHERE contact_a.id = %1 AND $permission
+     //   that somebody might flush the cache away from under our feet,
+     //   but the alternative would be a SQL call every time this is called,
+     //   and a complete rebuild if the result was an empty set...
++    $domain_id = CRM_Core_Config::domainID();
+     if (!isset(Civi::$statics[__CLASS__]['processed'])) {
+       Civi::$statics[__CLASS__]['processed'] = [
+         CRM_Core_Permission::VIEW => [],
+@@ -218,7 +221,7 @@ WHERE contact_a.id = %1 AND $permission
+ 
+     if (!$force) {
+       // skip if already calculated
+-      if (!empty(Civi::$statics[__CLASS__]['processed'][$type][$userID])) {
++      if (!empty(Civi::$statics[__CLASS__]['processed'][$type][$domain_id][$userID])) {
+         return;
+       }
+ 
+@@ -226,12 +229,12 @@ WHERE contact_a.id = %1 AND $permission
+       $sql = "
+ SELECT count(*)
+ FROM   civicrm_acl_contact_cache
+-WHERE  user_id = %1
++WHERE  user_id = %1 AND domain_id = $domain_id
+ AND    $operationClause
+ ";
+       $count = CRM_Core_DAO::singleValueQuery($sql, $queryParams);
+       if ($count > 0) {
+-        Civi::$statics[__CLASS__]['processed'][$type][$userID] = 1;
++        Civi::$statics[__CLASS__]['processed'][$type][$domain_id][$userID] = 1;
+         return;
+       }
+     }
+@@ -243,10 +246,10 @@ AND    $operationClause
+ 
+     $from = CRM_Contact_BAO_Query::fromClause($whereTables);
+     CRM_Core_DAO::executeQuery("
+-INSERT INTO civicrm_acl_contact_cache ( user_id, contact_id, operation )
+-SELECT DISTINCT $userID as user_id, contact_a.id as contact_id, '{$operation}' as operation
++INSERT INTO civicrm_acl_contact_cache ( user_id, domain_id, contact_id, operation )
++SELECT DISTINCT $userID as user_id, $domain_id as domain_id, contact_a.id as contact_id, '{$operation}' as operation
+          $from
+-         LEFT JOIN civicrm_acl_contact_cache ac ON ac.user_id = $userID AND ac.contact_id = contact_a.id AND ac.operation = '{$operation}'
++         LEFT JOIN civicrm_acl_contact_cache ac ON ac.domain_id = $domain_id AND ac.user_id = $userID AND ac.contact_id = contact_a.id AND ac.operation = '{$operation}'
+ WHERE    $permission
+ AND ac.user_id IS NULL
+ ");
+@@ -256,8 +259,8 @@ AND ac.user_id IS NULL
+     if (CRM_Core_Permission::check('edit my contact') ||
+       ($type == CRM_Core_Permission::VIEW && CRM_Core_Permission::check('view my contact'))) {
+       if (!CRM_Core_DAO::singleValueQuery("
+-        SELECT count(*) FROM civicrm_acl_contact_cache WHERE user_id = %1 AND contact_id = %1 AND operation = '{$operation}' LIMIT 1", $queryParams)) {
+-        CRM_Core_DAO::executeQuery("INSERT INTO civicrm_acl_contact_cache ( user_id, contact_id, operation ) VALUES(%1, %1, '{$operation}')", $queryParams);
++        SELECT count(*) FROM civicrm_acl_contact_cache WHERE user_id = %1 AND contact_id = %1 AND domain_id = $domain_id AND operation = '{$operation}' LIMIT 1", $queryParams)) {
++        CRM_Core_DAO::executeQuery("INSERT INTO civicrm_acl_contact_cache ( user_id, contact_id, domain_id, operation ) VALUES(%1, %1, $domain_id, '{$operation}')", $queryParams);
+       }
+     }
+     Civi::$statics[__CLASS__]['processed'][$type][$userID] = 1;
+@@ -289,18 +292,19 @@ AND ac.user_id IS NULL
+     $contactID = (int) CRM_Core_Session::getLoggedInContactID();
+     self::cache($contactID);
+ 
++    $domain_id = CRM_Core_Config::domainID();
+     if (is_array($contactAlias) && !empty($contactAlias)) {
+       //More than one contact alias
+       $clauses = [];
+       foreach ($contactAlias as $k => $alias) {
+-        $clauses[] = " INNER JOIN civicrm_acl_contact_cache aclContactCache_{$k} ON {$alias}.id = aclContactCache_{$k}.contact_id AND aclContactCache_{$k}.user_id = $contactID ";
++        $clauses[] = " INNER JOIN civicrm_acl_contact_cache aclContactCache_{$k} ON {$alias}.id = aclContactCache_{$k}.contact_id AND aclContactCache_{$k}.user_id = $contactID AND aclContactCache_{$k}.domain_id = {$domain_id}";
+       }
+ 
+       $fromClause = implode(" ", $clauses);
+       $whereClase = NULL;
+     }
+     else {
+-      $fromClause = " INNER JOIN civicrm_acl_contact_cache aclContactCache ON {$contactAlias}.id = aclContactCache.contact_id ";
++      $fromClause = " INNER JOIN civicrm_acl_contact_cache aclContactCache ON {$contactAlias}.id = aclContactCache.contact_id AND aclContactCache.domain_id = {$domain_id}";
+       $whereClase = " aclContactCache.user_id = $contactID AND $contactAlias.is_deleted = 0";
+     }
+ 
+@@ -318,7 +322,8 @@ AND ac.user_id IS NULL
+     if (!CRM_Core_Permission::check([['view all contacts', 'edit all contacts']])) {
+       $contactID = (int) CRM_Core_Session::getLoggedInContactID();
+       self::cache($contactID);
+-      return "IN (SELECT contact_id FROM civicrm_acl_contact_cache WHERE user_id = $contactID)";
++      $domain_id = CRM_Core_Config::domainID();
++      return "IN (SELECT contact_id FROM civicrm_acl_contact_cache WHERE user_id = $contactID AND domain_id = $domain_id)";
+     }
+     return NULL;
+   }
+diff --git a/CRM/Contact/BAO/Group.php b/CRM/Contact/BAO/Group.php
+index 869b26ea18..19eac0a2ad 100644
+--- a/CRM/Contact/BAO/Group.php
++++ b/CRM/Contact/BAO/Group.php
+@@ -308,6 +308,7 @@ class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
+ 
+     $permissions = NULL;
+     if (CRM_Core_Permission::check('edit all contacts') ||
++      CRM_Core_Permission::check('edit all contacts in domain') ||
+       CRM_ACL_API::groupPermission(CRM_ACL_API::EDIT, $id, NULL,
+         'civicrm_saved_search', $allGroups
+       )
+@@ -316,6 +317,7 @@ class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
+     }
+ 
+     if (CRM_Core_Permission::check('view all contacts') ||
++      CRM_Core_Permission::check('view all contacts in domain') ||
+       CRM_ACL_API::groupPermission(CRM_ACL_API::VIEW, $id, NULL,
+         'civicrm_saved_search', $allGroups
+       )
+diff --git a/CRM/Core/Error.php b/CRM/Core/Error.php
+index e52e51515a..d5d1a17a19 100644
+--- a/CRM/Core/Error.php
++++ b/CRM/Core/Error.php
+@@ -696,7 +696,7 @@ class CRM_Core_Error extends PEAR_ErrorStack {
+       $prefixString = $prefix ? ($prefix . '.') : '';
+ 
+       $hash = self::generateLogFileHash($config);
+-      $fileName = $config->configAndLogDir . 'CiviCRM.' . $prefixString . $hash . '.log';
++      $fileName = $config->configAndLogDir . 'CiviCRM.' . CIVICRM_DOMAIN_ID . '_' . $prefixString . $hash . '.log';
+ 
+       // Roll log file monthly or if greater than 256M.
+       // Size-based rotation introduced in response to filesize limits on
+diff --git a/CRM/Core/PseudoConstant.php b/CRM/Core/PseudoConstant.php
+index c36e04fb48..16edadd318 100644
+--- a/CRM/Core/PseudoConstant.php
++++ b/CRM/Core/PseudoConstant.php
+@@ -164,6 +164,12 @@ class CRM_Core_PseudoConstant {
+    */
+   private static $accountOptionValues;
+ 
++  /**
++   * Domain
++   * @var array
++   */
++  private static $domain;
++
+   /**
+    * Low-level option getter, rarely accessed directly.
+    * NOTE: Rather than calling this function directly use CRM_*_BAO_*::buildOptions()
+@@ -1007,6 +1013,36 @@ WHERE  id = %1";
+     return self::$staticGroup;
+   }
+ 
++  /**
++   * Get all the domain names from the database.
++   *
++   * The static array domain is returned, and if it's
++   * called the first time, the <b>Domain DAO</b> is used
++   * to get all the domain names.
++   *
++   * Note: any database errors will be trapped by the DAO.
++   *
++   *
++   * @param bool $id
++   *
++   * @return array
++   *   array reference of all domain names.
++   */
++  public static function &domain($id = FALSE) {
++    if (!self::$domain) {
++      self::populate(self::$domain, 'CRM_Core_DAO_Domain', TRUE, 'name');
++    }
++    if ($id) {
++      if (array_key_exists($id, self::$domain)) {
++        return self::$domain[$id];
++      }
++      else {
++        return CRM_Core_DAO::$_nullObject;
++      }
++    }
++    return self::$domain;
++  }
++
+   /**
+    * Get all Relationship Types  from database.
+    *
+diff --git a/CRM/Event/BAO/Event.php b/CRM/Event/BAO/Event.php
+index cdf49ea979..098faa179d 100644
+--- a/CRM/Event/BAO/Event.php
++++ b/CRM/Event/BAO/Event.php
+@@ -124,6 +124,10 @@ class CRM_Event_BAO_Event extends CRM_Event_DAO_Event {
+     if (empty($params['is_template'])) {
+       $params['is_template'] = 0;
+     }
++
++    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_event_per_domain')) {
++      $params['domain_id'] = CRM_Core_Config::domainID();
++    }
+     // check if new event, if so set the created_id (if not set)
+     // and always set created_date to now
+     if (empty($params['id'])) {
+diff --git a/CRM/Event/DAO/Event.php b/CRM/Event/DAO/Event.php
+index a9abd91d8b..74545d2369 100644
+--- a/CRM/Event/DAO/Event.php
++++ b/CRM/Event/DAO/Event.php
+@@ -35,6 +35,12 @@ class CRM_Event_DAO_Event extends CRM_Core_DAO {
+    */
+   public $id;
+ 
++  /**
++   * Which Domain is this match entry for
++   *
++   * @var int unsigned
++   */
++  public $domain_id;
+   /**
+    * Event Title (e.g. Fall Fundraiser Dinner)
+    *
+@@ -526,6 +532,7 @@ class CRM_Event_DAO_Event extends CRM_Core_DAO {
+   public static function getReferenceColumns() {
+     if (!isset(Civi::$statics[__CLASS__]['links'])) {
+       Civi::$statics[__CLASS__]['links'] = static::createReferenceColumns(__CLASS__);
++      Civi::$statics[__CLASS__]['links'][] = new CRM_Core_Reference_Basic(self::getTableName(), 'domain_id', 'civicrm_domain', 'id');
+       Civi::$statics[__CLASS__]['links'][] = new CRM_Core_Reference_Basic(self::getTableName(), 'loc_block_id', 'civicrm_loc_block', 'id');
+       Civi::$statics[__CLASS__]['links'][] = new CRM_Core_Reference_Basic(self::getTableName(), 'created_id', 'civicrm_contact', 'id');
+       Civi::$statics[__CLASS__]['links'][] = new CRM_Core_Reference_Basic(self::getTableName(), 'campaign_id', 'civicrm_campaign', 'id');
+@@ -555,6 +562,24 @@ class CRM_Event_DAO_Event extends CRM_Core_DAO {
+           'bao' => 'CRM_Event_BAO_Event',
+           'localizable' => 0,
+         ],
++
++        'domain_id' => [
++          'name' => 'domain_id',
++          'type' => CRM_Utils_Type::T_INT,
++          'title' => ts('Event Domain ID') ,
++          'description' => 'Which Domain is this match entry for',
++          'required' => true,
++          'table_name' => 'civicrm_event',
++          'entity' => 'Event',
++          'bao' => 'CRM_Event_BAO_Event',
++          'localizable' => 0,
++          'FKClassName' => 'CRM_Core_DAO_Domain',
++          'pseudoconstant' => [
++            'table' => 'civicrm_domain',
++            'keyColumn' => 'id',
++            'labelColumn' => 'name',
++          ]
++        ] ,
+         'event_title' => [
+           'name' => 'title',
+           'type' => CRM_Utils_Type::T_STRING,
+diff --git a/CRM/Event/Page/ManageEvent.php b/CRM/Event/Page/ManageEvent.php
+index 73eb67af1d..9d29b26e33 100644
+--- a/CRM/Event/Page/ManageEvent.php
++++ b/CRM/Event/Page/ManageEvent.php
+@@ -577,6 +577,11 @@ ORDER BY start_date desc
+       }
+     }
+ 
++    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_event_per_domain')) {
++      $domainID = CRM_Core_Config::domainID();
++      $clauses[] = "(domain_id IS NULL OR domain_id = $domainID )";
++    }
++
+     return !empty($clauses) ? implode(' AND ', $clauses) : '(1)';
+   }
+ 
+diff --git a/CRM/Event/PseudoConstant.php b/CRM/Event/PseudoConstant.php
+index 8a8e556313..d7e580183d 100644
+--- a/CRM/Event/PseudoConstant.php
++++ b/CRM/Event/PseudoConstant.php
+@@ -98,6 +98,16 @@ class CRM_Event_PseudoConstant extends CRM_Core_PseudoConstant {
+    *   array of all events if any
+    */
+   public static function event($id = NULL, $all = FALSE, $condition = NULL) {
++    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_event_per_domain')) {
++      $domainID = CRM_Core_Config::domainID();
++      $domainCondition = "(domain_id IS NULL OR domain_id = $domainID )";
++      if (!empty($condition)) {
++        $condition .= ' AND '. $domainCondition;
++      }
++      else {
++        $condition = $domainCondition;
++      }
++    }
+     $key = "{$id}_{$all}_{$condition}";
+ 
+     if (!isset(self::$event[$key])) {
+diff --git a/CRM/Grant/BAO/Grant.php b/CRM/Grant/BAO/Grant.php
+index 4db6f2a3c2..46384a90be 100644
+--- a/CRM/Grant/BAO/Grant.php
++++ b/CRM/Grant/BAO/Grant.php
+@@ -51,9 +51,14 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
+    *   Array of event summary values
+    */
+   public static function getGrantSummary($admin = FALSE) {
++    $acl = CRM_ACL_BAO_ACL::getAclClause();
+     $query = "
+-            SELECT status_id, count(id) as status_total
+-            FROM civicrm_grant  GROUP BY status_id";
++            SELECT status_id, count(civicrm_grant.id) as status_total
++            FROM civicrm_grant
++            INNER JOIN civicrm_contact contact_a ON ( contact_a.id = civicrm_grant.contact_id AND contact_a.is_deleted = 0 ) ";
++    $query .= $acl['aclFromClause'];
++    $query .= " WHERE (1) ". $acl['aclWhereClause'];
++    $query .= " GROUP BY civicrm_grant.status_id";
+ 
+     $dao = CRM_Core_DAO::executeQuery($query);
+ 
+diff --git a/CRM/Grant/BAO/Query.php b/CRM/Grant/BAO/Query.php
+index 534f25608e..d0c00c4613 100644
+--- a/CRM/Grant/BAO/Query.php
++++ b/CRM/Grant/BAO/Query.php
+@@ -251,11 +251,12 @@ class CRM_Grant_BAO_Query extends CRM_Core_BAO_Query {
+ 
+       case 'grant_type':
+         $from .= " $side JOIN civicrm_option_group option_group_grant_type ON (option_group_grant_type.name = 'grant_type')";
++        $domain_id = CRM_Core_Config::domainID();
+         if ($mode & CRM_Contact_BAO_Query::MODE_GRANT) {
+-          $from .= " INNER JOIN civicrm_option_value grant_type ON (civicrm_grant.grant_type_id = grant_type.value AND option_group_grant_type.id = grant_type.option_group_id ) ";
++          $from .= " INNER JOIN civicrm_option_value grant_type ON (civicrm_grant.grant_type_id = grant_type.value AND option_group_grant_type.id = grant_type.option_group_id AND grant_type.domain_id = {$domain_id} ) ";
+         }
+         else {
+-          $from .= " $side JOIN civicrm_option_value grant_type ON (civicrm_grant.grant_type_id = grant_type.value AND option_group_grant_type.id = grant_type.option_group_id ) ";
++          $from .= " $side JOIN civicrm_option_value grant_type ON (civicrm_grant.grant_type_id = grant_type.value AND option_group_grant_type.id = grant_type.option_group_id AND grant_type.domain_id = {$domain_id} ) ";
+         }
+         break;
+ 
+diff --git a/CRM/Grant/DAO/Grant.php b/CRM/Grant/DAO/Grant.php
+index af216a4e69..ec9c4a586e 100644
+--- a/CRM/Grant/DAO/Grant.php
++++ b/CRM/Grant/DAO/Grant.php
+@@ -412,7 +412,7 @@ class CRM_Grant_DAO_Grant extends CRM_Core_DAO {
+           'required' => TRUE,
+           'import' => TRUE,
+           'where' => 'civicrm_grant.status_id',
+-          'export' => FALSE,
++          'export' => TRUE,
+           'table_name' => 'civicrm_grant',
+           'entity' => 'Grant',
+           'bao' => 'CRM_Grant_BAO_Grant',
+diff --git a/CRM/Mailing/BAO/Mailing.php b/CRM/Mailing/BAO/Mailing.php
+index fed30dcf0c..f23b3f2f09 100644
+--- a/CRM/Mailing/BAO/Mailing.php
++++ b/CRM/Mailing/BAO/Mailing.php
+@@ -2355,6 +2355,7 @@ LEFT JOIN civicrm_mailing_group g ON g.mailing_id   = m.id
+       $mailingIDs = [];
+       while ($dao->fetch()) {
+         $mailingIDs[] = $dao->id;
++        self::getMailingRecurList($dao->id, $mailingIDs);
+       }
+       //CRM-18181 Get all mailings that use the mailings found earlier as receipients
+       if (!empty($mailingIDs)) {
+@@ -2374,6 +2375,23 @@ LEFT JOIN civicrm_mailing_group g ON g.mailing_id   = m.id
+     return $mailingIDs;
+   }
+ 
++  /**
++   * Get the Mailing list recursively from main mailing ID.
++   *
++   * @param int $id mailing ID
++   * @param array $mailingIDs List of Mailing ID
++   */
++  static function getMailingRecurList($id, &$mailingIDs) {
++    if ($id) {
++      $query = "SELECT mailing_id FROM civicrm_mailing_group WHERE entity_table LIKE 'civicrm_mailing%' and entity_id = $id " ;
++      $dao = CRM_Core_DAO::executeQuery($query);
++      while ($dao->fetch()) {
++        $mailingIDs[] = $dao->mailing_id;
++        self::getMailingRecurList($dao->mailing_id, $mailingIDs);
++      }
++    }
++  }
++
+   /**
+    * Get the rows for a browse operation.
+    *
+diff --git a/CRM/Mailing/Selector/Browse.php b/CRM/Mailing/Selector/Browse.php
+index 9440a77bb1..bd77dfceaf 100644
+--- a/CRM/Mailing/Selector/Browse.php
++++ b/CRM/Mailing/Selector/Browse.php
+@@ -645,7 +645,8 @@ LEFT JOIN  civicrm_contact scheduledContact ON ( $mailing.scheduled_id = schedul
+       $clauses[] = "civicrm_mailing.language = %6";
+       $params[6] = [$language, 'String'];
+     }
+-
++    $domainID = CRM_Core_Config::domainID();
++    $clauses[] = " ( domain_id = $domainID ) ";
+     if (empty($clauses)) {
+       return 1;
+     }
+diff --git a/CRM/Member/BAO/MembershipType.php b/CRM/Member/BAO/MembershipType.php
+index a831738a8f..e48056d574 100644
+--- a/CRM/Member/BAO/MembershipType.php
++++ b/CRM/Member/BAO/MembershipType.php
+@@ -276,6 +276,7 @@ class CRM_Member_BAO_MembershipType extends CRM_Member_DAO_MembershipType {
+   public static function getMembershipTypes($public = TRUE) {
+     $membershipTypes = [];
+     $membershipType = new CRM_Member_DAO_MembershipType();
++    $membershipType->domain_id = CRM_Core_Config::domainID();
+     $membershipType->is_active = 1;
+     if ($public) {
+       $membershipType->visibility = 'Public';
+diff --git a/CRM/Member/BAO/Query.php b/CRM/Member/BAO/Query.php
+index d8e0d9b9ea..81e2640203 100644
+--- a/CRM/Member/BAO/Query.php
++++ b/CRM/Member/BAO/Query.php
+@@ -416,8 +416,17 @@ class CRM_Member_BAO_Query extends CRM_Core_BAO_Query {
+         break;
+ 
+       case 'civicrm_membership_type':
++        $isEnabled = civicrm_api('setting', 'getvalue', array(
++            'version' => 3,
++            'name' => 'is_enabled',
++            'group' => 'Multi Site Preferences')
++        );
++        $domain_membership_type = '';
++        if ($isEnabled) {
++          $domain_membership_type = ' AND civicrm_membership_type.domain_id = '. CRM_Core_Config::domainID();
++        }
+         if ($mode & CRM_Contact_BAO_Query::MODE_MEMBER) {
+-          $from = " INNER JOIN civicrm_membership_type ON civicrm_membership.membership_type_id = civicrm_membership_type.id ";
++          $from = " INNER JOIN civicrm_membership_type ON civicrm_membership.membership_type_id = civicrm_membership_type.id {$domain_membership_type}";
+         }
+         else {
+           $from = " $side JOIN civicrm_membership_type ON civicrm_membership.membership_type_id = civicrm_membership_type.id ";
+diff --git a/CRM/Member/Page/DashBoard.php b/CRM/Member/Page/DashBoard.php
+index b9bf7885fd..0cea131dfb 100644
+--- a/CRM/Member/Page/DashBoard.php
++++ b/CRM/Member/Page/DashBoard.php
+@@ -49,11 +49,13 @@ class CRM_Member_Page_DashBoard extends CRM_Core_Page {
+     //CRM-13901 don't show dashboard to contacts with limited view writes & it does not relect
+     //what they have access to
+     //@todo implement acls on dashboard querys (preferably via api to enhance that at the same time)
++    /*
+     if (!CRM_Core_Permission::check('view all contacts') && !CRM_Core_Permission::check('edit all contacts')) {
+       $this->showMembershipSummary = FALSE;
+       $this->assign('membershipSummary', FALSE);
+       return;
+     }
++    */
+     $this->assign('membershipSummary', TRUE);
+     CRM_Utils_System::setTitle(ts('CiviMember'));
+     $membershipSummary = array();
+diff --git a/CRM/Member/Page/MembershipType.php b/CRM/Member/Page/MembershipType.php
+index e7807d67da..3e12921711 100644
+--- a/CRM/Member/Page/MembershipType.php
++++ b/CRM/Member/Page/MembershipType.php
+@@ -109,7 +109,7 @@ class CRM_Member_Page_MembershipType extends CRM_Core_Page {
+     // get all membership types sorted by weight
+     $membershipType = [];
+     $dao = new CRM_Member_DAO_MembershipType();
+-
++    $dao->domain_id = CRM_Core_Config::domainID();
+     $dao->orderBy('weight');
+     $dao->find();
+ 
+diff --git a/CRM/Member/PseudoConstant.php b/CRM/Member/PseudoConstant.php
+index dedf38aaaf..dcbbdd7d0b 100644
+--- a/CRM/Member/PseudoConstant.php
++++ b/CRM/Member/PseudoConstant.php
+@@ -63,9 +63,10 @@ class CRM_Member_PseudoConstant extends CRM_Core_PseudoConstant {
+    */
+   public static function membershipType($id = NULL, $force = TRUE) {
+     if (!self::$membershipType || $force) {
++      $domain_id = 'domain_id = '. CRM_Core_Config::domainID();
+       CRM_Core_PseudoConstant::populate(self::$membershipType,
+         'CRM_Member_DAO_MembershipType',
+-        FALSE, 'name', 'is_active', NULL, 'weight', 'id'
++        FALSE, 'name', 'is_active', $domain_id, 'weight', 'id', TRUE
+       );
+     }
+     if ($id) {
+diff --git a/CRM/Report/Form/Event/ParticipantListing.php b/CRM/Report/Form/Event/ParticipantListing.php
+index 257e0c3d22..e1f710e5ef 100644
+--- a/CRM/Report/Form/Event/ParticipantListing.php
++++ b/CRM/Report/Form/Event/ParticipantListing.php
+@@ -166,6 +166,7 @@ class CRM_Report_Form_Event_ParticipantListing extends CRM_Report_Form {
+           'participant_fee_level' => NULL,
+           'participant_fee_amount' => array('title' => ts('Participant Fee')),
+           'participant_register_date' => array('title' => ts('Registration Date')),
++          'participant_source' => array('title' => ts('Event Source')),
+           'total_paid' => array(
+             'title' => ts('Total Paid'),
+             'dbAlias' => 'IFNULL(SUM(ft.total_amount), 0)',
+diff --git a/CRM/Report/Form/Event/Summary.php b/CRM/Report/Form/Event/Summary.php
+index bfbc8e5a91..b6e0e3a298 100644
+--- a/CRM/Report/Form/Event/Summary.php
++++ b/CRM/Report/Form/Event/Summary.php
+@@ -172,6 +172,10 @@ class CRM_Report_Form_Event_Summary extends CRM_Report_Form {
+       }
+     }
+     $clauses[] = "{$this->_aliases['civicrm_event']}.is_template = 0";
++    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_event_per_domain')) {
++      $domainID = CRM_Core_Config::domainID();
++      $clauses[] = "({$this->_aliases['civicrm_event']}.domain_id IS NULL OR {$this->_aliases['civicrm_event']}.domain_id = $domainID ) ";
++    }
+     $this->_where = 'WHERE  ' . implode(' AND ', $clauses);
+   }
+ 
+diff --git a/CRM/Report/Page/InstanceList.php b/CRM/Report/Page/InstanceList.php
+index 2115984af3..8b1d325199 100644
+--- a/CRM/Report/Page/InstanceList.php
++++ b/CRM/Report/Page/InstanceList.php
+@@ -216,13 +216,13 @@ class CRM_Report_Page_InstanceList extends CRM_Core_Page {
+         $this->assign('title', $this->title);
+       }
+       else {
+-        CRM_Utils_System::setTitle(ts('%1 Reports', [1 => $this->_compName]));
++        CRM_Utils_System::setTitle(ts('%1 Reports', array(1 => ts($this->_compName))));
+       }
+     }
+     // assign link to template list for users with appropriate permissions
+     if (CRM_Core_Permission::check('administer Reports')) {
+       if ($this->compID) {
+-        $newButton = ts('New %1 Report', [1 => $this->_compName]);
++        $newButton = ts('New %1 Report', array(1 => ts($this->_compName)));
+         $templateUrl = CRM_Utils_System::url('civicrm/report/template/list', "reset=1&compid={$this->compID}");
+       }
+       else {
+@@ -231,7 +231,7 @@ class CRM_Report_Page_InstanceList extends CRM_Core_Page {
+       }
+       $this->assign('newButton', $newButton);
+       $this->assign('templateUrl', $templateUrl);
+-      $this->assign('compName', $this->_compName);
++      $this->assign('compName', ts($this->_compName));
+       $this->assign('myReports', $this->myReports);
+     }
+     return parent::run();
+diff --git a/api/v3/Contact.php b/api/v3/Contact.php
+index 1be833704c..5f57c565d1 100644
+--- a/api/v3/Contact.php
++++ b/api/v3/Contact.php
+@@ -876,9 +876,12 @@ function civicrm_api3_contact_getquick($params) {
+ 
+   // add acl clause here
+   list($aclFrom, $aclWhere) = CRM_Contact_BAO_Contact_Permission::cacheClause('cc');
++  $acl = CRM_ACL_BAO_ACL::getAclClause();
++  $aclFrom  = str_replace('contact_a', 'cc', $acl['aclFromClause']);
++  $aclWhere = str_replace('contact_a', 'cc', $acl['aclWhereClause']);
+ 
+   if ($aclWhere) {
+-    $where .= " AND $aclWhere ";
++    $where .= " $aclWhere ";
+   }
+   $isPrependWildcard = \Civi::settings()->get('includeWildCardInName');
+ 
+@@ -1016,7 +1019,7 @@ function civicrm_api3_contact_getquick($params) {
+           FROM   civicrm_contact cc {$from}
+         {$aclFrom}
+         {$additionalFrom} {$includeEmailFrom}
+-        {$emailWhere} AND cc.is_deleted = 0 " . ($aclWhere ? " AND $aclWhere " : '') . "
++        {$emailWhere} AND cc.is_deleted = 0 " . ($aclWhere ? " $aclWhere " : '') . "
+         {$orderBy}
+       LIMIT 0, {$limit}
+       )
+diff --git a/api/v3/Event.php b/api/v3/Event.php
+index f99d9a0430..dfc7258535 100644
+--- a/api/v3/Event.php
++++ b/api/v3/Event.php
+@@ -124,6 +124,10 @@ function civicrm_api3_event_get($params) {
+   if (!empty($params['isCurrent'])) {
+     $sql->where('(start_date >= CURDATE() || end_date >= CURDATE())');
+   }
++  if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::MULTISITE_PREFERENCES_NAME, 'multisite_event_per_domain')) {
++    $domainID = CRM_Core_Config::domainID();
++    $sql->where(" (domain_id IS NULL OR domain_id = $domainID ) ");
++  }
+ 
+   $events = _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params, FALSE, 'Event', $sql, TRUE);
+   $options = _civicrm_api3_get_options_from_params($params, TRUE);
+diff --git a/templates/CRM/Report/Page/InstanceList.tpl b/templates/CRM/Report/Page/InstanceList.tpl
+index ea88b8e49c..ac32a7d6d5 100644
+--- a/templates/CRM/Report/Page/InstanceList.tpl
++++ b/templates/CRM/Report/Page/InstanceList.tpl
+@@ -38,7 +38,7 @@
+       {foreach from=$list item=rows key=report}
+         <div class="crm-accordion-wrapper crm-accordion_{$report}-accordion ">
+           <div class="crm-accordion-header">
+-            {if $title}{$title}{elseif $report EQ 'Contribute'}{ts}Contribution Reports{/ts}{else}{ts}{$report} Reports{/ts}{/if}</a>
++            {if $title}{$title}{elseif $report EQ 'Contribute'}{ts}Contribution Reports{/ts}{else}{ts}{$report}{/ts} {ts}Reports{/ts}{/if}</a>
+           </div><!-- /.crm-accordion-header -->
+           <div class="crm-accordion-body">
+             <div id="{$report}" class="boxBlock">
+diff --git a/templates/CRM/Report/Page/TemplateList.tpl b/templates/CRM/Report/Page/TemplateList.tpl
+index 96b09eb6d3..5d415f5bd2 100644
+--- a/templates/CRM/Report/Page/TemplateList.tpl
++++ b/templates/CRM/Report/Page/TemplateList.tpl
+@@ -35,7 +35,7 @@
+       {foreach from=$list item=rows key=report}
+         <div class="crm-accordion-wrapper crm-accordion_{$report}-accordion ">
+           <div class="crm-accordion-header">
+-            {if $report}{if $report EQ 'Contribute'}{ts}Contribution{/ts}{else}{$report}{/if}{else}Contact{/if} Report Templates
++            {if $report}{if $report EQ 'Contribute'}{ts}Contribution{/ts}{else}{ts}{$report}{/ts}{/if}{else}Contact{/if} Report Templates
+           </div><!-- /.crm-accordion-header -->
+           <div class="crm-accordion-body">
+             <div id="{$report}" class="boxBlock">
+diff --git a/xml/schema/Event/Event.xml b/xml/schema/Event/Event.xml
+index 4dd1e206b6..ca7857c163 100644
+--- a/xml/schema/Event/Event.xml
++++ b/xml/schema/Event/Event.xml
+@@ -18,6 +18,25 @@
+     <name>id</name>
+     <autoincrement>true</autoincrement>
+   </primaryKey>
++  <field>
++    <name>domain_id</name>
++    <title>Event Domain ID</title>
++    <type>int unsigned</type>
++    <required>true</required>
++    <comment>Which Domain is this match entry for</comment>
++    <pseudoconstant>
++      <table>civicrm_domain</table>
++      <keyColumn>id</keyColumn>
++      <labelColumn>name</labelColumn>
++    </pseudoconstant>
++    <add>4.6</add>
++  </field>
++  <foreignKey>
++    <name>domain_id</name>
++    <table>civicrm_domain</table>
++    <key>id</key>
++    <add>3.0</add>
++  </foreignKey>
+   <field>
+     <name>title</name>
+     <uniqueName>event_title</uniqueName>
+-- 
+2.18.4
+

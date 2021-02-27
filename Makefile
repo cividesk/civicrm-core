@@ -1,5 +1,6 @@
 CIVICRM = 5.19.4
 DRUPAL = 7.x
+PREVIOUS = /var/www/html/civicrm-stable-5.19.4
 
 .PHONY: all build diff clean
 
@@ -46,7 +47,7 @@ multisite:
 	@echo "  git reset --hard"
 
 diff:
-	diff -rwq --exclude=".git" . /var/www/html/civicrm-stable-$(VERSION)
+	diff -rwq --exclude=".git" --exclude="?bower.json" . $(PREVIOUS)
 
 .PHONY: clean-imports clean-drupal
 clean: clean-imports clean-drupal

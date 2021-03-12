@@ -32,7 +32,8 @@ secure:
 	rm -f vendor/pear/log/README.rst
 	find . -type d -exec chmod 755 {} + 
 	find . -type f -exec chmod go-w {} + 
-	chown -R root:apache *
+#       chwon -R root:www-data *
+#	chown -R root:apache *
 
 multisite:
 	-cat patches/multisite/*.patch | patch -p1 -N -r - -V never

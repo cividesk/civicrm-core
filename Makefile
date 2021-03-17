@@ -17,13 +17,13 @@ civicrm-drupal:
 build: build-imports build-drupal build-patch
 
 build-imports: clean-imports
-	wget -O - https://sourceforge.net/projects/civicrm/files/civicrm-stable/$(CIVICRM)/civicrm-$(CIVICRM)-drupal.tar.gz/download# | tar xfz -
+	wget -q -O - https://sourceforge.net/projects/civicrm/files/civicrm-stable/$(CIVICRM)/civicrm-$(CIVICRM)-drupal.tar.gz/download# | tar xfz -
 	cd civicrm ; cp -R $(IMPORTS) ..
 	rm -Rf civicrm
 
 build-drupal: clean-drupal
-	wget -O civicrm-drupal.zip https://github.com/cividesk/civicrm-drupal/archive/$(DRUPAL)-$(CIVICRM)-cividesk.zip
-	unzip civicrm-drupal.zip && rm civicrm-drupal.zip
+	wget -q -O civicrm-drupal.zip https://github.com/cividesk/civicrm-drupal/archive/$(DRUPAL)-$(CIVICRM)-cividesk.zip
+	unzip -q civicrm-drupal.zip && rm civicrm-drupal.zip
 	mv civicrm-drupal-$(DRUPAL)-$(CIVICRM)-cividesk drupal
 
 build-patch:
@@ -33,8 +33,6 @@ secure:
 	rm -f vendor/pear/log/README.rst
 	find . -type d -exec chmod 755 {} + 
 	find . -type f -exec chmod go-w {} + 
-#       chwon -R root:www-data *
-#	chown -R root:apache *
 
 multisite:
 	-cat patches/multisite/*.patch | patch -p1 -N -r - -V never

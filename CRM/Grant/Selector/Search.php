@@ -377,6 +377,11 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
           'direction' => CRM_Utils_Sort::DONTCARE,
         ],
         [
+          'name' => ts('Report Due'),
+          'sort' => 'grant_due_date',
+          'direction' => CRM_Utils_Sort::DONTCARE,
+        ],
+        [
           'name' => ts('Report Received'),
           'sort' => 'grant_report_received',
           'direction' => CRM_Utils_Sort::DONTCARE,

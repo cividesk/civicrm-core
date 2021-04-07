@@ -511,6 +511,7 @@ class CRM_Core_SelectValues {
       '{activity.subject}' => ts('Activity Subject'),
       '{activity.details}' => ts('Activity Details'),
       '{activity.activity_date_time}' => ts('Activity Date Time'),
+      '{activity.location}' => ts('Activity Location'),
     ];
   }
 

@@ -123,6 +123,7 @@ class CRM_Activity_Tokens extends \Civi\Token\AbstractTokenSubscriber {
       'activity_type' => ts('Activity Type'),
       'subject' => ts('Activity Subject'),
       'details' => ts('Activity Details'),
+      'location' => ts('Activity Location'),
       'activity_date_time' => ts('Activity Date-Time'),
     ];
   }

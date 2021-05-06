@@ -1420,6 +1420,7 @@ class CRM_Report_Form extends CRM_Core_Form {
     ];
     $order = array_intersect_key(array_fill_keys($order, 1), $this->tabs);
     $order = array_merge($order, $this->tabs);
+    CRM_Utils_Hook::alterReportVar('tabs', $order, $this);
     $this->assign('tabs', $order);
   }
 

@@ -215,7 +215,8 @@ class CRM_Event_Form_ManageEvent extends CRM_Core_Form {
         'manage event profiles',
       ],
     ];
-    if (CRM_Core_Permission::check($checkPermission) || !empty($ufCreate) || !empty($ufEdit)) {
+    $this->assign('perm', FALSE);
+    if (CRM_Core_Permission::check($checkPermission)) { // removed: || !empty($ufCreate) || !empty($ufEdit)) {
       $this->assign('perm', TRUE);
     }
 

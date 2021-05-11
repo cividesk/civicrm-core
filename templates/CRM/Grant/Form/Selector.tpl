@@ -64,6 +64,7 @@
     <td class="right crm-grant-grant_amount_total">{$row.grant_amount_total|crmMoney}</td>
     <td class="right crm-grant-grant_amount_granted">{$row.grant_amount_granted|crmMoney}</td>
     <td class="right crm-grant-grant_application_received_date">{$row.grant_application_received_date|truncate:10:''|crmDate}</td>
+    <td class="right crm-grant-grant_due_date">{$row.grant_due_date|truncate:10:''|crmDate}</td>
     <td class="crm-grant-grant_report_received">{if $row.grant_report_received}{ts}Yes{/ts}{else}{ts}No{/ts}{/if}</td>
     <td class="right crm-grant-grant_money_transfer_date">{$row.grant_money_transfer_date|truncate:10:''|crmDate}</td>
     <td>{$row.action|replace:'xx':$row.grant_id}</td>

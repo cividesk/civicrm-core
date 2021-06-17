@@ -2482,10 +2482,6 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
         }
       }
 
-      //get class name for parent report
-      $className = get_parent_class($this);
-      $ext = strpos($className, 'CRM_Extendedreport');
-
       // Run the alter display functions
       foreach ($rows as $index => & $row) {
         foreach ($row as $selectedField => $value) {

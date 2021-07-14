@@ -2520,6 +2520,10 @@ LEFT JOIN  civicrm_contribution contribution ON ( componentPayment.contribution_
       $contribution->id = $createContribution['id'];
       CRM_Contribute_BAO_ContributionRecur::copyCustomValues($contributionParams['contribution_recur_id'], $contribution->id);
       self::handleMembershipIDOverride($contribution->id, $input);
+
+      // Add new soft credit against current $contribution.
+      CRM_Contribute_BAO_ContributionRecur::addrecurSoftCredit($contributionParams['contribution_recur_id'], $createContribution['id']);
+
       return TRUE;
     }
   }
@@ -4574,11 +4578,6 @@ INNER JOIN civicrm_activity ON civicrm_activity_contact.activity_id = civicrm_ac
     // unsetting it here does NOT cause any other contribution test to fail!
     unset($contributionParams['financial_type_id']);
     $contributionResult = civicrm_api3('Contribution', 'create', $contributionParams);
-
-    // Add new soft credit against current $contribution.
-    if (!empty($objects['contributionRecur']) && $objects['contributionRecur']->id) {
-      CRM_Contribute_BAO_ContributionRecur::addrecurSoftCredit($objects['contributionRecur']->id, $contribution->id);
-    }
 
     $contributionStatuses = CRM_Core_PseudoConstant::get('CRM_Contribute_DAO_Contribution', 'contribution_status_id', [
       'labelColumn' => 'name',

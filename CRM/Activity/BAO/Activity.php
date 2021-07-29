@@ -273,6 +273,7 @@ class CRM_Activity_BAO_Activity extends CRM_Activity_DAO_Activity {
     // requests are done. CRM-15470
     if ($activityContact->find()) {
       $activityContact->delete();
+      CRM_Utils_Hook::post('delete', 'ActivityContact', $activityContact->id, $activityContact);
     }
   }
 

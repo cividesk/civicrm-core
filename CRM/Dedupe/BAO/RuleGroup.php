@@ -132,7 +132,7 @@ class CRM_Dedupe_BAO_RuleGroup extends CRM_Dedupe_DAO_RuleGroup {
             continue;
           }
           foreach ($cg['fields'] as $cf) {
-            $fields[$ctype][$cg['table_name']][$cf['column_name']] = $cf['label'];
+            $fields[$ctype][$cg['table_name']][$cf['column_name']] = $cf['label'] . ' : ' . $cg['title'];
           }
         }
       }

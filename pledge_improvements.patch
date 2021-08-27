@@ -1,0 +1,435 @@
+diff --git a/CRM/Contribute/Form/Contribution.php b/CRM/Contribute/Form/Contribution.php
+index d0f366e516..4b226e1931 100644
+--- a/CRM/Contribute/Form/Contribution.php
++++ b/CRM/Contribute/Form/Contribution.php
+@@ -268,7 +268,7 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
+     $this->_mode = CRM_Utils_Request::retrieve('mode', 'Alphanumeric', $this);
+ 
+     $this->assign('contributionMode', $this->_mode);
+-    if ($this->_action & CRM_Core_Action::DELETE) {
++    if ($this->_action == CRM_Core_Action::DELETE || $this->_action == CRM_Core_Action::DETACH) {
+       return;
+     }
+ 
+@@ -339,10 +339,9 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
+       $defaults['option_type'] = 1;
+     }
+ 
+-    if ($this->_action & CRM_Core_Action::DELETE) {
++    if ($this->_action == CRM_Core_Action::DELETE || $this->_action == CRM_Core_Action::DETACH) {
+       return $defaults;
+     }
+-
+     $defaults['frequency_interval'] = 1;
+     $defaults['frequency_unit'] = 'month';
+ 
+@@ -469,6 +468,21 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
+     if ($this->_id) {
+       $this->add('hidden', 'id', $this->_id);
+     }
++    if ($this->_action & CRM_Core_Action::DETACH) {
++      $this->addButtons([
++        [
++          'type' => 'next',
++          'name' => ts('Unlink'),
++          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
++          'isDefault' => TRUE,
++        ],
++        [
++          'type' => 'cancel',
++          'name' => ts('Cancel'),
++        ],
++      ]);
++      return;
++    }
+ 
+     if ($this->_action & CRM_Core_Action::DELETE) {
+       $this->addButtons([
+@@ -945,6 +959,13 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
+    * Process the form submission.
+    */
+   public function postProcess() {
++    if ($this->_action & CRM_Core_Action::DETACH) {
++      //unlink the contribution from pledge payment
++      //by updating associated pledge payment and
++      //pledge status and amount
++      CRM_Pledge_BAO_PledgePayment::resetPledgePayment($this->_id);
++      return;
++    }
+     if ($this->_action & CRM_Core_Action::DELETE) {
+       CRM_Contribute_BAO_Contribution::deleteContribution($this->_id);
+       CRM_Core_Session::singleton()->replaceUserContext(CRM_Utils_System::url('civicrm/contact/view',
+diff --git a/CRM/Contribute/Form/ContributionView.php b/CRM/Contribute/Form/ContributionView.php
+index c3db67121a..a31ab8b202 100644
+--- a/CRM/Contribute/Form/ContributionView.php
++++ b/CRM/Contribute/Form/ContributionView.php
+@@ -41,6 +41,14 @@ class CRM_Contribute_Form_ContributionView extends CRM_Core_Form {
+    */
+   public function preProcess() {
+     $id = $this->get('id');
++    $pledgePaymentId = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment',
++      $id,
++      'id',
++      'contribution_id'
++    );
++
++    $this->assign('pledgePaymentId', $pledgePaymentId);
++
+     $params = ['id' => $id];
+     $context = CRM_Utils_Request::retrieve('context', 'Alphanumeric', $this);
+     $this->assign('context', $context);
+diff --git a/CRM/Contribute/Page/Tab.php b/CRM/Contribute/Page/Tab.php
+index 742e47ec63..dcbe8d8705 100644
+--- a/CRM/Contribute/Page/Tab.php
++++ b/CRM/Contribute/Page/Tab.php
+@@ -384,7 +384,7 @@ class CRM_Contribute_Page_Tab extends CRM_Core_Page {
+     if ($this->_action & CRM_Core_Action::VIEW) {
+       $this->view();
+     }
+-    elseif ($this->_action & (CRM_Core_Action::UPDATE | CRM_Core_Action::ADD | CRM_Core_Action::DELETE)) {
++    elseif ($this->_action & (CRM_Core_Action::UPDATE | CRM_Core_Action::ADD | CRM_Core_Action::DELETE | CRM_Core_Action::DETACH)) {
+       $this->edit();
+     }
+     else {
+diff --git a/CRM/Pledge/BAO/Pledge.php b/CRM/Pledge/BAO/Pledge.php
+index e5feb625b5..f71291db13 100644
+--- a/CRM/Pledge/BAO/Pledge.php
++++ b/CRM/Pledge/BAO/Pledge.php
+@@ -313,7 +313,7 @@ class CRM_Pledge_BAO_Pledge extends CRM_Pledge_DAO_Pledge {
+     while ($payment->fetch()) {
+       // also delete associated contribution.
+       if ($payment->contribution_id) {
+-        CRM_Contribute_BAO_Contribution::deleteContribution($payment->contribution_id);
++    //    CRM_Contribute_BAO_Contribution::deleteContribution($payment->contribution_id);
+       }
+       $payment->delete();
+     }
+diff --git a/CRM/Pledge/BAO/PledgePayment.php b/CRM/Pledge/BAO/PledgePayment.php
+index 7de77302e0..16e1cb74ce 100644
+--- a/CRM/Pledge/BAO/PledgePayment.php
++++ b/CRM/Pledge/BAO/PledgePayment.php
+@@ -39,6 +39,60 @@ class CRM_Pledge_BAO_PledgePayment extends CRM_Pledge_DAO_PledgePayment {
+     parent::__construct();
+   }
+ 
++/*
++ * update the pledge amount
++ * and subtract the pledge schedule amount
++ * FIXME : subtract the installment (-1) : check with NG
++ */
++  public static function updatePledgeAmount($pledgeId, $amount) {
++   $query = "
++UPDATE civicrm_pledge
++SET amount = amount - %1
++WHERE id = %2
++";
++
++    $params[1] = [$amount, 'Money'];
++    $params[2] = [$pledgeId, 'Integer'];
++    $payment = CRM_Core_DAO::executeQuery($query, $params);
++
++  }
++
++/*
++ * Get all the contributions for this contact
++ * that have NOT been linked to any pledge payments
++ * and are COMPLETED and are not TEST
++ * show this listing in 'Link with Payment' on
++ * 'Edit Scheduled Pledge Payment' screen
++ */
++  public static function getUnlinkedContributions($contactId) {
++    $query = "
++SELECT cc.id, cc.total_amount, cc.receive_date, cc.financial_type_id
++FROM   civicrm_contribution cc
++WHERE  cc.contact_id = %1 AND
++       cc.is_test = 0 AND
++       cc.contribution_status_id = 1 AND
++       NOT EXISTS ( SELECT pp.id
++                    FROM civicrm_pledge_payment pp
++                    WHERE  pp.contribution_id = cc.id )
++";
++
++    $params[1] = [$contactId, 'Integer'];
++    $payment = CRM_Core_DAO::executeQuery($query, $params);
++
++    $type = CRM_Contribute_PseudoConstant::financialType();
++    $paymentDetails = [];
++    while ($payment->fetch()) {
++      $pd[$payment->id] = CRM_Utils_Date::customFormat($payment->receive_date) . ' - '. $type[$payment->financial_type_id] .' - '. CRM_Utils_Money::format($payment->total_amount);
++      $paymentDetails[$payment->id]['total_amount'] = $payment->total_amount;
++      $paymentDetails[$payment->id]['receive_date'] = $payment->receive_date;
++      $paymentDetails[$payment->id]['financial_type'] = $type[$payment->financial_type_id];
++      $paymentDetails[$payment->id]['unlinked_contributions'] = CRM_Utils_Money::format($payment->total_amount) . ' '. CRM_Utils_Date::customFormat($payment->receive_date) . ' '. $type[$payment->financial_type_id];
++      $paymentDetails[$payment->id]['unlinked_contributions'] = CRM_Utils_Date::customFormat($payment->receive_date) . ' - '. $type[$payment->financial_type_id] .' - '. CRM_Utils_Money::format($payment->total_amount);
++    }
++
++    return $pd;
++  }
++
+   /**
+    * Get pledge payment details.
+    *
+@@ -268,7 +322,7 @@ WHERE     pledge_id = %1
+       while ($payment->fetch()) {
+         //also delete associated contribution.
+         if ($payment->contribution_id) {
+-          CRM_Contribute_BAO_Contribution::deleteContribution($payment->contribution_id);
++//          CRM_Contribute_BAO_Contribution::deleteContribution($payment->contribution_id);
+         }
+         self::del($payment->id);
+       }
+diff --git a/CRM/Pledge/Form/Payment.php b/CRM/Pledge/Form/Payment.php
+index ea24635c07..f920c712b9 100644
+--- a/CRM/Pledge/Form/Payment.php
++++ b/CRM/Pledge/Form/Payment.php
+@@ -67,6 +67,7 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
+     }
+ 
+     $this->_id = CRM_Utils_Request::retrieve('ppId', 'Positive', $this);
++    $this->_contactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this);
+ 
+     CRM_Utils_System::setTitle(ts('Edit Scheduled Pledge Payment'));
+   }
+@@ -85,6 +86,7 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
+       }
+       $status = CRM_Core_PseudoConstant::getName('CRM_Pledge_BAO_Pledge', 'status_id', $defaults['status_id']);
+       $this->assign('status', $status);
++      $this->assign('scheduled_amount', $defaults['scheduled_amount']);
+     }
+     $defaults['option_type'] = 1;
+     return $defaults;
+@@ -116,18 +118,71 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
+       [], '<br/>'
+     );
+ 
+-    $this->addButtons([
++    $pledgeId = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment', $this->_id, 'pledge_id');
++    //get pledge payments for this pledge
++    $pledgePayments = CRM_Pledge_BAO_PledgePayment::getPledgePayments($pledgeId);
++    $this->_nextPaymentID = '';
++    foreach($pledgePayments as $paymentID => $value) {
++      if ($value['status'] == 'Pending' && $paymentID > $this->_id) {
++        $this->_nextPaymentID = $paymentID;
++        break;
++      }
++    }
++
++    //check if there are any completed, live
++    //contributions that are NOT associate to any
++    //pledges for this contact
++    $unlinkedContributions = CRM_Pledge_BAO_PledgePayment::getUnlinkedContributions($this->_contactId);
++    if (!empty($unlinkedContributions)) {
++      //show the contributions that fulfil criteria to link
++      $this->add('select', 'contribution_id', ts('Link with Payment'), ['' => ts('- select -')] + $unlinkedContributions, FALSE);
++    }
++
++    if ($this->_nextPaymentID) {
++      $buttons = [
+         [
+           'type' => 'next',
++          'name' => ts('Delete'),
++          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
++          'subName' => 'delete',
++        ],
++        [
++          'type' => 'done',
+           'name' => ts('Save'),
+           'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+           'isDefault' => TRUE,
+         ],
++        [
++          'type' => 'next',
++          'name' => ts('Save and New'),
++          'subName' => 'new',
++        ],
+         [
+           'type' => 'cancel',
+           'name' => ts('Cancel'),
+         ],
+-    ]);
++      ];
++    } else {
++      $buttons = [
++        [
++          'type' => 'next',
++          'name' => ts('Delete'),
++          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
++          'subName' => 'delete',
++        ],
++        [
++          'type' => 'done',
++          'name' => ts('Save'),
++          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
++          'isDefault' => TRUE,
++        ],
++        [
++          'type' => 'cancel',
++          'name' => ts('Cancel'),
++        ],
++      ];
++    }
++    $this->addButtons($buttons);
+   }
+ 
+   /**
+@@ -135,6 +190,20 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
+    */
+   public function postProcess() {
+     $formValues = $this->controller->exportValues($this->_name);
++    $buttonName = $this->controller->getButtonName();
++
++    if ($buttonName == '_qf_Payment_next_delete') {
++      $formValues = $this->controller->exportValues($this->_name);
++      $pledgeId = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment', $this->_id, 'pledge_id');
++
++      //delete the scheduled pledge payment
++      CRM_Pledge_BAO_PledgePayment::del($this->_id);
++
++      //reduce the pledge amount (ie. civicrm_pledge.amount) by the corresponding amount.
++      CRM_Pledge_BAO_PledgePayment::updatePledgeAmount($pledgeId, $formValues['scheduled_amount']);
++      return;
++    }
++
+     $params = [
+       'id' => $this->_id,
+       'scheduled_date' => $formValues['scheduled_date'],
+@@ -148,6 +217,15 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
+       $params['status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Pledge_BAO_Pledge', 'status_id', 'Pending');
+     }
+ 
++    if ($formValues['contribution_id']) {
++      //if a contribution has been linked to the pledge payment,
++      //update the status as well
++      $params['contribution_id'] = $formValues['contribution_id'];
++      $allStatus = CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'name');
++      $completedStatus = array_search('Completed', $allStatus);
++      $params['status_id'] = $completedStatus;
++    }
++
+     $pledgeId = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment', $params['id'], 'pledge_id');
+ 
+     CRM_Pledge_BAO_PledgePayment::add($params);
+@@ -175,8 +253,17 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
+       $adjustTotalAmount
+     );
+ 
+-    $statusMsg = ts('Pledge Payment Schedule has been updated.');
+-    CRM_Core_Session::setStatus($statusMsg, ts('Saved'), 'success');
++    $session = CRM_Core_Session::singleton();
++    if ($buttonName == $this->getButtonName('next', 'new')) {
++      $msg .= '<p>' . ts("Ready to add another.") . '</p>';
++      $session->replaceUserContext(CRM_Utils_System::url('civicrm/pledge/payment',
++        'reset=1&action=update&cid=' .  $this->_contactId. '&ppId=' . $this->_nextPaymentID
++      ));
++    }
++    else {
++      $statusMsg = ts('Pledge Payment Schedule has been updated.');
++      CRM_Core_Session::setStatus($statusMsg, ts('Saved'), 'success');
++    }
+   }
+ 
+ }
+diff --git a/templates/CRM/Contribute/Form/Contribution.tpl b/templates/CRM/Contribute/Form/Contribution.tpl
+index 85330bacd4..ec239e0c42 100644
+--- a/templates/CRM/Contribute/Form/Contribution.tpl
++++ b/templates/CRM/Contribute/Form/Contribution.tpl
+@@ -47,13 +47,17 @@
+ 
+   <div class="crm-block crm-form-block crm-contribution-form-block">
+ 
+-  {if !$email and $action neq 8 and $context neq 'standalone'}
++  {if !$email and $action neq 8 and $action neq 65536 and $context neq 'standalone'}
+   <div class="messages status no-popup">
+     <div class="icon inform-icon"></div>&nbsp;{ts}You will not be able to send an automatic email receipt for this contribution because there is no email address recorded for this contact. If you want a receipt to be sent when this contribution is recorded, click Cancel and then click Edit from the Summary tab to add an email address before recording the contribution.{/ts}
+   </div>
+   {/if}
+-
+-  {if $action eq 8}
++  {if $action eq 65536}
++  <div class="messages status no-popup">
++    <div class="icon inform-icon"></div>
++    {ts}WARNING: Unlinking this pledge payment will result in the loss of the association of financial transactions with the pledge.{/ts} {ts}Do you want to continue?{/ts}
++  </div>
++  {elseif $action eq 8}
+   <div class="messages status no-popup">
+     <div class="icon inform-icon"></div>
+     {ts}WARNING: Deleting this contribution will result in the loss of the associated financial transactions (if any).{/ts} {ts}Do you want to continue?{/ts}
+diff --git a/templates/CRM/Contribute/Form/ContributionView.tpl b/templates/CRM/Contribute/Form/ContributionView.tpl
+index cb24fe0932..5b7f0761c1 100644
+--- a/templates/CRM/Contribute/Form/ContributionView.tpl
++++ b/templates/CRM/Contribute/Form/ContributionView.tpl
+@@ -44,6 +44,13 @@
+       {if ( $context eq 'fulltext' || $context eq 'search' ) && $searchKey}
+         {assign var='urlParams' value="reset=1&id=$id&cid=$contact_id&action=delete&context=$context&key=$searchKey"}
+       {/if}
++      {if $pledgePaymentId}
++      {assign var='urlParams' value="reset=1&id=$id&cid=$contact_id&action=detach&context=$context"}
++      <a class="button" href="{crmURL p='civicrm/contact/view/contribution' q=$urlParams}"><span>
++          <i class="crm-i fa-link"></i> {ts}Unlink{/ts}</span>
++      </a>
++      {/if}
++
+       <a class="button" href="{crmURL p='civicrm/contact/view/contribution' q=$urlParams}"><span>
+           <i class="crm-i fa-trash"></i> {ts}Delete{/ts}</span>
+       </a>
+diff --git a/templates/CRM/Contribute/Page/Tab.tpl b/templates/CRM/Contribute/Page/Tab.tpl
+index 7ef5d8efde..f538c55af3 100644
+--- a/templates/CRM/Contribute/Page/Tab.tpl
++++ b/templates/CRM/Contribute/Page/Tab.tpl
+@@ -23,7 +23,7 @@
+  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+  +--------------------------------------------------------------------+
+ *}
+-{if $action eq 1 or $action eq 2 or $action eq 8} {* add, update or view *}
++{if $action eq 1 or $action eq 2 or $action eq 8 or $action eq 65536} {* add, update or view *}
+     {include file="CRM/Contribute/Form/Contribution.tpl"}
+ {elseif $action eq 4}
+     {include file="CRM/Contribute/Form/ContributionView.tpl"}
+diff --git a/templates/CRM/Pledge/Form/Payment.tpl b/templates/CRM/Pledge/Form/Payment.tpl
+index 794a2ab18d..626985962c 100644
+--- a/templates/CRM/Pledge/Form/Payment.tpl
++++ b/templates/CRM/Pledge/Form/Payment.tpl
+@@ -49,6 +49,11 @@
+     <tr id="adjust-option-type" class="crm-contribution-form-block-option_type">
+       <td class="label"></td> <td>{$form.option_type.html}</td>
+     </tr>
++    <tr>
++      <td class="label">{$form.contribution_id.label}</td>
++      <td id="contributions_id">{$form.contribution_id.html}</td>
++    </tr>
++
+   </table>
+   <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
+   </fieldset>
+@@ -64,6 +69,31 @@
+         $('#adjust-option-type').show();
+         $("#scheduled_amount").prop("readonly", false);
+       });
++
++      //on change on of contribution id,
++      //show hide options and update the scheduled amount
++      $('#contribution_id').change(function(e) {
++        var scheduled_amount = {/literal}{$scheduled_amount}{literal};
++        var contribution_id = $(this).val();
++
++        CRM.api3('Contribution', 'get', {
++          "id": contribution_id,
++          'sequential': 1,
++        }).done(function (result) {
++          var total_amount = result.values[0].total_amount;
++          if (scheduled_amount == total_amount) {
++            $("#scheduled_amount").val(scheduled_amount);
++            $('a.adjust-pledge-payment').show();
++            $('#adjust-option-type').hide();
++          } else {
++            $("#scheduled_amount").val(total_amount);
++            $('a.adjust-pledge-payment').hide();
++            $('#adjust-option-type').show();
++          }
++    });
++
++});
++
+     });
+   </script>
+ {/literal}

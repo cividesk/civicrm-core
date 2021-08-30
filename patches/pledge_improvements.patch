@@ -105,10 +105,10 @@ index e5feb625b5..f71291db13 100644
        $payment->delete();
      }
 diff --git a/CRM/Pledge/BAO/PledgePayment.php b/CRM/Pledge/BAO/PledgePayment.php
-index 7de77302e0..16e1cb74ce 100644
+index 7de77302e0..55a92e1105 100644
 --- a/CRM/Pledge/BAO/PledgePayment.php
 +++ b/CRM/Pledge/BAO/PledgePayment.php
-@@ -39,6 +39,60 @@ class CRM_Pledge_BAO_PledgePayment extends CRM_Pledge_DAO_PledgePayment {
+@@ -39,6 +39,61 @@ class CRM_Pledge_BAO_PledgePayment extends CRM_Pledge_DAO_PledgePayment {
      parent::__construct();
    }
  
@@ -117,17 +117,18 @@ index 7de77302e0..16e1cb74ce 100644
 + * and subtract the pledge schedule amount
 + * FIXME : subtract the installment (-1) : check with NG
 + */
-+  public static function updatePledgeAmount($pledgeId, $amount) {
++  public static function updatePledgeAmount($pledgeId, $amount, $operation = '-') {
 +   $query = "
 +UPDATE civicrm_pledge
-+SET amount = amount - %1
++SET amount = amount $operation %1,
++    installments = installments $operation 1
 +WHERE id = %2
 +";
 +
 +    $params[1] = [$amount, 'Money'];
 +    $params[2] = [$pledgeId, 'Integer'];
-+    $payment = CRM_Core_DAO::executeQuery($query, $params);
 +
++    $payment = CRM_Core_DAO::executeQuery($query, $params);
 +  }
 +
 +/*
@@ -169,7 +170,7 @@ index 7de77302e0..16e1cb74ce 100644
    /**
     * Get pledge payment details.
     *
-@@ -268,7 +322,7 @@ WHERE     pledge_id = %1
+@@ -268,7 +323,7 @@ WHERE     pledge_id = %1
        while ($payment->fetch()) {
          //also delete associated contribution.
          if ($payment->contribution_id) {
@@ -179,40 +180,51 @@ index 7de77302e0..16e1cb74ce 100644
          self::del($payment->id);
        }
 diff --git a/CRM/Pledge/Form/Payment.php b/CRM/Pledge/Form/Payment.php
-index ea24635c07..f920c712b9 100644
+index ea24635c07..4b4d6111f1 100644
 --- a/CRM/Pledge/Form/Payment.php
 +++ b/CRM/Pledge/Form/Payment.php
-@@ -67,6 +67,7 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
+@@ -67,8 +67,13 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
      }
  
      $this->_id = CRM_Utils_Request::retrieve('ppId', 'Positive', $this);
 +    $this->_contactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this);
  
      CRM_Utils_System::setTitle(ts('Edit Scheduled Pledge Payment'));
++
++    if ($this->_action & CRM_Core_Action::ADD) {
++      CRM_Utils_System::setTitle(ts('New Scheduled Pledge Payment'));
++    }
    }
-@@ -85,6 +86,7 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
+ 
+   /**
+@@ -85,6 +90,21 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
        }
        $status = CRM_Core_PseudoConstant::getName('CRM_Pledge_BAO_Pledge', 'status_id', $defaults['status_id']);
        $this->assign('status', $status);
 +      $this->assign('scheduled_amount', $defaults['scheduled_amount']);
++    }
++
++    if ($this->_action & CRM_Core_Action::ADD) {
++      //preset to one period after the last scheduled payment
++      $pledgeParams = ['id' => $this->_pledgeID];
++      CRM_Pledge_BAO_Pledge::retrieve($pledgeParams, $pledgeDefaults);
++
++      // Add new payment after the last payment for the pledge
++      $allPayments = CRM_Pledge_BAO_PledgePayment::getPledgePayments($this->_pledgeID);
++      $lastPayment = array_pop($allPayments);
++
++      $pledgeDefaults[scheduled_date] = $lastPayment[scheduled_date];
++      $lastDate = CRM_Utils_Date::mysqlToIso(CRM_Pledge_BAO_PledgePayment::calculateNextScheduledDate($pledgeDefaults, $pledgeParams['installments'] +1));
++      $defaults['pledge_payment_scheduled_date'] = $defaults['scheduled_date'] = $lastDate;
      }
      $defaults['option_type'] = 1;
      return $defaults;
-@@ -116,18 +118,71 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
+@@ -116,18 +136,56 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
        [], '<br/>'
      );
  
 -    $this->addButtons([
-+    $pledgeId = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment', $this->_id, 'pledge_id');
-+    //get pledge payments for this pledge
-+    $pledgePayments = CRM_Pledge_BAO_PledgePayment::getPledgePayments($pledgeId);
-+    $this->_nextPaymentID = '';
-+    foreach($pledgePayments as $paymentID => $value) {
-+      if ($value['status'] == 'Pending' && $paymentID > $this->_id) {
-+        $this->_nextPaymentID = $paymentID;
-+        break;
-+      }
-+    }
++    $this->_pledgeID = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment', $this->_id, 'pledge_id');
 +
 +    //check if there are any completed, live
 +    //contributions that are NOT associate to any
@@ -223,7 +235,7 @@ index ea24635c07..f920c712b9 100644
 +      $this->add('select', 'contribution_id', ts('Link with Payment'), ['' => ts('- select -')] + $unlinkedContributions, FALSE);
 +    }
 +
-+    if ($this->_nextPaymentID) {
++    if ($this->_action & CRM_Core_Action::UPDATE) {
 +      $buttons = [
          [
            'type' => 'next',
@@ -251,12 +263,6 @@ index ea24635c07..f920c712b9 100644
 +    } else {
 +      $buttons = [
 +        [
-+          'type' => 'next',
-+          'name' => ts('Delete'),
-+          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-+          'subName' => 'delete',
-+        ],
-+        [
 +          'type' => 'done',
 +          'name' => ts('Save'),
 +          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
@@ -272,7 +278,7 @@ index ea24635c07..f920c712b9 100644
    }
  
    /**
-@@ -135,6 +190,20 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
+@@ -135,6 +193,20 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
     */
    public function postProcess() {
      $formValues = $this->controller->exportValues($this->_name);
@@ -280,23 +286,30 @@ index ea24635c07..f920c712b9 100644
 +
 +    if ($buttonName == '_qf_Payment_next_delete') {
 +      $formValues = $this->controller->exportValues($this->_name);
-+      $pledgeId = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment', $this->_id, 'pledge_id');
 +
 +      //delete the scheduled pledge payment
 +      CRM_Pledge_BAO_PledgePayment::del($this->_id);
 +
-+      //reduce the pledge amount (ie. civicrm_pledge.amount) by the corresponding amount.
-+      CRM_Pledge_BAO_PledgePayment::updatePledgeAmount($pledgeId, $formValues['scheduled_amount']);
++      //reduce the pledge amount (ie. civicrm_pledge.amount) by the corresponding amount
++      // and reduce installment as well.
++      CRM_Pledge_BAO_PledgePayment::updatePledgeAmount($this->_pledgeID, $formValues['scheduled_amount']);
 +      return;
 +    }
 +
      $params = [
        'id' => $this->_id,
        'scheduled_date' => $formValues['scheduled_date'],
-@@ -148,6 +217,15 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
+@@ -148,9 +220,30 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
        $params['status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Pledge_BAO_Pledge', 'status_id', 'Pending');
      }
  
+-    $pledgeId = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment', $params['id'], 'pledge_id');
++    if ($this->_action & CRM_Core_Action::ADD) {
++      unset($params['id']);
++      $params['pledge_id'] = $this->_pledgeID;
++      $params['scheduled_amount'] = $formValues['scheduled_amount'];
++    }
++
 +    if ($formValues['contribution_id']) {
 +      //if a contribution has been linked to the pledge payment,
 +      //update the status as well
@@ -305,11 +318,39 @@ index ea24635c07..f920c712b9 100644
 +      $completedStatus = array_search('Completed', $allStatus);
 +      $params['status_id'] = $completedStatus;
 +    }
-+
-     $pledgeId = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment', $params['id'], 'pledge_id');
  
      CRM_Pledge_BAO_PledgePayment::add($params);
-@@ -175,8 +253,17 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
++
++    if ($this->_action & CRM_Core_Action::ADD) {
++      //increase the pledge amount (ie. civicrm_pledge.amount) by the corresponding amount
++      //and update incremented installment as well
++      CRM_Pledge_BAO_PledgePayment::updatePledgeAmount($this->_pledgeID, $formValues['scheduled_amount'], '+');
++      return;
++    }
++
+     $adjustTotalAmount = (CRM_Utils_Array::value('option_type', $formValues) == 2);
+ 
+     $pledgeScheduledAmount = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment',
+@@ -159,15 +252,15 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
+       'id'
+     );
+ 
+-    $oldestPaymentAmount = CRM_Pledge_BAO_PledgePayment::getOldestPledgePayment($pledgeId, 2);
++    $oldestPaymentAmount = CRM_Pledge_BAO_PledgePayment::getOldestPledgePayment($this->_pledgeID, 2);
+     if (($oldestPaymentAmount['count'] != 1) && ($oldestPaymentAmount['id'] == $params['id'])) {
+-      $oldestPaymentAmount = CRM_Pledge_BAO_PledgePayment::getOldestPledgePayment($pledgeId);
++      $oldestPaymentAmount = CRM_Pledge_BAO_PledgePayment::getOldestPledgePayment($this->_pledgeID);
+     }
+     if (($formValues['scheduled_amount'] - $pledgeScheduledAmount) >= $oldestPaymentAmount['amount']) {
+       $adjustTotalAmount = TRUE;
+     }
+     // update pledge status
+-    CRM_Pledge_BAO_PledgePayment::updatePledgePaymentStatus($pledgeId,
++    CRM_Pledge_BAO_PledgePayment::updatePledgePaymentStatus($this->_pledgeID,
+       [$params['id']],
+       $params['status_id'],
+       NULL,
+@@ -175,8 +268,17 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
        $adjustTotalAmount
      );
  
@@ -319,7 +360,7 @@ index ea24635c07..f920c712b9 100644
 +    if ($buttonName == $this->getButtonName('next', 'new')) {
 +      $msg .= '<p>' . ts("Ready to add another.") . '</p>';
 +      $session->replaceUserContext(CRM_Utils_System::url('civicrm/pledge/payment',
-+        'reset=1&action=update&cid=' .  $this->_contactId. '&ppId=' . $this->_nextPaymentID
++        'reset=1&action=add&cid=' .  $this->_contactId. '&ppId=' . $this->_id
 +      ));
 +    }
 +    else {
@@ -329,6 +370,20 @@ index ea24635c07..f920c712b9 100644
    }
  
  }
+diff --git a/CRM/Pledge/Page/Payment.php b/CRM/Pledge/Page/Payment.php
+index 4de246d4ea..5326c78f53 100644
+--- a/CRM/Pledge/Page/Payment.php
++++ b/CRM/Pledge/Page/Payment.php
+@@ -47,8 +47,7 @@ class CRM_Pledge_Page_Payment extends CRM_Core_Page {
+     $this->_contactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this);
+ 
+     CRM_Pledge_Page_Tab::setContext($this);
+-
+-    if ($this->_action & CRM_Core_Action::UPDATE) {
++    if (($this->_action & CRM_Core_Action::UPDATE) || ($this->_action & CRM_Core_Action::ADD)) {
+       $this->edit();
+     }
+     else {
 diff --git a/templates/CRM/Contribute/Form/Contribution.tpl b/templates/CRM/Contribute/Form/Contribution.tpl
 index 85330bacd4..ec239e0c42 100644
 --- a/templates/CRM/Contribute/Form/Contribution.tpl
@@ -433,3 +488,16 @@ index 794a2ab18d..626985962c 100644
      });
    </script>
  {/literal}
+diff --git a/templates/CRM/Pledge/Page/Payment.tpl b/templates/CRM/Pledge/Page/Payment.tpl
+index 3f20d7dbbf..6c2b03056d 100644
+--- a/templates/CRM/Pledge/Page/Payment.tpl
++++ b/templates/CRM/Pledge/Page/Payment.tpl
+@@ -23,7 +23,7 @@
+  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+  +--------------------------------------------------------------------+
+ *}
+-{if $action eq 2 } {* update *}
++{if $action eq 2 or $action eq 1} {* update or create new*}
+     {include file="CRM/Pledge/Form/Payment.tpl"}
+ {else}
+ {if $context eq 'dashboard'}{assign var='context' value='pledgeDashboard'}{/if}

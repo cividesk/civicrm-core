@@ -187,6 +187,7 @@ class CRM_Core_BAO_UFMatch extends CRM_Core_DAO_UFMatch {
         // Before the civicrm_uf_match record is added where as in D7 it isn't called until the user tries to actually login.
         if (!empty($params['contactID'])) {
           $params['contact_id'] = $params['contactID'];
+        }
 
         // unset onbehalf array
         // dedupe function flatten the array then rename onbehalf 'email-3', 'email-Primary' TO 'email' which overwrite Individual email

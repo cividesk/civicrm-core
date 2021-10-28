@@ -269,7 +269,8 @@ class CRM_Core_Permission {
    * @return string
    */
   public static function customGroupClause($type = CRM_Core_Permission::VIEW, $prefix = NULL, $reset = FALSE) {
-    if (self::customGroupAdmin()) {
+    //https://projects.cividesk.com/projects/9?modal=Task-4685-9
+    if (self::check('administer CiviCRM')) {
       return ' ( 1 ) ';
     }
 

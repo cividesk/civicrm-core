@@ -49,7 +49,13 @@
                 {assign var=filterVal   value=$fieldName|cat:"_value"}
                 {assign var=filterMin   value=$fieldName|cat:"_min"}
                 {assign var=filterMax   value=$fieldName|cat:"_max"}
-                {if $field.operatorType & 4}
+                {if $field.operatorType & 1024}
+                  <tr class="report-contents crm-report crm-report-criteria-filter crm-report-criteria-filter-{$tableName}" {if $field.no_display} style="display: none;"{/if}>
+                    <td class="label report-contents">{$field.title}</td>
+                    <td class="report-contents">{$form.$fieldOp.html}</td>
+                    <td class="report-contents">{$form.$fieldName.html}</td>
+                  </tr>
+                {elseif $field.operatorType & 4}
                   <tr class="report-contents crm-report crm-report-criteria-filter crm-report-criteria-filter-{$tableName}">
                     <td class="label report-contents">{$field.title}</td>
                       {include file="CRM/Core/DateRange.tpl" fieldName=$fieldName from='_from' to='_to'}

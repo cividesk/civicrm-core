@@ -44,8 +44,8 @@ class CRM_Report_Form extends CRM_Core_Form {
     OP_MULTISELECT = 65,
     OP_MULTISELECT_SEPARATOR = 66,
     OP_MONTH = 128,
-    OP_ENTITYREF = 256;
-
+    OP_ENTITYREF = 256,
+    OP_DATE_ONLY = 1024;
   /**
    * The id of the report instance
    *
@@ -1371,6 +1371,12 @@ class CRM_Report_Form extends CRM_Core_Form {
             $count++;
             break;
 
+          case CRM_Report_Form::OP_DATE_ONLY:
+            // build date only fields
+            $this->add('datepicker', $fieldName, $fieldName, [], FALSE, ['time' => FALSE]);
+            $count++;
+            break;
+
           case CRM_Report_Form::OP_INT:
           case CRM_Report_Form::OP_FLOAT:
             // and a min value input box
@@ -1785,6 +1791,7 @@ class CRM_Report_Form extends CRM_Core_Form {
         ];
         return $result;
 
+      case CRM_Report_Form::OP_DATE_ONLY:
       case CRM_Report_Form::OP_SELECT:
         $result = [
           'eq' => ts('Is equal to'),

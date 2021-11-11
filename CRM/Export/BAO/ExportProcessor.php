@@ -1443,6 +1443,10 @@ class CRM_Export_BAO_ExportProcessor {
           if (in_array(CRM_Utils_Array::value('data_type', $fieldSpec), ['Country', 'StateProvince', 'ContactReference'])) {
             return "$fieldName varchar(255)";
           }
+          if (in_array(CRM_Utils_Array::value('name', $fieldSpec), ['on_hold'])) {
+            return "$fieldName varchar(32)";
+          }
+
           return "$fieldName varchar(16)";
 
         case CRM_Utils_Type::T_STRING:

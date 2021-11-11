@@ -51,6 +51,7 @@ class CRM_Report_Form_Contribute_Lybunt extends CRM_Report_Form {
   protected $lifeTime_from = NULL;
   protected $lifeTime_where = NULL;
   protected $_customGroupExtends = [
+    'Contribution',
     'Contact',
     'Individual',
     'Household',

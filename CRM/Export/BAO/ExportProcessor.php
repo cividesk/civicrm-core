@@ -1450,7 +1450,7 @@ class CRM_Export_BAO_ExportProcessor {
           return "$fieldName varchar(16)";
 
         case CRM_Utils_Type::T_STRING:
-          if (isset($queryFields[$columnName]['maxlength'])) {
+          if (isset($queryFields[$columnName]['maxlength']) && $queryFields[$columnName]['html_type'] != 'CheckBox') {
             return "$fieldName varchar({$queryFields[$columnName]['maxlength']})";
           }
           else {

@@ -39,6 +39,61 @@ class CRM_Pledge_BAO_PledgePayment extends CRM_Pledge_DAO_PledgePayment {
     parent::__construct();
   }
 
+/*
+ * update the pledge amount
+ * and subtract the pledge schedule amount
+ * FIXME : subtract the installment (-1) : check with NG
+ */
+  public static function updatePledgeAmount($pledgeId, $amount, $operation = '-') {
+   $query = "
+UPDATE civicrm_pledge
+SET amount = amount $operation %1,
+    installments = installments $operation 1
+WHERE id = %2
+";
+
+    $params[1] = [$amount, 'Money'];
+    $params[2] = [$pledgeId, 'Integer'];
+
+    $payment = CRM_Core_DAO::executeQuery($query, $params);
+  }
+
+/*
+ * Get all the contributions for this contact
+ * that have NOT been linked to any pledge payments
+ * and are COMPLETED and are not TEST
+ * show this listing in 'Link with Payment' on
+ * 'Edit Scheduled Pledge Payment' screen
+ */
+  public static function getUnlinkedContributions($contactId) {
+    $query = "
+SELECT cc.id, cc.total_amount, cc.receive_date, cc.financial_type_id
+FROM   civicrm_contribution cc
+WHERE  cc.contact_id = %1 AND
+       cc.is_test = 0 AND
+       cc.contribution_status_id = 1 AND
+       NOT EXISTS ( SELECT pp.id
+                    FROM civicrm_pledge_payment pp
+                    WHERE  pp.contribution_id = cc.id )
+";
+
+    $params[1] = [$contactId, 'Integer'];
+    $payment = CRM_Core_DAO::executeQuery($query, $params);
+
+    $type = CRM_Contribute_PseudoConstant::financialType();
+    $paymentDetails = [];
+    while ($payment->fetch()) {
+      $pd[$payment->id] = CRM_Utils_Date::customFormat($payment->receive_date) . ' - '. $type[$payment->financial_type_id] .' - '. CRM_Utils_Money::format($payment->total_amount);
+      $paymentDetails[$payment->id]['total_amount'] = $payment->total_amount;
+      $paymentDetails[$payment->id]['receive_date'] = $payment->receive_date;
+      $paymentDetails[$payment->id]['financial_type'] = $type[$payment->financial_type_id];
+      $paymentDetails[$payment->id]['unlinked_contributions'] = CRM_Utils_Money::format($payment->total_amount) . ' '. CRM_Utils_Date::customFormat($payment->receive_date) . ' '. $type[$payment->financial_type_id];
+      $paymentDetails[$payment->id]['unlinked_contributions'] = CRM_Utils_Date::customFormat($payment->receive_date) . ' - '. $type[$payment->financial_type_id] .' - '. CRM_Utils_Money::format($payment->total_amount);
+    }
+
+    return $pd;
+  }
+
   /**
    * Get pledge payment details.
    *
@@ -268,7 +323,7 @@ WHERE     pledge_id = %1
       while ($payment->fetch()) {
         //also delete associated contribution.
         if ($payment->contribution_id) {
-          CRM_Contribute_BAO_Contribution::deleteContribution($payment->contribution_id);
+//          CRM_Contribute_BAO_Contribution::deleteContribution($payment->contribution_id);
         }
         self::del($payment->id);
       }

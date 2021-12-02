@@ -23,7 +23,7 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
-{if $action eq 2 } {* update *}
+{if $action eq 2 or $action eq 1} {* update or create new*}
     {include file="CRM/Pledge/Form/Payment.tpl"}
 {else}
 {if $context eq 'dashboard'}{assign var='context' value='pledgeDashboard'}{/if}

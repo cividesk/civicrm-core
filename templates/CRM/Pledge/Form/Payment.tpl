@@ -49,6 +49,11 @@
     <tr id="adjust-option-type" class="crm-contribution-form-block-option_type">
       <td class="label"></td> <td>{$form.option_type.html}</td>
     </tr>
+    <tr>
+      <td class="label">{$form.contribution_id.label}</td>
+      <td id="contributions_id">{$form.contribution_id.html}</td>
+    </tr>
+
   </table>
   <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
   </fieldset>
@@ -64,6 +69,31 @@
         $('#adjust-option-type').show();
         $("#scheduled_amount").prop("readonly", false);
       });
+
+      //on change on of contribution id,
+      //show hide options and update the scheduled amount
+      $('#contribution_id').change(function(e) {
+        var scheduled_amount = {/literal}{$scheduled_amount}{literal};
+        var contribution_id = $(this).val();
+
+        CRM.api3('Contribution', 'get', {
+          "id": contribution_id,
+          'sequential': 1,
+        }).done(function (result) {
+          var total_amount = result.values[0].total_amount;
+          if (scheduled_amount == total_amount) {
+            $("#scheduled_amount").val(scheduled_amount);
+            $('a.adjust-pledge-payment').show();
+            $('#adjust-option-type').hide();
+          } else {
+            $("#scheduled_amount").val(total_amount);
+            $('a.adjust-pledge-payment').hide();
+            $('#adjust-option-type').show();
+          }
+    });
+
+});
+
     });
   </script>
 {/literal}

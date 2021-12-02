@@ -41,6 +41,14 @@ class CRM_Contribute_Form_ContributionView extends CRM_Core_Form {
    */
   public function preProcess() {
     $id = $this->get('id');
+    $pledgePaymentId = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment',
+      $id,
+      'id',
+      'contribution_id'
+    );
+
+    $this->assign('pledgePaymentId', $pledgePaymentId);
+
     $params = ['id' => $id];
     $context = CRM_Utils_Request::retrieve('context', 'Alphanumeric', $this);
     $this->assign('context', $context);

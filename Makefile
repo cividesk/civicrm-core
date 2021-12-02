@@ -1,6 +1,8 @@
 CIVICRM = 5.19.4
 DRUPAL = 7.x
 PREVIOUS = /var/www/html/civicrm-stable-5.19.4
+UPSTREAM = https://sourceforge.net/projects/civicrm/files/civicrm-stable/$(CIVICRM)/civicrm-$(CIVICRM)-drupal.tar.gz/download#
+UPSTREAM = https://download.civicrm.org/civicrm-$(CIVICRM)-drupal.tar.gz
 
 .PHONY: all build diff clean
 
@@ -17,7 +19,7 @@ civicrm-drupal:
 build: build-imports build-drupal build-patch
 
 build-imports: clean-imports
-	wget -q -O - https://sourceforge.net/projects/civicrm/files/civicrm-stable/$(CIVICRM)/civicrm-$(CIVICRM)-drupal.tar.gz/download# | tar xfz -
+	wget -q -O - $(UPSTREAM) | tar xfz -
 	cd civicrm ; cp -R $(IMPORTS) ..
 	rm -Rf civicrm
 

@@ -47,8 +47,7 @@ class CRM_Pledge_Page_Payment extends CRM_Core_Page {
     $this->_contactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this);
 
     CRM_Pledge_Page_Tab::setContext($this);
-
-    if ($this->_action & CRM_Core_Action::UPDATE) {
+    if (($this->_action & CRM_Core_Action::UPDATE) || ($this->_action & CRM_Core_Action::ADD)) {
       $this->edit();
     }
     else {

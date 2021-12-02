@@ -268,7 +268,7 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
     $this->_mode = CRM_Utils_Request::retrieve('mode', 'Alphanumeric', $this);
 
     $this->assign('contributionMode', $this->_mode);
-    if ($this->_action & CRM_Core_Action::DELETE) {
+    if ($this->_action == CRM_Core_Action::DELETE || $this->_action == CRM_Core_Action::DETACH) {
       return;
     }
 
@@ -339,10 +339,9 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
       $defaults['option_type'] = 1;
     }
 
-    if ($this->_action & CRM_Core_Action::DELETE) {
+    if ($this->_action == CRM_Core_Action::DELETE || $this->_action == CRM_Core_Action::DETACH) {
       return $defaults;
     }
-
     $defaults['frequency_interval'] = 1;
     $defaults['frequency_unit'] = 'month';
 
@@ -468,6 +467,21 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
   public function buildQuickForm() {
     if ($this->_id) {
       $this->add('hidden', 'id', $this->_id);
+    }
+    if ($this->_action & CRM_Core_Action::DETACH) {
+      $this->addButtons([
+        [
+          'type' => 'next',
+          'name' => ts('Unlink'),
+          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+          'isDefault' => TRUE,
+        ],
+        [
+          'type' => 'cancel',
+          'name' => ts('Cancel'),
+        ],
+      ]);
+      return;
     }
 
     if ($this->_action & CRM_Core_Action::DELETE) {
@@ -945,6 +959,13 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
    * Process the form submission.
    */
   public function postProcess() {
+    if ($this->_action & CRM_Core_Action::DETACH) {
+      //unlink the contribution from pledge payment
+      //by updating associated pledge payment and
+      //pledge status and amount
+      CRM_Pledge_BAO_PledgePayment::resetPledgePayment($this->_id);
+      return;
+    }
     if ($this->_action & CRM_Core_Action::DELETE) {
       CRM_Contribute_BAO_Contribution::deleteContribution($this->_id);
       CRM_Core_Session::singleton()->replaceUserContext(CRM_Utils_System::url('civicrm/contact/view',

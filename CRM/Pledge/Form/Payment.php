@@ -67,8 +67,13 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
     }
 
     $this->_id = CRM_Utils_Request::retrieve('ppId', 'Positive', $this);
+    $this->_contactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this);
 
     CRM_Utils_System::setTitle(ts('Edit Scheduled Pledge Payment'));
+
+    if ($this->_action & CRM_Core_Action::ADD) {
+      CRM_Utils_System::setTitle(ts('New Scheduled Pledge Payment'));
+    }
   }
 
   /**
@@ -85,6 +90,21 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
       }
       $status = CRM_Core_PseudoConstant::getName('CRM_Pledge_BAO_Pledge', 'status_id', $defaults['status_id']);
       $this->assign('status', $status);
+      $this->assign('scheduled_amount', $defaults['scheduled_amount']);
+    }
+
+    if ($this->_action & CRM_Core_Action::ADD) {
+      //preset to one period after the last scheduled payment
+      $pledgeParams = ['id' => $this->_pledgeID];
+      CRM_Pledge_BAO_Pledge::retrieve($pledgeParams, $pledgeDefaults);
+
+      // Add new payment after the last payment for the pledge
+      $allPayments = CRM_Pledge_BAO_PledgePayment::getPledgePayments($this->_pledgeID);
+      $lastPayment = array_pop($allPayments);
+
+      $pledgeDefaults[scheduled_date] = $lastPayment[scheduled_date];
+      $lastDate = CRM_Utils_Date::mysqlToIso(CRM_Pledge_BAO_PledgePayment::calculateNextScheduledDate($pledgeDefaults, $pledgeParams['installments'] +1));
+      $defaults['pledge_payment_scheduled_date'] = $defaults['scheduled_date'] = $lastDate;
     }
     $defaults['option_type'] = 1;
     return $defaults;
@@ -116,9 +136,45 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
       [], '<br/>'
     );
 
-    $this->addButtons([
+    $this->_pledgeID = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment', $this->_id, 'pledge_id');
+
+    //check if there are any completed, live
+    //contributions that are NOT associate to any
+    //pledges for this contact
+    $unlinkedContributions = CRM_Pledge_BAO_PledgePayment::getUnlinkedContributions($this->_contactId);
+    if (!empty($unlinkedContributions)) {
+      //show the contributions that fulfil criteria to link
+      $this->add('select', 'contribution_id', ts('Link with Payment'), ['' => ts('- select -')] + $unlinkedContributions, FALSE);
+    }
+
+    if ($this->_action & CRM_Core_Action::UPDATE) {
+      $buttons = [
         [
           'type' => 'next',
+          'name' => ts('Delete'),
+          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+          'subName' => 'delete',
+        ],
+        [
+          'type' => 'done',
+          'name' => ts('Save'),
+          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+          'isDefault' => TRUE,
+        ],
+        [
+          'type' => 'next',
+          'name' => ts('Save and New'),
+          'subName' => 'new',
+        ],
+        [
+          'type' => 'cancel',
+          'name' => ts('Cancel'),
+        ],
+      ];
+    } else {
+      $buttons = [
+        [
+          'type' => 'done',
           'name' => ts('Save'),
           'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
           'isDefault' => TRUE,
@@ -127,7 +183,9 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
           'type' => 'cancel',
           'name' => ts('Cancel'),
         ],
-    ]);
+      ];
+    }
+    $this->addButtons($buttons);
   }
 
   /**
@@ -135,6 +193,20 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
    */
   public function postProcess() {
     $formValues = $this->controller->exportValues($this->_name);
+    $buttonName = $this->controller->getButtonName();
+
+    if ($buttonName == '_qf_Payment_next_delete') {
+      $formValues = $this->controller->exportValues($this->_name);
+
+      //delete the scheduled pledge payment
+      CRM_Pledge_BAO_PledgePayment::del($this->_id);
+
+      //reduce the pledge amount (ie. civicrm_pledge.amount) by the corresponding amount
+      // and reduce installment as well.
+      CRM_Pledge_BAO_PledgePayment::updatePledgeAmount($this->_pledgeID, $formValues['scheduled_amount']);
+      return;
+    }
+
     $params = [
       'id' => $this->_id,
       'scheduled_date' => $formValues['scheduled_date'],
@@ -148,9 +220,30 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
       $params['status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Pledge_BAO_Pledge', 'status_id', 'Pending');
     }
 
-    $pledgeId = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment', $params['id'], 'pledge_id');
+    if ($this->_action & CRM_Core_Action::ADD) {
+      unset($params['id']);
+      $params['pledge_id'] = $this->_pledgeID;
+      $params['scheduled_amount'] = $formValues['scheduled_amount'];
+    }
+
+    if ($formValues['contribution_id']) {
+      //if a contribution has been linked to the pledge payment,
+      //update the status as well
+      $params['contribution_id'] = $formValues['contribution_id'];
+      $allStatus = CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'name');
+      $completedStatus = array_search('Completed', $allStatus);
+      $params['status_id'] = $completedStatus;
+    }
 
     CRM_Pledge_BAO_PledgePayment::add($params);
+
+    if ($this->_action & CRM_Core_Action::ADD) {
+      //increase the pledge amount (ie. civicrm_pledge.amount) by the corresponding amount
+      //and update incremented installment as well
+      CRM_Pledge_BAO_PledgePayment::updatePledgeAmount($this->_pledgeID, $formValues['scheduled_amount'], '+');
+      return;
+    }
+
     $adjustTotalAmount = (CRM_Utils_Array::value('option_type', $formValues) == 2);
 
     $pledgeScheduledAmount = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment',
@@ -159,15 +252,15 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
       'id'
     );
 
-    $oldestPaymentAmount = CRM_Pledge_BAO_PledgePayment::getOldestPledgePayment($pledgeId, 2);
+    $oldestPaymentAmount = CRM_Pledge_BAO_PledgePayment::getOldestPledgePayment($this->_pledgeID, 2);
     if (($oldestPaymentAmount['count'] != 1) && ($oldestPaymentAmount['id'] == $params['id'])) {
-      $oldestPaymentAmount = CRM_Pledge_BAO_PledgePayment::getOldestPledgePayment($pledgeId);
+      $oldestPaymentAmount = CRM_Pledge_BAO_PledgePayment::getOldestPledgePayment($this->_pledgeID);
     }
     if (($formValues['scheduled_amount'] - $pledgeScheduledAmount) >= $oldestPaymentAmount['amount']) {
       $adjustTotalAmount = TRUE;
     }
     // update pledge status
-    CRM_Pledge_BAO_PledgePayment::updatePledgePaymentStatus($pledgeId,
+    CRM_Pledge_BAO_PledgePayment::updatePledgePaymentStatus($this->_pledgeID,
       [$params['id']],
       $params['status_id'],
       NULL,
@@ -175,8 +268,17 @@ class CRM_Pledge_Form_Payment extends CRM_Core_Form {
       $adjustTotalAmount
     );
 
-    $statusMsg = ts('Pledge Payment Schedule has been updated.');
-    CRM_Core_Session::setStatus($statusMsg, ts('Saved'), 'success');
+    $session = CRM_Core_Session::singleton();
+    if ($buttonName == $this->getButtonName('next', 'new')) {
+      $msg .= '<p>' . ts("Ready to add another.") . '</p>';
+      $session->replaceUserContext(CRM_Utils_System::url('civicrm/pledge/payment',
+        'reset=1&action=add&cid=' .  $this->_contactId. '&ppId=' . $this->_id
+      ));
+    }
+    else {
+      $statusMsg = ts('Pledge Payment Schedule has been updated.');
+      CRM_Core_Session::setStatus($statusMsg, ts('Saved'), 'success');
+    }
   }
 
 }

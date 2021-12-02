@@ -188,7 +188,9 @@ class CRM_Report_Utils_Get {
         // send the type as string so that multiple values can also be retrieved from url.
         // for e.g url like - "memtype_in=in&memtype_value=1,2,3"
         $value = self::getTypedValue("{$fieldName}_value", CRM_Utils_Type::T_STRING);
-        if (!preg_match('/^(\d+)(,\d+){0,14}$/', $value)) {
+        //https://projects.cividesk.com/projects/9/tasks/4735
+        //change the max value to 20, ideally remove condition
+        if (!preg_match('/^(\d+)(,\d+){0,20}$/', $value)) {
           // extra check. Also put a limit of 15 max values.
           $value = NULL;
         }

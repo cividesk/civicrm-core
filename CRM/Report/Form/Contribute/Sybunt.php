@@ -177,6 +177,13 @@ class CRM_Report_Form_Contribute_Sybunt extends CRM_Report_Form {
             'default' => TRUE,
           ],
         ],
+       'filters' => [
+          'on_hold' => [
+            'title' => ts('On Hold'),
+            'type' => CRM_Utils_Type::T_BOOLEAN,
+            'options' => ['' => ts('Any')] + CRM_Core_SelectValues::boolean(),
+          ],
+        ],
       ],
       'civicrm_phone' => [
         'dao' => 'CRM_Core_DAO_Phone',

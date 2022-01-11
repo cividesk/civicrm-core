@@ -968,7 +968,12 @@ class CRM_Report_Form extends CRM_Core_Form {
                 $this->_defaults["{$fieldName}_relative"] = 0;
               }
               else {
-                $this->_defaults["{$fieldName}_relative"] = $field['default'];
+                if (CRM_Utils_Array::value('operatorType', $field) == CRM_Report_Form::OP_DATE_ONLY) {
+                  $this->_defaults[$fieldName] = $this->_defaults["{$fieldName}_relative"] ?? $field['default'];
+                }
+                else {
+                  $this->_defaults["{$fieldName}_relative"] = $field['default'];
+                }
               }
             }
             else {

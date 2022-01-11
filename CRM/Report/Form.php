@@ -3336,6 +3336,12 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
                 'value' => $pair[$rel],
               ];
             }
+            elseif (CRM_Utils_Array::value('operatorType', $field) == CRM_Report_Form::OP_DATE_ONLY && CRM_Utils_Array::value($fieldName, $this->_params)) {
+              $statistics['filters'][] = [
+                'title' => $field['title'],
+                'value' => ts("Is equal to %1", [1 => $this->_params[$fieldName]]),
+              ];
+            }
           }
           else {
             $op = CRM_Utils_Array::value("{$fieldName}_op", $this->_params);

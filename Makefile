@@ -1,32 +1,29 @@
 CIVICRM = 5.19.4
 DRUPAL = 7.x
-PREVIOUS = /var/www/html/civicrm-stable-5.19.4
-UPSTREAM = https://sourceforge.net/projects/civicrm/files/civicrm-stable/$(CIVICRM)/civicrm-$(CIVICRM)-drupal.tar.gz/download#
-UPSTREAM = https://download.civicrm.org/civicrm-$(CIVICRM)-drupal.tar.gz
 
-.PHONY: all build diff clean
+CORE_DIST = https://download.civicrm.org/civicrm-$(CIVICRM)-drupal.tar.gz
+CORE_IMPORTS=packages vendor bower_components
+
+# civicrm-drupal is not IMPORTed above so we can substitute our own repo when necessary
+DRUPAL_NAME = $(DRUPAL)-$(CIVICRM)
+DRUPAL_DIST = https://github.com/civicrm/civicrm-drupal/archive/$(DRUPAL_NAME).zip
+
+.PHONY: all build secure clean
 
 all: build secure
-
-IMPORTS=packages vendor bower_components
-
-civicrm:
-
-civicrm-drupal:
-	rm civicrm-drupal.zip
 
 .PHONY: build-imports build-drupal build-patch
 build: build-imports build-drupal build-patch
 
 build-imports: clean-imports
-	wget -q -O - $(UPSTREAM) | tar xfz -
-	cd civicrm ; cp -R $(IMPORTS) ..
+	wget -q -O - $(CORE_DIST) | tar xfz -
+	cd civicrm ; cp -R $(CORE_IMPORTS) ..
 	rm -Rf civicrm
 
 build-drupal: clean-drupal
-	wget -q -O civicrm-drupal.zip https://github.com/cividesk/civicrm-drupal/archive/$(DRUPAL)-$(CIVICRM)-cividesk.zip
-	unzip -q civicrm-drupal.zip && rm civicrm-drupal.zip
-	mv civicrm-drupal-$(DRUPAL)-$(CIVICRM)-cividesk drupal
+	wget -q -O $(DRUPAL_NAME).zip $(DRUPAL_DIST)
+	unzip -q $(DRUPAL_NAME).zip && rm -Rf $(DRUPAL_NAME).zip
+	mv civicrm-drupal-$(DRUPAL_NAME) drupal && rm -Rf civicrm-drupal-$(DRUPAL_NAME)
 
 build-patch:
 	cat patches/*.patch | patch -p1 -N -r - -V never
@@ -47,14 +44,11 @@ multisite:
 	@echo OR, to revert the patches that were added:
 	@echo "  git reset --hard"
 
-diff:
-	diff -rwq --exclude=".git" --exclude="?bower.json" . $(PREVIOUS)
-
 .PHONY: clean-imports clean-drupal
 clean: clean-imports clean-drupal
 
 clean-imports:
-	rm -Rf $(IMPORTS)
+	rm -Rf $(CORE_IMPORTS)
 
 clean-drupal:
-	rm -Rf drupal
+	rm -Rf drupal civicrm-drupal-$(DRUPAL_NAME)

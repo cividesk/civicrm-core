@@ -198,6 +198,13 @@ class CRM_Report_Form_Contribute_HouseholdSummary extends CRM_Report_Form {
         'fields' => [
           'email' => NULL,
         ],
+       'filters' => [
+          'on_hold' => [
+            'title' => ts('On Hold'),
+            'type' => CRM_Utils_Type::T_BOOLEAN,
+            'options' => ['' => ts('Any')] + CRM_Core_SelectValues::boolean(),
+          ],
+        ],
         'grouping' => 'contact-fields',
       ],
     ];

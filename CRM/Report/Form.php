@@ -968,7 +968,12 @@ class CRM_Report_Form extends CRM_Core_Form {
                 $this->_defaults["{$fieldName}_relative"] = 0;
               }
               else {
-                $this->_defaults["{$fieldName}_relative"] = $field['default'];
+                if (CRM_Utils_Array::value('operatorType', $field) == CRM_Report_Form::OP_DATE_ONLY) {
+                  $this->_defaults[$fieldName] = $this->_defaults["{$fieldName}_relative"] ?? $field['default'];
+                }
+                else {
+                  $this->_defaults["{$fieldName}_relative"] = $field['default'];
+                }
               }
             }
             else {
@@ -3334,6 +3339,12 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
               $statistics['filters'][] = [
                 'title' => $field['title'],
                 'value' => $pair[$rel],
+              ];
+            }
+            elseif (CRM_Utils_Array::value('operatorType', $field) == CRM_Report_Form::OP_DATE_ONLY && CRM_Utils_Array::value($fieldName, $this->_params)) {
+              $statistics['filters'][] = [
+                'title' => $field['title'],
+                'value' => ts("Is equal to %1", [1 => CRM_Utils_Date::customFormat($this->_params[$fieldName])]),
               ];
             }
           }

@@ -375,12 +375,10 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
    *
    * @return HTML_QuickForm_Element
    *   Could be an error object
-   *
-   * @throws \CRM_Core_Exception
    */
   public function &add(
     $type, $name, $label = '',
-    $attributes = [], $required = FALSE, $extra = NULL
+    $attributes = '', $required = FALSE, $extra = NULL
   ) {
     // Fudge some extra types that quickform doesn't support
     $inputType = $type;
@@ -404,27 +402,8 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
       $extra = NULL;
     }
     // @see http://wiki.civicrm.org/confluence/display/CRMDOC/crmDatepicker
-    if ($type === 'datepicker') {
-      //comment out the code till all the date fields are fully resolved
-      //have format so that they don't throw fatal errors
-/*
-      if (!empty($attributes['format'])) {
-        $dateAttributes = CRM_Core_SelectValues::date($attributes['format'], NULL, NULL, NULL, 'Input');
-        if (empty($extra['minDate']) && !empty($dateAttributes['minYear'])) {
-          $extra['minDate'] = $dateAttributes['minYear'] . '-01-01';
-        }
-        if (empty($extra['maxDate']) && !empty($dateAttributes['minYear'])) {
-          $extra['maxDate'] = $dateAttributes['maxYear'] . '-12-31';
-        }
-      }
-      // Support minDate/maxDate properties
-      if (isset($extra['minDate'])) {
-        $extra['minDate'] = date('Y-m-d', strtotime($extra['minDate']));
-      }
-      if (isset($extra['maxDate'])) {
-        $extra['maxDate'] = date('Y-m-d', strtotime($extra['maxDate']));
-      }
-*/
+    if ($type == 'datepicker') {
+      $attributes = ($attributes ? $attributes : []);
       $attributes['data-crm-datepicker'] = json_encode((array) $extra);
       if (!empty($attributes['aria-label']) || $label) {
         $attributes['aria-label'] = CRM_Utils_Array::value('aria-label', $attributes, $label);
@@ -1624,7 +1603,7 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
         }
         else {
           $fieldSpec = CRM_Utils_Date::addDateMetadataToField($fieldSpec, $fieldSpec);
-          $attributes = ['format' => $fieldSpec['html']['formatType']];
+          $attributes = ['format' => $fieldSpec['date_format']];
           return $this->add('datepicker', $name, $label, $attributes, $required, $fieldSpec['datepicker']['extra']);
         }
 

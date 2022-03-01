@@ -41,6 +41,19 @@ class CRM_Contribute_Form_ContributionView extends CRM_Core_Form {
    */
   public function preProcess() {
     $id = $this->get('id');
+    // Check permission for action.
+    if (!CRM_Core_Permission::checkActionPermission('CiviContribute', $this->_action)) {
+      CRM_Core_Error::statusBounce(ts('You do not have permission to access this page.'));
+    }
+
+    $pledgePaymentId = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_PledgePayment',
+      $id,
+      'id',
+      'contribution_id'
+    );
+
+    $this->assign('pledgePaymentId', $pledgePaymentId);
+
     $params = ['id' => $id];
     $context = CRM_Utils_Request::retrieve('context', 'Alphanumeric', $this);
     $this->assign('context', $context);

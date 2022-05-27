@@ -82,7 +82,7 @@ class CRM_Report_Form_Case_Detail extends CRM_Report_Form {
           ],
           'subject' => [
             'title' => ts('Subject'),
-            'required' => TRUE,
+            'default' => TRUE,
           ],
           'start_date' => [
             'title' => ts('Start Date'),

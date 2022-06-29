@@ -1,0 +1,22 @@
+From 4609d331e59b82055693b92977a2f22a6886c1ab Mon Sep 17 00:00:00 2001
+From: yashodha <yashodha@cividesk.com>
+Date: Tue, 29 Mar 2022 18:13:49 +0530
+Subject: [PATCH] (dev/core#3141) Membership should be listed chronologically
+ by join date, the most recent member since first
+
+---
+ CRM/Member/Page/UserDashboard.php | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CRM/Member/Page/UserDashboard.php b/CRM/Member/Page/UserDashboard.php
+index 3fcb435fc17..05d4581f6cc 100644
+--- a/CRM/Member/Page/UserDashboard.php
++++ b/CRM/Member/Page/UserDashboard.php
+@@ -29,6 +29,7 @@ public function listMemberships() {
+     $dao = new CRM_Member_DAO_Membership();
+     $dao->contact_id = $this->_contactId;
+     $dao->is_test = 0;
++    $dao->orderBy('start_date DESC');
+     $dao->find();
+ 
+     while ($dao->fetch()) {

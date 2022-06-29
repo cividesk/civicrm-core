@@ -1,0 +1,22 @@
+From 0518d797a05d459ac88941c8c1442cd33d5aedd7 Mon Sep 17 00:00:00 2001
+From: yashodha <yashodha@cividesk.com>
+Date: Thu, 19 May 2022 21:22:09 +0530
+Subject: [PATCH] fix to get around link issues in ckeditor when opening
+ scheduled reminder in popup
+
+---
+ CRM/Admin/Page/ScheduleReminders.php | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CRM/Admin/Page/ScheduleReminders.php b/CRM/Admin/Page/ScheduleReminders.php
+index 2eb555d1753..1f3e1b57fe7 100644
+--- a/CRM/Admin/Page/ScheduleReminders.php
++++ b/CRM/Admin/Page/ScheduleReminders.php
+@@ -51,6 +51,7 @@ public function &links() {
+       self::$_links = [
+         CRM_Core_Action::UPDATE => [
+           'name' => ts('Edit'),
++          'class' => 'no-popup',
+           'url' => 'civicrm/admin/scheduleReminders',
+           'qs' => 'action=update&id=%%id%%&reset=1',
+           'title' => ts('Edit Schedule Reminders'),

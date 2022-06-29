@@ -1,29 +1,30 @@
-CIVICRM = 5.19.4
-DRUPAL = 7.x
-
+CIVICRM = 5.46.3
 CORE_DIST = https://download.civicrm.org/civicrm-$(CIVICRM)-drupal.tar.gz
-CORE_IMPORTS=packages vendor bower_components
+CORE_REPO = https://github.com/civicrm/civicrm-core.git
 
-# civicrm-drupal is not IMPORTed above so we can substitute our own repo when necessary
-DRUPAL_NAME = $(DRUPAL)-$(CIVICRM)
-DRUPAL_DIST = https://github.com/civicrm/civicrm-drupal/archive/$(DRUPAL_NAME).zip
+.PHONY: all clean build secure
 
-.PHONY: all build secure clean
+all: clean build secure
 
-all: build secure
+clean:
+	cat .gitignore | xargs rm -Rf
 
-.PHONY: build-imports build-drupal build-patch
-build: build-imports build-drupal build-patch
+build: build-distro build-extra build-patch
 
-build-imports: clean-imports
+build-distro:
 	wget -q -O - $(CORE_DIST) | tar xfz -
-	cd civicrm ; cp -R $(CORE_IMPORTS) ..
+	cd civicrm && ls -A > ../.gitignore && cp -r . ..
 	rm -Rf civicrm
 
-build-drupal: clean-drupal
-	wget -q -O $(DRUPAL_NAME).zip $(DRUPAL_DIST)
-	unzip -q $(DRUPAL_NAME).zip && rm -Rf $(DRUPAL_NAME).zip
-	mv civicrm-drupal-$(DRUPAL_NAME) drupal && rm -Rf civicrm-drupal-$(DRUPAL_NAME)
+# Since the test directory is NOT in the official realease, but can be patched
+EXTRA_DIRS = tests tools
+GIT_OPTS = -c advice.detachedHead=false --quiet 
+build-extra:
+	git clone $(GIT_OPTS) -b $(CIVICRM) $(CORE_REPO)
+	cd civicrm-core && cp -r $(EXTRA_DIRS) ..
+	cd civicrm-core && cat ../.gitignore | xargs rm -Rf
+	echo $(EXTRA_DIRS) | xargs -n 1 echo >> .gitignore
+	rm -Rf civicrm-core
 
 build-patch:
 	cat patches/*.patch | patch -p1 -N -r - -V never
@@ -32,23 +33,3 @@ secure:
 	rm -f vendor/pear/log/README.rst
 	find . -type d -exec chmod 755 {} + 
 	find . -type f -exec chmod go-w {} + 
-
-multisite:
-	-cat patches/multisite/*.patch | patch -p1 -N -r - -V never
-# detach the repository to not accidentally merge the patches in
-	@echo
-	@echo ATTENTION: Please type the following commands:
-	@echo "  git add *"
-	@echo "  git commit -m 'PATCHES for multisite added, NEVER PUSH to origin!'"
-	@echo "  git remote set-url --push origin do_not_push_from_multisite"
-	@echo OR, to revert the patches that were added:
-	@echo "  git reset --hard"
-
-.PHONY: clean-imports clean-drupal
-clean: clean-imports clean-drupal
-
-clean-imports:
-	rm -Rf $(CORE_IMPORTS)
-
-clean-drupal:
-	rm -Rf drupal civicrm-drupal-$(DRUPAL_NAME)

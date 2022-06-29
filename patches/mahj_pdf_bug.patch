@@ -1,0 +1,23 @@
+From a4ef79ee82f290f2f765e22ebe906aaa2b9e9ae2 Mon Sep 17 00:00:00 2001
+From: Seamus Lee <seamuslee001@gmail.com>
+Date: Mon, 17 Jan 2022 14:33:15 +1100
+Subject: [PATCH] dev/core#3034 Ensure that filename contains the file
+ extension for PDFs
+
+---
+ CRM/Contact/Form/Task/PDFTrait.php | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CRM/Contact/Form/Task/PDFTrait.php b/CRM/Contact/Form/Task/PDFTrait.php
+index 7f6cf3e7a8c..b5cc18541d9 100644
+--- a/CRM/Contact/Form/Task/PDFTrait.php
++++ b/CRM/Contact/Form/Task/PDFTrait.php
+@@ -263,7 +263,7 @@ public function postProcess(): void {
+     $fileName = $this->getFileName();
+ 
+     if ($type === 'pdf') {
+-      CRM_Utils_PDF_Utils::html2pdf($html, $fileName, FALSE, $formValues);
++      CRM_Utils_PDF_Utils::html2pdf($html, $fileName . '.pdf', FALSE, $formValues);
+     }
+     elseif (!empty($formValues['document_file_path'])) {
+       $fileName = pathinfo($formValues['document_file_path'], PATHINFO_FILENAME) . '.' . $type;

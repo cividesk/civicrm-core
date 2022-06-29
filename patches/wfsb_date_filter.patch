@@ -1,0 +1,28 @@
+From e7576ae534d6dac337aab85e32eb5246faeb3c7f Mon Sep 17 00:00:00 2001
+From: yashodha <yashodha@cividesk.com>
+Date: Thu, 11 Feb 2021 13:54:19 +0530
+Subject: [PATCH] add new relative filter for 'To end of year prior to previous
+ calendar year'
+
+---
+ CRM/Utils/Date.php | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/CRM/Utils/Date.php b/CRM/Utils/Date.php
+index fa96fca47fa..63a04ae7282 100644
+--- a/CRM/Utils/Date.php
++++ b/CRM/Utils/Date.php
+@@ -1150,6 +1150,13 @@ public static function relativeToAbsolute($relativeTerm, $unit) {
+             unset($from);
+             break;
+ 
++          case 'earlier_1':
++            $to['d'] = 31;
++            $to['M'] = 12;
++            $to['Y'] = $now['year'] - 2;
++            unset($from);
++            break;
++
+           case 'greater':
+             $from['M'] = $from['d'] = 1;
+             $from['Y'] = $now['year'];
